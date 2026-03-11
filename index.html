@@ -28,11 +28,12 @@
   --text:#f0f0f0;--text2:#999;--text3:#5a5a5a;
   --border:#2e2e2e;--accent:#f0f0f0;--accent-fg:#141414
 }
-html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:400;overflow:hidden;transition:background .2s,color .2s;-webkit-font-smoothing:antialiased}
+html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:400;overflow:hidden;overscroll-behavior:none;touch-action:none;transition:background .2s,color .2s;-webkit-font-smoothing:antialiased;position:fixed;inset:0}
+button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class*="-del"],[class*="-tab"],[class*="tab"],[class*="note-card"],[class*="task-item"],[class*="habit-row"],[class*="date-opt"],[class*="ctx-item"],[class*="ctx-cancel"]{touch-action:manipulation}
 .app{display:flex;flex-direction:column;height:100dvh;width:100%;padding-top:var(--safe-t);overflow:hidden}
 .header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 14px;flex-shrink:0}
 .logo{font-weight:700;font-size:20px;letter-spacing:-.04em}
-.icon-btn{width:34px;height:34px;border:none;background:var(--bg2);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;transition:background .15s}
+.icon-btn{width:44px;height:44px;border:none;background:var(--bg2);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;transition:background .15s}
 .icon-btn:active{background:var(--bg3)}
 .screens{flex:1;overflow:hidden;position:relative}
 .screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity .18s,transform .18s}
@@ -41,7 +42,7 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-fam
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--text3);font-size:10px;font-weight:500;letter-spacing:.04em;-webkit-user-select:none}
 .tab svg{flex-shrink:0;width:20px;height:20px}
 .tab.active{color:var(--text)}
-.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px}
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px;touch-action:pan-y;overscroll-behavior:contain}
 .scroll::-webkit-scrollbar{display:none}
 .divider{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:20px 0 8px}
 .empty-state{
@@ -100,10 +101,10 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-fam
 
 /* Кнопка «Добавить» — всегда справа, активна только при наличии текста */
 .add-submit-btn{
-  flex-shrink:0;margin-top:2px;background:none;border:none;cursor:pointer;
+  flex-shrink:0;margin-top:0;background:none;border:none;cursor:pointer;
   font-family:inherit;font-size:15px;font-weight:500;
-  color:#007aff;padding:0;-webkit-user-select:none;white-space:nowrap;
-  opacity:0;pointer-events:none;transition:opacity .15s
+  color:#007aff;padding:10px 4px;-webkit-user-select:none;white-space:nowrap;
+  opacity:0;pointer-events:none;transition:opacity .15s;min-height:44px
 }
 .add-submit-btn.active{opacity:1;pointer-events:all}
 .add-submit-btn:active{opacity:.5}
@@ -150,8 +151,8 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-fam
 .date-opts{border-top:1px solid var(--border);padding:0 16px}
 .date-opt{
   display:flex;align-items:center;justify-content:space-between;
-  padding:13px 0;border-bottom:1px solid var(--border);
-  cursor:pointer;-webkit-user-select:none
+  padding:16px 0;border-bottom:1px solid var(--border);
+  cursor:pointer;-webkit-user-select:none;min-height:52px
 }
 .date-opt:last-child{border-bottom:none}
 .date-opt:active{opacity:.5}
@@ -174,7 +175,7 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-fam
 .cal-day-names{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:2px}
 .cal-day-name{text-align:center;font-size:11px;font-weight:500;color:var(--text3);padding:4px 0;font-weight:500}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
-.cal-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text);cursor:pointer;border-radius:50%;transition:background .1s}
+.cal-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;min-height:44px;color:var(--text);cursor:pointer;border-radius:50%;transition:background .1s}
 .cal-cell:active:not(.is-past){background:var(--bg2)}
 .cal-cell.other-month{opacity:.2;pointer-events:none}
 .cal-cell.is-today{font-weight:700;color:#007aff}
@@ -182,15 +183,15 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-fam
 .cal-cell.is-past{opacity:.25;pointer-events:none}
 
 /* ── TASKS ── */
-.task-item{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
-.task-check{width:20px;height:20px;border:1.5px solid var(--text3);border-radius:50%;flex-shrink:0;margin-top:2px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.task-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
+.task-check{width:24px;height:24px;border:1.5px solid var(--text3);border-radius:50%;flex-shrink:0;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;padding:10px;box-sizing:content-box}
 .task-check.done{background:var(--text);border-color:var(--text)}
 .task-check.done::after{content:'';width:5px;height:3px;border-left:1.5px solid var(--accent-fg);border-bottom:1.5px solid var(--accent-fg);transform:rotate(-45deg) translateY(-1px)}
 .task-text-wrap{flex:1;min-width:0}
 .task-text{font-size:16px;font-weight:400;line-height:1.5;color:var(--text);word-break:break-word}
 .task-text.done{color:var(--text3);text-decoration:line-through;text-decoration-color:var(--text3)}
 .task-date-label{font-size:12px;font-weight:400;color:var(--text3);margin-top:1px}
-.task-delete{color:var(--text3);font-size:18px;cursor:pointer;padding:0 2px;flex-shrink:0;line-height:1;margin-top:1px}
+.task-delete{color:var(--text3);font-size:18px;cursor:pointer;padding:10px 8px;flex-shrink:0;line-height:1}
 .task-delete:active{color:var(--text)}
 .done-toggle-btn{display:block;width:100%;text-align:left;background:none;border:none;padding:16px 0 8px;font-size:13px;font-weight:400;color:var(--text3);cursor:pointer;font-family:inherit;-webkit-user-select:none;transition:color .15s}
 .done-toggle-btn:active{color:var(--text)}
@@ -212,16 +213,16 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-fam
 .week-labels{display:flex;gap:3px;flex-shrink:0}
 .week-day-label{width:26px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.04em;color:var(--text3);text-transform:uppercase;flex-shrink:0}
 .week-day-label.is-today{color:var(--text);font-weight:600}
-.week-row-del{width:26px;flex-shrink:0}
+.week-row-del{width:44px;flex-shrink:0}
 
-.habit-row{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);gap:12px}
+.habit-row{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:12px}
 .habit-name{display:flex;align-items:center;gap:5px;flex:1;min-width:0}
 .habit-name-text{font-size:15px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.habit-del{width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);font-size:16px;line-height:1;cursor:pointer;border-radius:50%;transition:color .12s,background .12s;-webkit-user-select:none;opacity:.5}
+.habit-del{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);font-size:16px;line-height:1;cursor:pointer;border-radius:50%;transition:color .12s,background .12s;-webkit-user-select:none;opacity:.5}
 .habit-del:active{color:var(--text);background:var(--bg2)}
 .habit-streak-badge{flex-shrink:0;font-size:11px;color:var(--text3);white-space:nowrap}
 .habit-dots{display:flex;gap:3px;flex-shrink:0}
-.habit-dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--text3);cursor:pointer;transition:background .12s,border-color .12s,opacity .12s;flex-shrink:0;opacity:.35}
+.habit-dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--text3);cursor:pointer;transition:background .12s,border-color .12s,opacity .12s;flex-shrink:0;opacity:.35;padding:9px;box-sizing:content-box}
 .habit-dot.checked{background:var(--text);border-color:var(--text);opacity:1}
 .habit-dot.is-future{opacity:.15;pointer-events:none}
 .habit-dot.is-today{border-color:var(--text);opacity:.7}
@@ -234,7 +235,7 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-fam
 .ctx-menu{position:fixed;left:12px;right:12px;bottom:calc(12px + var(--safe-b));z-index:71;transform:translateY(120%);transition:transform .28s cubic-bezier(.32,1,.55,1)}
 .ctx-menu.open{transform:none}
 .ctx-group{background:var(--bg2);border-radius:14px;overflow:hidden;margin-bottom:8px}
-.ctx-item{padding:14px 16px;font-size:17px;font-weight:400;color:var(--text);cursor:pointer;-webkit-user-select:none;border-bottom:1px solid var(--border)}
+.ctx-item{padding:14px 16px;font-size:17px;font-weight:400;min-height:52px;display:flex;align-items:center;color:var(--text);cursor:pointer;-webkit-user-select:none;border-bottom:1px solid var(--border)}
 .ctx-item:last-child{border-bottom:none}
 .ctx-item:active{background:var(--bg3)}
 .ctx-item.destructive{color:#ff3b30}
@@ -247,7 +248,7 @@ html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-fam
 .notes-top{padding:10px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
 .search-input{-webkit-user-select:text;user-select:text;flex:1;background:var(--bg2);border:none;outline:none;border-radius:10px;padding:8px 12px;font-family:inherit;font-size:15px;font-weight:400;color:var(--text)}
 
-.note-card{padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.note-card{padding:16px 0;border-bottom:1px solid var(--border);cursor:pointer}
 .note-title{font-weight:500;font-size:15px;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .note-preview{font-size:13px;font-weight:400;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .note-meta{font-size:12px;font-weight:400;color:var(--text3);margin-top:4px}
@@ -535,6 +536,8 @@ function closeAddSheet(){
   document.getElementById('taskInput').blur();
   document.getElementById('sheetOverlay').classList.remove('open');
   document.getElementById('addSheet').classList.remove('open');
+  // Сбрасываем подъём
+  document.getElementById('addSheet').style.transform='';
   closeDatePicker();
   // Сброс
   const inp=document.getElementById('taskInput');
@@ -542,6 +545,36 @@ function closeAddSheet(){
   document.getElementById('addTaskBtn').classList.remove('active');
   setDate('today');
 }
+
+// ── KEYBOARD LIFT: шторки поднимаются вместе с клавиатурой ──────────────────
+function setupKeyboardLift(){
+  if(!window.visualViewport) return;
+  function onViewportChange(){
+    const vv = window.visualViewport;
+    // Сдвиг = разница между полным экраном и видимой областью (высота клавиатуры)
+    const offset = window.innerHeight - vv.height - vv.offsetTop;
+    const kbHeight = Math.max(0, offset);
+    ['addSheet','habitSheet'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el && el.classList.contains('open')){
+        el.style.transform = kbHeight > 0 ? `translateY(-${kbHeight}px)` : '';
+        el.style.transition = kbHeight > 0 ? 'none' : 'transform .3s cubic-bezier(.32,1,.55,1)';
+      }
+    });
+  }
+  window.visualViewport.addEventListener('resize', onViewportChange);
+  window.visualViewport.addEventListener('scroll', onViewportChange);
+}
+setupKeyboardLift();
+
+// Глушим scroll/bounce на оверлеях — только скроллируемые .scroll двигаются
+document.addEventListener('touchmove', function(e){
+  // Разрешаем скролл внутри .scroll контейнеров
+  if(e.target.closest('.scroll') || e.target.closest('.add-sheet') || e.target.closest('.ctx-menu') || e.target.closest('.note-editor')){
+    return;
+  }
+  e.preventDefault();
+}, {passive:false});
 
 function openDatePicker(){
   datePickerOpen=true;
@@ -794,6 +827,7 @@ function closeHabitSheet(){
   document.getElementById('habitInput').blur();
   document.getElementById('habitSheetOverlay').classList.remove('open');
   document.getElementById('habitSheet').classList.remove('open');
+  document.getElementById('habitSheet').style.transform='';
   document.getElementById('habitInput').value='';
   document.getElementById('addHabitBtn').classList.remove('active');
 }

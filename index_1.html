@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff" id="themeColor">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="dot">
+<title>dot</title>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; max-width:100%; -webkit-user-select:none; user-select:none; }
+:root {
+  --bg:#ffffff; --bg2:#f7f7f7; --bg3:#efefef;
+  --text:#2c2c2c; --text2:#999999; --text3:#cccccc;
+  --border:#ebebeb; --accent:#2c2c2c; --accent-fg:#ffffff;
+  --tab-h:54px; --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+}
+[data-dark] {
+  --bg:#141414; --bg2:#1e1e1e; --bg3:#282828;
+  --text:#f0f0f0; --text2:#666666; --text3:#3a3a3a;
+  --border:#252525; --accent:#f0f0f0; --accent-fg:#141414;
+}
+html,body { height:100%; width:100%; max-width:100%; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif; font-size:17px; overflow:hidden; transition:background 0.2s,color 0.2s; -webkit-font-smoothing:antialiased; }
+.app { display:flex; flex-direction:column; height:100dvh; width:100%; padding-top:var(--safe-t); overflow:hidden; }
+.header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px 14px; flex-shrink:0; }
+.logo { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif; font-weight:800; font-size:22px; color:var(--text); letter-spacing:-0.01em; }
+.icon-btn { width:34px; height:34px; border:none; background:var(--bg2); border-radius:50%; cursor:pointer; display:flex; align-items:center; justify-content:center; color:var(--text2); font-size:15px; transition:background 0.15s; }
+.icon-btn:active { background:var(--bg3); }
+.screens { flex:1; overflow:hidden; position:relative; }
+.screen { position:absolute; inset:0; display:flex; flex-direction:column; opacity:0; pointer-events:none; transform:translateY(6px); transition:opacity 0.18s ease,transform 0.18s ease; }
+.screen.active { opacity:1; pointer-events:all; transform:translateY(0); }
+.tabbar { display:flex; border-top:1px solid var(--border); background:var(--bg); height:var(--tab-h); padding-bottom:var(--safe-b); flex-shrink:0; }
+.tab { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; cursor:pointer; color:var(--text3); transition:color 0.15s; font-size:15px; letter-spacing:0.08em; text-transform:uppercase; font-weight:500; user-select:none; -webkit-user-select:none; }
+.tab.active { color:var(--text); }
+.scroll { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:0 20px; }
+.scroll::-webkit-scrollbar { display:none; }
+.divider { font-size:12px; letter-spacing:0.12em; text-transform:uppercase; color:var(--text3); padding:20px 0 8px; font-weight:500; }
+.empty-state { padding:60px 0; text-align:center; color:var(--text3); font-size:12px; letter-spacing:0.06em; }
+/* TASKS */
+.task-input-wrap { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.task-input-row { display:flex; align-items:center; gap:10px; flex:1; }
+
+/* Toolbar above keyboard */
+.task-toolbar { position:fixed; left:0; right:0; height:44px; background:var(--bg2); border-top:1px solid var(--border); display:flex; align-items:center; padding:0 16px; gap:10px; z-index:50; transition:bottom 0.3s cubic-bezier(0.32,0,0.15,1); bottom:-44px; }
+.task-toolbar.visible { bottom:var(--kb-height,0px); }
+.task-date-chip { display:flex; align-items:center; gap:5px; background:var(--bg3); border-radius:7px; padding:5px 10px; cursor:pointer; font-size:13px; font-weight:600; color:var(--text); transition:background 0.1s; }
+.task-date-chip.has-date { background:var(--text); color:var(--bg); }
+.toolbar-spacer { flex:1; }
+.toolbar-done { font-size:15px; font-weight:600; color:#007aff; cursor:pointer; padding:4px; }
+
+/* Date sheet */
+.date-sheet-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:60; opacity:0; pointer-events:none; transition:opacity 0.2s; }
+.date-sheet-overlay.visible { opacity:1; pointer-events:all; }
+.date-sheet { position:fixed; bottom:0; left:0; right:0; background:var(--bg2); border-radius:14px 14px 0 0; padding:8px 8px 12px; z-index:61; transform:translateY(100%); transition:transform 0.3s cubic-bezier(0.32,0,0.15,1); }
+.date-sheet.visible { transform:translateY(0); }
+.sheet-handle { width:36px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 12px; }
+.ds-group { background:var(--bg); border-radius:12px; overflow:hidden; margin-bottom:8px; }
+.ds-option { padding:13px 16px; cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:background 0.1s; }
+.ds-option:not(:last-child) { border-bottom:1px solid var(--border); }
+.ds-option:active { background:var(--bg2); }
+.ds-opt-left { display:flex; flex-direction:column; gap:1px; }
+.ds-opt-title { font-size:17px; color:var(--text); }
+.ds-opt-sub { font-size:13px; color:var(--text3); }
+.ds-opt-check { color:var(--text); font-size:15px; opacity:0; }
+.ds-option.selected .ds-opt-check { opacity:1; }
+.ds-opt-arrow { color:var(--text3); font-size:18px; }
+.ds-cancel { background:var(--bg); border-radius:12px; padding:14px; text-align:center; font-size:17px; font-weight:600; color:var(--text); cursor:pointer; }
+.ds-cancel:active { background:var(--bg2); }
+
+/* Calendar inside sheet */
+.ds-cal { display:none; }
+.ds-cal.visible { display:block; }
+.cal-header { display:flex; align-items:center; padding:14px 16px 10px; }
+.cal-back { font-size:15px; color:#007aff; cursor:pointer; display:flex; align-items:center; gap:2px; }
+.cal-month-label { flex:1; text-align:center; font-size:16px; font-weight:600; color:var(--text); }
+.cal-nav { display:flex; gap:8px; }
+.cal-nav-btn { font-size:22px; color:#007aff; cursor:pointer; padding:0 2px; line-height:1; }
+.cal-day-names { display:grid; grid-template-columns:repeat(7,1fr); padding:0 8px; margin-bottom:2px; }
+.cal-day-name { text-align:center; font-size:12px; color:var(--text3); padding:4px 0; }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); padding:0 8px 10px; gap:2px; }
+.cal-cell { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:15px; color:var(--text); cursor:pointer; border-radius:50%; transition:background 0.1s; }
+.cal-cell:active { background:var(--bg2); }
+.cal-cell.other-month { color:var(--text3); opacity:0.4; }
+.cal-cell.is-today { font-weight:700; color:#007aff; }
+.cal-cell.is-selected { background:var(--text); color:var(--bg); font-weight:600; }
+.cal-cell.is-past { opacity:0.35; }
+.task-input { -webkit-user-select:text; user-select:text; background:none; border:none; outline:none; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif; font-size:16px; color:var(--text); width:100%; padding:0; }
+.task-input::placeholder { color:var(--text3); }
+.date-input { -webkit-user-select:text; user-select:text; background:none; border:none; outline:none; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif; font-size:13px; font-weight:600; color:var(--text2); padding:0; cursor:pointer; }
+.date-input::-webkit-calendar-picker-indicator { display:none; }
+.add-btn { width:30px; height:30px; border-radius:50%; background:var(--accent); color:var(--accent-fg); border:none; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:opacity 0.15s; }
+.add-btn:active { opacity:0.7; }
+.task-item { display:flex; align-items:flex-start; gap:12px; padding:12px 0; border-bottom:1px solid var(--border); animation:fadeIn 0.2s ease; }
+.task-check { width:20px; height:20px; border:1.5px solid var(--text3); border-radius:50%; flex-shrink:0; margin-top:1px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; }
+.task-check.выполнено { background:var(--text); border-color:var(--text); }
+.task-check.выполнено::after { content:''; width:5px; height:3px; border-left:1.5px solid var(--accent-fg); border-bottom:1.5px solid var(--accent-fg); transform:rotate(-45deg) translateY(-1px); }
+.task-text-wrap { flex:1; }
+.task-text { font-size:17px; line-height:1.5; color:var(--text); word-break:break-word; }
+.task-text.выполнено { color:var(--text3); text-decoration:line-through; }
+.task-date-label { font-size:12px; font-weight:600; color:var(--text2); margin-top:3px; }
+.task-delete { color:var(--text3); font-size:17px; cursor:pointer; padding:0 2px; opacity:0; transition:opacity 0.15s; flex-shrink:0; }
+.task-item:active .task-delete { opacity:1; }
+/* HABITS */
+.habits-top { padding:14px 20px 12px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.week-row { display:flex; justify-content:flex-end; padding-right:46px; }
+.week-day-label { width:36px; text-align:center; font-size:15px; color:var(--text3); letter-spacing:0.06em; text-transform:uppercase; }
+.week-day-label.is-today { color:var(--text); }
+.habit-add-row { display:flex; gap:10px; align-items:center; padding:12px 20px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.habit-input { -webkit-user-select:text; user-select:text; flex:1; background:none; border:none; outline:none; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif; font-size:16px; color:var(--text); padding:0; }
+.habit-input::placeholder { color:var(--text3); }
+.habit-row { display:flex; align-items:center; padding:8px 20px; border-bottom:1px solid var(--border); gap:8px; animation:fadeIn 0.2s ease; }
+.habit-name { flex:1; font-size:15px; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.habit-dots { display:flex; }
+.habit-dot { width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.habit-dot-inner { width:16px; height:16px; border-radius:50%; border:1.5px solid var(--text3); transition:all 0.15s; }
+.habit-dot.checked .habit-dot-inner { background:var(--text); border-color:var(--text); }
+.habit-dot.is-today .habit-dot-inner { border-color:var(--text2); }
+
+.streak { font-size:12px; color:var(--text3); min-width:24px; text-align:right; flex-shrink:0; }
+/* NOTES */
+.search-wrap { padding:10px 20px 8px; flex-shrink:0; }
+.search-input { -webkit-user-select:text; user-select:text; width:100%; background:var(--bg2); border:none; border-radius:8px; padding:8px 12px; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif; font-size:16px; color:var(--text); outline:none; }
+.search-input::placeholder { color:var(--text3); }
+.note-card { padding:14px 0; border-bottom:1px solid var(--border); cursor:pointer; animation:fadeIn 0.2s ease; transition:opacity 0.15s; }
+.note-card:active { opacity:0.6; }
+.note-title { font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif; font-weight:600; font-size:20px; color:var(--text); margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.note-preview { font-size:12px; color:var(--text2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.note-date { font-size:12px; color:var(--text3); margin-top:5px; letter-spacing:0.04em; }
+.new-note-btn { position:fixed; bottom:calc(var(--tab-h) + var(--safe-b) + 16px); right:20px; width:44px; height:44px; border-radius:50%; background:var(--accent); color:var(--accent-fg); border:none; font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 12px rgba(0,0,0,0.12); transition:transform 0.15s; z-index:10; }
+.new-note-btn:active { transform:scale(0.92); }
+.pin-dot { width:5px; height:5px; border-radius:50%; background:var(--text); display:inline-block; margin-right:6px; vertical-align:middle; }
+/* EDITOR */
+.note-editor { position:fixed; inset:0; background:var(--bg); z-index:100; display:flex; flex-direction:column; padding-top:var(--safe-t); transform:translateY(100%); transition:transform 0.28s cubic-bezier(0.32,0,0.15,1); }
+.note-editor.open { transform:translateY(0); }
+.editor-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.editor-back { display:flex; align-items:center; gap:6px; color:var(--text2); font-size:12px; letter-spacing:0.06em; cursor:pointer; border:none; background:none; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif; padding:4px 0; }
+.editor-actions { display:flex; gap:8px; }
+.editor-meta { font-size:12px; color:var(--text3); letter-spacing:0.06em; padding:8px 20px 4px; flex-shrink:0; }
+.format-bar { display:flex; gap:2px; padding:6px 20px; border-bottom:1px solid var(--border); overflow-x:auto; flex-shrink:0; }
+.format-bar::-webkit-scrollbar { display:none; }
+.fmt-btn { min-width:34px; height:28px; border:none; background:none; border-radius:6px; cursor:pointer; color:var(--text2); font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif; font-size:15px; font-weight:500; padding:0 8px; white-space:nowrap; transition:background 0.12s,color 0.12s; display:flex; align-items:center; justify-content:center; }
+.fmt-btn:active { background:var(--bg3); color:var(--text); }
+.editor-body { flex:1; overflow-y:auto; padding:20px 20px 40px; -webkit-overflow-scrolling:touch; }
+.editor-body::-webkit-scrollbar { display:none; }
+.note-title-input { -webkit-user-select:text; user-select:text; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif; font-weight:600; font-size:28px; color:var(--text); background:none; border:none; outline:none; width:100%; margin-bottom:16px; line-height:1.3; letter-spacing:-0.01em; }
+.note-title-input::placeholder { color:var(--text3); }
+.note-content-input { -webkit-user-select:text; user-select:text; font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display',sans-serif; font-size:16px; color:var(--text); background:none; border:none; outline:none; width:100%; min-height:300px; line-height:1.8; resize:none; }
+.note-content-input::placeholder { color:var(--text3); }
+
+/* iOS BOTTOM SHEET */
+.ctx-overlay {
+  position:fixed; inset:0; z-index:199;
+  background:rgba(0,0,0,0.4);
+  animation:overlayIn 0.2s ease;
+}
+@keyframes overlayIn { from{opacity:0} to{opacity:1} }
+
+.ctx-sheet {
+  position:fixed; bottom:0; left:0; right:0; z-index:200;
+  padding:0 8px calc(var(--safe-b) + 8px);
+  animation:sheetIn 0.28s cubic-bezier(0.32,0,0.15,1);
+}
+@keyframes sheetIn { from{transform:translateY(100%)} to{transform:translateY(0)} }
+
+.ctx-group {
+  background:var(--bg);
+  border-radius:14px;
+  overflow:hidden;
+  margin-bottom:8px;
+}
+.ctx-label {
+  padding:12px 16px 4px;
+  font-size:12px;
+  color:var(--text2);
+  text-align:center;
+  font-weight:500;
+}
+.ctx-item {
+  padding:14px 16px;
+  font-size:17px;
+  color:var(--text);
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  transition:background 0.1s;
+  -webkit-user-select:none;
+}
+.ctx-item:not(:last-child) { border-bottom:1px solid var(--border); }
+.ctx-item:active { background:var(--bg3); }
+.ctx-item.danger { color:#ff3b30; }
+.ctx-cancel {
+  background:var(--bg);
+  border-radius:14px;
+  padding:14px 16px;
+  font-size:17px;
+  font-weight:600;
+  color:var(--text);
+  cursor:pointer;
+  text-align:center;
+  -webkit-user-select:none;
+}
+.ctx-cancel:active { background:var(--bg3); }
+
+@keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="logo">dot.</div>
+    <button class="icon-btn" id="themeToggle">
+      <svg id="iconSun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      <svg id="iconMoon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+    </button>
+  </div>
+  <div class="screens">
+
+    <!-- TASKS -->
+    <div class="screen active" id="screen-tasks">
+      <div class="task-input-wrap">
+        <input class="task-input" id="taskInput" placeholder="добавить задачу..." autocomplete="off">
+        <button class="add-btn" id="addTaskBtn">+</button>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="task-toolbar" id="taskToolbar">
+        <div class="task-date-chip" id="taskDateChip" onclick="openDateSheet()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span id="taskDateLabel">сегодня</span>
+        </div>
+        <div class="toolbar-spacer"></div>
+        <div class="toolbar-done" id="toolbarDone">Готово</div>
+      </div>
+
+      <!-- Date sheet overlay -->
+      <div class="date-sheet-overlay" id="dsOverlay" onclick="closeDateSheet()"></div>
+
+      <!-- Date sheet -->
+      <div class="date-sheet" id="dateSheet">
+        <div class="sheet-handle"></div>
+        <div id="dsQuickView">
+          <div class="ds-group">
+            <div class="ds-option selected" data-val="сегодня" onclick="dsPick(this)">
+              <div class="ds-opt-left"><div class="ds-opt-title">Сегодня</div></div>
+              <div class="ds-opt-check">✓</div>
+            </div>
+            <div class="ds-option" data-val="завтра" onclick="dsPick(this)">
+              <div class="ds-opt-left"><div class="ds-opt-title">Завтра</div><div class="ds-opt-sub" id="dsTomSub"></div></div>
+              <div class="ds-opt-check">✓</div>
+            </div>
+            <div class="ds-option" data-val="неделя" onclick="dsPickWeek()">
+              <div class="ds-opt-left"><div class="ds-opt-title">На этой неделе</div><div class="ds-opt-sub" id="dsWeekSub"></div></div>
+              <div class="ds-opt-check">✓</div>
+            </div>
+            <div class="ds-option" data-val="без даты" onclick="dsPickNoDate()">
+              <div class="ds-opt-left"><div class="ds-opt-title">Без даты</div></div>
+              <div class="ds-opt-check">✓</div>
+            </div>
+            <div class="ds-option" onclick="dsOpenCal()">
+              <div class="ds-opt-left"><div class="ds-opt-title">Выбрать дату</div></div>
+              <span class="ds-opt-arrow">›</span>
+            </div>
+          </div>
+          <div class="ds-cancel" onclick="closeDateSheet()">Отмена</div>
+        </div>
+        <div class="ds-cal" id="dsCal">
+          <div class="ds-group">
+            <div class="cal-header">
+              <div class="cal-back" onclick="dsBackToQuick()">‹ Назад</div>
+              <div class="cal-month-label" id="calMonthLabel"></div>
+              <div class="cal-nav">
+                <div class="cal-nav-btn" onclick="calPrev()">‹</div>
+                <div class="cal-nav-btn" onclick="calNext()">›</div>
+              </div>
+            </div>
+            <div class="cal-day-names">
+              <div class="cal-day-name">пн</div><div class="cal-day-name">вт</div><div class="cal-day-name">ср</div>
+              <div class="cal-day-name">чт</div><div class="cal-day-name">пт</div><div class="cal-day-name">сб</div><div class="cal-day-name">вс</div>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+          <div class="ds-cancel" onclick="closeDateSheet()">Отмена</div>
+        </div>
+      </div>
+      <div class="scroll" id="taskList"></div>
+    </div>
+
+    <!-- HABITS -->
+    <div class="screen" id="screen-habits">
+      <div class="habits-top">
+        <div class="week-row" id="weekLabels"></div>
+      </div>
+      <div class="habit-add-row">
+        <input class="habit-input" id="habitInput" placeholder="добавить привычку..." autocomplete="off">
+        <button class="add-btn" id="addHabitBtn">+</button>
+      </div>
+      <div class="scroll" style="padding:0">
+        <div id="habitsList"></div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div class="screen" id="screen-notes">
+      <div class="search-wrap">
+        <input class="search-input" id="searchInput" placeholder="поиск заметок..." autocomplete="off">
+      </div>
+      <div class="scroll">
+        <div id="notesList"></div>
+      </div>
+      <button class="new-note-btn" id="newNoteBtn">+</button>
+    </div>
+
+  </div>
+  <div class="tabbar">
+    <div class="tab active" data-tab="tasks">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      задачи
+    </div>
+    <div class="tab" data-tab="habits">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      привычки
+    </div>
+    <div class="tab" data-tab="notes">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      заметки
+    </div>
+  </div>
+</div>
+
+<!-- NOTE EDITOR -->
+<div class="note-editor" id="noteEditor">
+  <div class="editor-header">
+    <button class="editor-back" id="editorBack">← назад</button>
+    <div class="editor-actions">
+      <button class="icon-btn" id="pinBtn">◇</button>
+      <button class="icon-btn" id="deleteNoteBtn">×</button>
+    </div>
+  </div>
+  <div class="editor-meta" id="editorMeta"></div>
+  <div class="format-bar">
+    <button class="fmt-btn" data-fmt="h1">H1</button>
+    <button class="fmt-btn" data-fmt="h2">H2</button>
+    <button class="fmt-btn" data-fmt="bold">B</button>
+    <button class="fmt-btn" data-fmt="italic">I</button>
+    <button class="fmt-btn" data-fmt="bullet">—</button>
+    <button class="fmt-btn" data-fmt="check">☐</button>
+    <button class="fmt-btn" data-fmt="divider">···</button>
+    <button class="fmt-btn" data-fmt="link">[[]]</button>
+  </div>
+  <div class="editor-body">
+    <input class="note-title-input" id="noteЗаголовокInput" placeholder="Заголовок" autocomplete="off">
+    <textarea class="note-content-input" id="noteContentInput" placeholder="Начни писать..."></textarea>
+  </div>
+</div>
+
+<script>
+let S = { theme:'light', tasks:[], habits:[], notes:[], editingNoteId:null, search:'' };
+
+function save() { localStorage.setItem('dot_v2', JSON.stringify({theme:S.theme,tasks:S.tasks,habits:S.habits,notes:S.notes})); }
+function load() {
+  try {
+    const d = JSON.parse(localStorage.getItem('dot_v2')||'{}');
+    S.theme=d.theme||'light'; S.tasks=d.tasks||[]; S.habits=d.habits||[]; S.notes=d.notes||[];
+  } catch(e){}
+}
+
+function uid() { return Math.random().toString(36).slice(2)+Date.now().toString(36); }
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function relDate(ts) {
+  const d=Date.now()-ts;
+  if(d<60000) return 'только что';
+  if(d<3600000) return Math.floor(d/60000)+' мин назад';
+  if(d<86400000) return Math.floor(d/3600000)+' ч назад';
+  return Math.floor(d/86400000)+' д назад';
+}
+function fmtDate(d) {
+  if(!d) return '';
+  const t=todayStr(), tm=new Date(); tm.setDate(tm.getDate()+1);
+  const ts=tm.toISOString().slice(0,10);
+  if(d===t) return 'сегодня'; if(d===ts) return 'завтра'; return d;
+}
+
+// THEME
+function applyTheme() {
+  const sun=document.getElementById('iconSun'), moon=document.getElementById('iconMoon');
+  if(S.theme==='dark') {
+    document.documentElement.setAttribute('data-dark','');
+    document.getElementById('themeColor').content='#141414';
+    if(sun) sun.style.display='none';
+    if(moon) moon.style.display='';
+  } else {
+    document.documentElement.removeAttribute('data-dark');
+    document.getElementById('themeColor').content='#ffffff';
+    if(sun) sun.style.display='';
+    if(moon) moon.style.display='none';
+  }
+}
+document.getElementById('themeToggle').addEventListener('click',()=>{ S.theme=S.theme==='light'?'dark':'light'; applyTheme(); save(); });
+
+// TABS
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); tab.classList.add('active');
+    document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active')); document.getElementById('screen-'+tab.dataset.tab).classList.add('active');
+  });
+});
+
+// TASKS
+function groupTasks(tasks) {
+  const g={};
+  tasks.forEach(t=>{ const k=t.date||'когда-нибудь'; if(!g[k])g[k]=[]; g[k].push(t); });
+  return Object.keys(g).sort((a,b)=>{ if(a==='когда-нибудь')return 1; if(b==='когда-нибудь')return -1; return a.localeCompare(b); }).map(k=>({label:k,tasks:g[k]}));
+}
+
+function renderTasks() {
+  const el=document.getElementById('taskList');
+  const active=S.tasks.filter(t=>!t.выполнено), выполнено=S.tasks.filter(t=>t.выполнено);
+  let html='';
+  if(!active.length&&!выполнено.length) { html='<div class="empty-state">нет задач</div>'; }
+  else {
+    groupTasks(active).forEach(g=>{ html+=`<div class="divider">${g.label==='когда-нибудь'?'когда-нибудь':fmtDate(g.label)}</div>`; g.tasks.forEach(t=>html+=tHTML(t)); });
+    if(выполнено.length) { html+='<div class="divider">выполнено</div>'; выполнено.slice(-5).reverse().forEach(t=>html+=tHTML(t)); }
+  }
+  el.innerHTML=html;
+  el.querySelectorAll('.task-check').forEach(e=>e.addEventListener('click',()=>toggleTask(e.dataset.id)));
+  el.querySelectorAll('.task-delete').forEach(e=>e.addEventListener('click',()=>deleteTask(e.dataset.id)));
+}
+
+function tHTML(t) {
+  return `<div class="task-item"><div class="task-check ${t.выполнено?'выполнено':''}" data-id="${t.id}"></div><div class="task-text-wrap"><div class="task-text ${t.выполнено?'выполнено':''}">${esc(t.text)}</div>${t.date?`<div class="task-date-label">${fmtDate(t.date)}</div>`:''}</div><span class="task-delete" data-id="${t.id}">×</span></div>`;
+}
+
+function addTask() {
+  const i=document.getElementById('taskInput'), d=document.getElementById('taskDate'), text=i.value.trim();
+  if(!text) return;
+  S.tasks.push({id:uid(),text,date:d.value||'',выполнено:false,created:Date.now()});
+  i.value=''; save(); renderTasks(); i.focus();
+}
+function toggleTask(id) { const t=S.tasks.find(x=>x.id===id); if(t){t.выполнено=!t.выполнено;save();renderTasks();} }
+function deleteTask(id) { S.tasks=S.tasks.filter(x=>x.id!==id); save(); renderTasks(); }
+
+// ---- DATE PICKER ----
+const MONTHS_RU_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const MONTHS_RU_FULL = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const DAYS_RU = ['пн','вт','ср','чт','пт','сб','вс'];
+let taskSelectedDate = todayStr();
+let calViewDate = new Date();
+
+function dsSetDate(dateStr, label) {
+  taskSelectedDate = dateStr;
+  document.getElementById('taskDateLabel').textContent = label;
+  const chip = document.getElementById('taskDateChip');
+  chip.classList.toggle('has-date', dateStr !== todayStr());
+  document.querySelectorAll('.ds-option').forEach(o => o.classList.remove('selected'));
+}
+
+function dsInitSubs() {
+  const tom = new Date(); tom.setDate(tom.getDate()+1);
+  document.getElementById('dsTomSub').textContent = DAYS_RU[tom.getDay()===0?6:tom.getDay()-1] + ', ' + tom.getDate() + ' ' + MONTHS_RU_SHORT[tom.getMonth()];
+  const dow = (new Date().getDay()+6)%7;
+  const daysToSun = dow===6?7:6-dow;
+  const sun = new Date(); sun.setDate(sun.getDate()+daysToSun);
+  document.getElementById('dsWeekSub').textContent = 'до вс, ' + sun.getDate() + ' ' + MONTHS_RU_SHORT[sun.getMonth()];
+}
+dsInitSubs();
+
+function openDateSheet() {
+  document.getElementById('dsOverlay').classList.add('visible');
+  document.getElementById('dateSheet').classList.add('visible');
+}
+
+function closeDateSheet() {
+  document.getElementById('dsOverlay').classList.remove('visible');
+  document.getElementById('dateSheet').classList.remove('visible');
+  setTimeout(dsBackToQuick, 300);
+}
+
+function dsPick(el) {
+  const val = el.dataset.val;
+  document.querySelectorAll('.ds-option').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  if(val === 'сегодня') { dsSetDate(todayStr(), 'сегодня'); }
+  else if(val === 'завтра') {
+    const d = new Date(); d.setDate(d.getDate()+1);
+    dsSetDate(d.toISOString().slice(0,10), 'завтра');
+  }
+  setTimeout(closeDateSheet, 180);
+}
+
+function dsPickWeek() {
+  const dow = (new Date().getDay()+6)%7;
+  const daysToSun = dow===6?7:6-dow;
+  const sun = new Date(); sun.setDate(sun.getDate()+daysToSun);
+  const label = 'вс, ' + sun.getDate() + ' ' + MONTHS_RU_SHORT[sun.getMonth()];
+  document.querySelectorAll('.ds-option').forEach(o => o.classList.remove('selected'));
+  dsSetDate(sun.toISOString().slice(0,10), label);
+  setTimeout(closeDateSheet, 180);
+}
+
+function dsPickNoDate() {
+  document.querySelectorAll('.ds-option').forEach(o => o.classList.remove('selected'));
+  document.querySelectorAll('.ds-option')[3].classList.add('selected');
+  dsSetDate('', 'без даты');
+  document.getElementById('taskDateChip').classList.remove('has-date');
+  document.getElementById('taskDateLabel').textContent = 'без даты';
+  setTimeout(closeDateSheet, 180);
+}
+
+function dsOpenCal() {
+  document.getElementById('dsQuickView').style.display = 'none';
+  document.getElementById('dsCal').classList.add('visible');
+  calViewDate = new Date();
+  renderCal();
+}
+
+function dsBackToQuick() {
+  document.getElementById('dsQuickView').style.display = '';
+  document.getElementById('dsCal').classList.remove('visible');
+}
+
+function renderCal() {
+  const y = calViewDate.getFullYear(), m = calViewDate.getMonth();
+  document.getElementById('calMonthLabel').textContent = MONTHS_RU_FULL[m] + ' ' + y;
+  const todayD = new Date(); todayD.setHours(0,0,0,0);
+  const firstDay = new Date(y, m, 1);
+  const lastDay = new Date(y, m+1, 0);
+  const startDow = (firstDay.getDay()+6)%7;
+  let cells = '';
+  for(let i=0; i<startDow; i++) {
+    const d = new Date(y, m, -startDow+i+1);
+    cells += `<div class="cal-cell other-month">${d.getDate()}</div>`;
+  }
+  for(let d=1; d<=lastDay.getDate(); d++) {
+    const date = new Date(y, m, d); date.setHours(0,0,0,0);
+    const isToday = date.getTime()===todayD.getTime();
+    const isPast = date < todayD;
+    const isSel = taskSelectedDate === date.toISOString().slice(0,10);
+    const cls = [isToday?'is-today':'', isPast?'is-past':'', isSel?'is-selected':''].filter(Boolean).join(' ');
+    cells += `<div class="cal-cell ${cls}" onclick="calPickDay(${y},${m},${d})">${d}</div>`;
+  }
+  const remaining = (7-((startDow+lastDay.getDate())%7))%7;
+  for(let i=1; i<=remaining; i++) cells += `<div class="cal-cell other-month">${i}</div>`;
+  document.getElementById('calGrid').innerHTML = cells;
+}
+
+function calPickDay(y, m, d) {
+  const date = new Date(y, m, d);
+  const todayD = new Date(); todayD.setHours(0,0,0,0);
+  const tom = new Date(todayD); tom.setDate(tom.getDate()+1);
+  let label;
+  if(date.getTime()===todayD.getTime()) label='сегодня';
+  else if(date.getTime()===tom.getTime()) label='завтра';
+  else label = DAYS_RU[(date.getDay()+6)%7] + ', ' + d + ' ' + MONTHS_RU_SHORT[m];
+  dsSetDate(date.toISOString().slice(0,10), label);
+  renderCal();
+  setTimeout(closeDateSheet, 180);
+}
+
+function calPrev() { calViewDate.setMonth(calViewDate.getMonth()-1); renderCal(); }
+function calNext() { calViewDate.setMonth(calViewDate.getMonth()+1); renderCal(); }
+
+// Show/hide toolbar on input focus
+document.getElementById('taskInput').addEventListener('focus', () => {
+  const kbHeight = window.innerHeight * 0.35;
+  document.documentElement.style.setProperty('--kb-height', kbHeight + 'px');
+  document.getElementById('taskToolbar').classList.add('visible');
+});
+document.getElementById('taskInput').addEventListener('blur', () => {
+  setTimeout(() => {
+    if(!document.getElementById('dateSheet').classList.contains('visible')) {
+      document.getElementById('taskToolbar').classList.remove('visible');
+    }
+  }, 100);
+});
+document.getElementById('toolbarDone').addEventListener('click', () => {
+  document.getElementById('taskInput').blur();
+  document.getElementById('taskToolbar').classList.remove('visible');
+});
+document.getElementById('addTaskBtn').addEventListener('click',addTask);
+document.getElementById('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+
+// HABITS
+function getWeek() {
+  const days=[];
+  const today=new Date();
+  const dow=today.getDay(); // 0=sun
+  // Find last Monday
+  const diff=(dow===0)?6:dow-1;
+  for(let i=0;i<7;i++) {
+    const d=new Date(today);
+    d.setDate(today.getDate()-diff+i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  return days;
+}
+function dayLabel(ds) { return ['вс','пн','вт','ср','чт','пт','сб'][new Date(ds+'T12:00:00').getDay()]; }
+function calcStreak(h) {
+  // Start from today if checked, otherwise from yesterday
+  const today = todayStr();
+  const start = (h.checks && h.checks[today]) ? today : (() => {
+    const d = new Date(); d.setDate(d.getDate()-1); return d.toISOString().slice(0,10);
+  })();
+  let s = 0;
+  const d = new Date(start + 'T12:00:00');
+  while(true) {
+    const ds = d.toISOString().slice(0,10);
+    if(h.checks && h.checks[ds]) { s++; d.setDate(d.getDate()-1); }
+    else break;
+  }
+  return s;
+}
+
+function renderHabits() {
+  const week=getWeek(), today=todayStr();
+  document.getElementById('weekLabels').innerHTML=week.map(d=>`<div class="week-day-label ${d===today?'is-today':''}">${dayLabel(d)}</div>`).join('');
+  const el=document.getElementById('habitsList');
+  if(!S.habits.length) { el.innerHTML='<div class="empty-state" style="padding:40px 20px">нет привычек</div>'; return; }
+  el.innerHTML=S.habits.map(h=>{
+    const streak=calcStreak(h);
+    const dots=week.map(d=>{
+    const checked=h.checks&&h.checks[d];
+    const isToday=d===today;
+    const isFuture=d>today; // today is defined above
+    return `<div class="habit-dot ${checked?'checked':''} ${isToday?'is-today':''} ${isFuture?'is-future':''}" data-id="${h.id}" data-date="${d}"><div class="habit-dot-inner"></div></div>`;
+  }).join('');
+    return `<div class="habit-row" data-id="${h.id}"><div class="habit-name">${esc(h.name)}</div><div class="habit-dots">${dots}</div><div class="streak">${streak>0?streak+'🔥':''}</div></div>`;
+  }).join('');
+  el.querySelectorAll('.habit-dot').forEach(e=>e.addEventListener('click',()=>toggleHabit(e.dataset.id,e.dataset.date)));
+
+  // Long press on habit row -> context menu
+  el.querySelectorAll('.habit-row').forEach(row=>{
+    let timer;
+    row.addEventListener('touchstart',e=>{
+      timer=setTimeout(()=>showHabitMenu(row.dataset.id),500);
+    },{passive:true});
+    row.addEventListener('touchend',()=>clearTimeout(timer));
+    row.addEventListener('touchmove',()=>clearTimeout(timer));
+    row.addEventListener('mousedown',e=>{ timer=setTimeout(()=>showHabitMenu(row.dataset.id),500); });
+    row.addEventListener('mouseup',()=>clearTimeout(timer));
+  });
+
+}
+
+function addHabit() {
+  const i=document.getElementById('habitInput'), name=i.value.trim();
+  if(!name) return;
+  S.habits.push({id:uid(),name,checks:{},created:Date.now()});
+  i.value=''; save(); renderHabits();
+  i.blur(); // dismiss keyboard
+}
+function toggleHabit(id,date) {
+  if(date>todayStr()) return;
+  const h=S.habits.find(x=>x.id===id); if(!h)return;
+  if(!h.checks)h.checks={};
+  h.checks[date]=!h.checks[date]; if(!h.checks[date])delete h.checks[date];
+  save(); renderHabits();
+}
+function deleteHabit(id) { S.habits=S.habits.filter(x=>x.id!==id); save(); renderHabits(); }
+
+document.getElementById('addHabitBtn').addEventListener('click',addHabit);
+document.getElementById('habitInput').addEventListener('keydown',e=>{if(e.key==='Enter')addHabit();});
+
+// NOTES
+function renderNotes() {
+  const el=document.getElementById('notesList'), q=S.search.toLowerCase();
+  let notes=[...S.notes].sort((a,b)=>{ if(a.pinned&&!b.pinned)return -1; if(!a.pinned&&b.pinned)return 1; return b.updated-a.updated; });
+  if(q) notes=notes.filter(n=>n.title.toLowerCase().includes(q)||n.content.toLowerCase().includes(q));
+  if(!notes.length){el.innerHTML='<div class="empty-state">нет заметок</div>';return;}
+  el.innerHTML=notes.map(n=>`<div class="note-card" data-id="${n.id}"><div class="note-title">${n.pinned?'<span class="pin-dot"></span>':''}${esc(n.title||'untitled')}</div><div class="note-preview">${esc(plainText(n.content).slice(0,80))}</div><div class="note-date">${relDate(n.updated)}</div></div>`).join('');
+  el.querySelectorAll('.note-card').forEach(e=>e.addEventListener('click',()=>openNote(e.dataset.id)));
+}
+function plainText(s){return s.replace(/^#{1,2}\s/gm,'').replace(/\*\*(.*?)\*\*/g,'$1').replace(/_(.*?)_/g,'$1');}
+function openNote(id) {
+  const n=S.notes.find(x=>x.id===id); if(!n)return;
+  S.editingNoteId=id;
+  document.getElementById('noteЗаголовокInput').value=n.title;
+  document.getElementById('noteContentInput').value=n.content;
+  document.getElementById('editorMeta').textContent=relDate(n.updated);
+  document.getElementById('pinBtn').textContent=n.pinned?'◆':'◇';
+  document.getElementById('noteEditor').classList.add('open');
+}
+function newNote() {
+  const n={id:uid(),title:'',content:'',pinned:false,created:Date.now(),updated:Date.now()};
+  S.notes.unshift(n); save(); openNote(n.id);
+}
+function saveNote() {
+  const n=S.notes.find(x=>x.id===S.editingNoteId); if(!n)return;
+  n.title=document.getElementById('noteЗаголовокInput').value;
+  n.content=document.getElementById('noteContentInput').value;
+  n.updated=Date.now(); save(); renderNotes();
+}
+function closeEditor() { saveNote(); document.getElementById('noteEditor').classList.remove('open'); S.editingNoteId=null; }
+
+document.getElementById('editorBack').addEventListener('click',closeEditor);
+document.getElementById('newNoteBtn').addEventListener('click',newNote);
+document.getElementById('deleteNoteBtn').addEventListener('click',()=>{ if(!S.editingNoteId)return; S.notes=S.notes.filter(x=>x.id!==S.editingNoteId); save(); closeEditor(); renderNotes(); });
+document.getElementById('pinBtn').addEventListener('click',()=>{ const n=S.notes.find(x=>x.id===S.editingNoteId); if(!n)return; n.pinned=!n.pinned; document.getElementById('pinBtn').textContent=n.pinned?'◆':'◇'; save(); });
+
+let st;
+['noteЗаголовокInput','noteContentInput'].forEach(id=>{ document.getElementById(id).addEventListener('input',()=>{ clearTimeout(st); st=setTimeout(saveNote,600); }); });
+document.getElementById('searchInput').addEventListener('input',e=>{ S.search=e.target.value; renderNotes(); });
+
+document.querySelectorAll('.fmt-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const ta=document.getElementById('noteContentInput'), fmt=btn.dataset.fmt;
+    const start=ta.selectionStart, val=ta.value, sel=val.slice(start,ta.selectionEnd);
+    let ins='';
+    if(fmt==='h1')ins='\n# '; else if(fmt==='h2')ins='\n## ';
+    else if(fmt==='bold')ins=sel?`**${sel}**`:'****';
+    else if(fmt==='italic')ins=sel?`_${sel}_`:'__';
+    else if(fmt==='bullet')ins='\n— '; else if(fmt==='check')ins='\n☐ ';
+    else if(fmt==='divider')ins='\n\n···\n\n'; else if(fmt==='link')ins='[[]]';
+    ta.value=val.slice(0,start)+ins+val.slice(ta.selectionEnd);
+    ta.focus(); const np=start+ins.length; ta.setSelectionRange(np,np); saveNote();
+  });
+});
+
+
+// CONTEXT MENU
+function showHabitMenu(id) {
+  closeCtxMenu();
+  const h = S.habits.find(x=>x.id===id);
+  if(!h) return;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'ctx-overlay';
+  overlay.addEventListener('click', closeCtxMenu);
+
+  const sheet = document.createElement('div');
+  sheet.className = 'ctx-sheet';
+  sheet.id = 'ctxMenu';
+  sheet.innerHTML = `
+    <div class="ctx-group">
+      <div class="ctx-label">${h.name}</div>
+      <div class="ctx-item" id="ctxRename">Переименовать</div>
+      <div class="ctx-item danger" id="ctxDelete">Удалить</div>
+    </div>
+    <div class="ctx-cancel" id="ctxCancel">Отмена</div>
+  `;
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(sheet);
+
+  document.getElementById('ctxRename').addEventListener('click', ()=>{
+    // Replace sheet content with rename input
+    sheet.innerHTML = `
+      <div class="ctx-group">
+        <div class="ctx-label">Переименовать</div>
+        <div style="padding:12px 16px; border-bottom:1px solid var(--border)">
+          <input id="renameInput" style="width:100%;background:none;border:none;outline:none;font-family:Inter,sans-serif;font-size:17px;color:var(--text);padding:0" value="${h.name}" autocomplete="off">
+        </div>
+        <div class="ctx-item" id="ctxSave" style="font-weight:600;justify-content:center">Сохранить</div>
+      </div>
+      <div class="ctx-cancel" id="ctxCancel2">Отмена</div>
+    `;
+    const input = document.getElementById('renameInput');
+    input.focus();
+    input.select();
+    document.getElementById('ctxSave').addEventListener('click', ()=>{
+      const val = input.value.trim();
+      if(val) { h.name=val; save(); renderHabits(); }
+      closeCtxMenu();
+    });
+    input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ const val=input.value.trim(); if(val){h.name=val;save();renderHabits();} closeCtxMenu(); }});
+    document.getElementById('ctxCancel2').addEventListener('click', closeCtxMenu);
+  });
+
+  document.getElementById('ctxDelete').addEventListener('click', ()=>{ closeCtxMenu(); deleteHabit(id); });
+  document.getElementById('ctxCancel').addEventListener('click', closeCtxMenu);
+}
+
+function closeCtxMenu() {
+  document.getElementById('ctxMenu')?.remove();
+  document.querySelector('.ctx-overlay')?.remove();
+}
+
+load(); applyTheme(); renderTasks(); renderHabits(); renderNotes();
+</script>
+</body>
+</html>

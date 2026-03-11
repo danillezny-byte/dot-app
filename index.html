@@ -538,6 +538,7 @@ function closeAddSheet(){
   document.getElementById('addSheet').classList.remove('open');
   // Сбрасываем подъём
   document.getElementById('addSheet').style.transform='';
+  document.getElementById('addSheet').style.bottom='';
   closeDatePicker();
   // Сброс
   const inp=document.getElementById('taskInput');
@@ -551,14 +552,18 @@ function setupKeyboardLift(){
   if(!window.visualViewport) return;
   function onViewportChange(){
     const vv = window.visualViewport;
-    // Сдвиг = разница между полным экраном и видимой областью (высота клавиатуры)
-    const offset = window.innerHeight - vv.height - vv.offsetTop;
-    const kbHeight = Math.max(0, offset);
+    const kbHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
     ['addSheet','habitSheet'].forEach(id=>{
       const el=document.getElementById(id);
       if(el && el.classList.contains('open')){
-        el.style.transform = kbHeight > 0 ? `translateY(-${kbHeight}px)` : '';
-        el.style.transition = kbHeight > 0 ? 'none' : 'transform .3s cubic-bezier(.32,1,.55,1)';
+        if(kbHeight > 0){
+          // Не даём шторке уйти выше видимой области
+          const sheetH = el.getBoundingClientRect().height;
+          const maxBottom = vv.height - sheetH - 8;
+          el.style.bottom = Math.max(0, Math.min(kbHeight, maxBottom < 0 ? kbHeight : kbHeight)) + 'px';
+        } else {
+          el.style.bottom = '';
+        }
       }
     });
   }
@@ -828,6 +833,7 @@ function closeHabitSheet(){
   document.getElementById('habitSheetOverlay').classList.remove('open');
   document.getElementById('habitSheet').classList.remove('open');
   document.getElementById('habitSheet').style.transform='';
+  document.getElementById('habitSheet').style.bottom='';
   document.getElementById('habitInput').value='';
   document.getElementById('addHabitBtn').classList.remove('active');
 }

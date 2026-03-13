@@ -8,992 +8,776 @@
 <meta name="apple-mobile-web-app-title" content="dot.">
 <meta name="theme-color" id="themeColor" content="#ffffff">
 <title>dot.</title>
+<link rel="manifest" href="data:application/manifest+json;base64,ewogICJuYW1lIjogImRvdC4iLAogICJzaG9ydF9uYW1lIjogImRvdC4iLAogICJzdGFydF91cmwiOiAiLiIsCiAgImRpc3BsYXkiOiAic3RhbmRhbG9uZSIsCiAgImJhY2tncm91bmRfY29sb3IiOiAiI2ZmZmZmZiIsCiAgInRoZW1lX2NvbG9yIjogIiNmZmZmZmYiLAogICJvcmllbnRhdGlvbiI6ICJwb3J0cmFpdCIsCiAgImljb25zIjogWwogICAgeyJzcmMiOiAiZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFDQUFBQUFnQ0FZQUFBQnplbnIwQUFBQlIwbEVRVlJZUisyV3dRM0NNQXhGWDlrQUkzUUROdUFJak1BSWpNQUdiTUFJak1BR2pNQUdqTUFHak1BR2pNQUdqTUFHak1BR2pBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBIiwgInNpemVzIjogIjY0eDY0IiwgInR5cGUiOiAiaW1hZ2UvcG5nIn0KICBdCn0=">
 <link id="appIcon" rel="apple-touch-icon" href="data:image/png;base64,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">
-<link id="favicon" rel="icon" type="image/png" href="data:image/png;base64,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">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script>try{if(JSON.parse(localStorage.getItem('dot_v2')||'{}').theme==='dark')document.documentElement.setAttribute('data-dark','')}catch(e){}</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
 ::placeholder{color:var(--text3)}
+.btn{background:none;border:none;cursor:pointer;font-family:inherit}
+
+/* ── TOKENS ── */
 :root{
-  --bg:#ffffff;--bg2:#f7f7f7;--bg3:#efefef;
-  --text:#2c2c2c;--text2:#999;--text3:#ccc;
-  --border:#ebebeb;--accent:#2c2c2c;--accent-fg:#fff;
-  --tab-h:54px;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
-  --fs-body:16px;--fs-sm:13px;--fs-xs:11px
+--bg:#ffffff;--bg2:#f5f5f7;--bg3:#e9e9ed;
+--text:#111111;--text2:#888;--text3:#c0c0c6;
+--border:#ebebef;
+--accent:#6c5ce7;--accent-fg:#ffffff;--accent-dim:rgba(108,92,231,.1);
+--red:#ff3b30;
+--tab-h:52px;--safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
 }
 [data-dark]{
-  --bg:#141414;--bg2:#1e1e1e;--bg3:#2a2a2a;
-  --text:#f0f0f0;--text2:#999;--text3:#5a5a5a;
-  --border:#2e2e2e;--accent:#f0f0f0;--accent-fg:#141414
+--bg:#0e0e10;--bg2:#1a1a1c;--bg3:#26262a;
+--text:#f2f2f7;--text2:#8e8e93;--text3:#44444a;
+--border:#26262a;
+--accent:#a29bfe;--accent-fg:#ffffff;--accent-dim:rgba(162,155,254,.12);
 }
-html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:400;overflow:hidden;overscroll-behavior:none;touch-action:none;transition:background .2s,color .2s;-webkit-font-smoothing:antialiased;position:fixed;inset:0}
-button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class*="-del"],[class*="-tab"],[class*="tab"],[class*="note-card"],[class*="task-item"],[class*="habit-row"],[class*="date-opt"],[class*="ctx-item"],[class*="ctx-cancel"]{touch-action:manipulation}
+
+html,body{height:100%;width:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;font-weight:400;overflow:hidden;overscroll-behavior:none;touch-action:none;transition:background .2s,color .2s;-webkit-font-smoothing:antialiased}
+button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class*="-del"],[class*="tab"],[class*="note-card"],[class*="task-item"],[class*="habit-row"],[class*="date-opt"],[class*="ctx-item"],[class*="ctx-cancel"]{touch-action:manipulation}
+
+/* ── LAYOUT ── */
 .app{display:flex;flex-direction:column;height:100dvh;width:100%;padding-top:var(--safe-t);overflow:hidden}
-.header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 14px;flex-shrink:0}
-.logo{font-weight:700;font-size:20px;letter-spacing:-.04em}
-.icon-btn{width:44px;height:44px;border:none;background:var(--bg2);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);font-size:14px;transition:background .15s}
-.icon-btn:active{background:var(--bg3)}
+
+/* ── HEADER ── */
+.header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 16px;flex-shrink:0}
+.logo{font-weight:800;font-size:22px;letter-spacing:-.05em;color:var(--text)}
+.logo-dot{color:var(--accent)}
+.icon-btn{width:36px;height:36px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:color .15s;border-radius:10px}
+.icon-btn:active{background:var(--bg2)}
+
+/* ── SCREENS ── */
 .screens{flex:1;overflow:hidden;position:relative}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity .18s,transform .18s}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .2s,transform .2s}
 .screen.active{opacity:1;pointer-events:all;transform:none}
+
+/* ── TAB BAR ── */
 .tabbar{display:flex;border-top:1px solid var(--border);background:var(--bg);height:calc(var(--tab-h) + var(--safe-b));padding-bottom:var(--safe-b);flex-shrink:0}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--text3);font-size:10px;font-weight:500;letter-spacing:.04em;-webkit-user-select:none}
-.tab svg{flex-shrink:0;width:20px;height:20px}
-.tab.active{color:var(--text)}
-.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 20px;touch-action:pan-y;overscroll-behavior:contain}
-.scroll::-webkit-scrollbar{display:none}
-.divider{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);padding:20px 0 8px}
-.empty-state{
-  min-height:100%;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  text-align:center;color:var(--text3);
-  font-size:12px;font-weight:400;letter-spacing:.04em;gap:16px;
-  padding:40px 20px
-}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;cursor:pointer;color:var(--text3);position:relative}
+.tab svg{flex-shrink:0;width:22px;height:22px;transition:color .15s,transform .15s}
+.tab.active svg{color:var(--accent)}
+.tab-dot{width:4px;height:4px;border-radius:50%;background:var(--accent);margin-top:4px;opacity:0;transition:opacity .15s;transform:scale(0);transition:opacity .15s,transform .15s}
+.tab.active .tab-dot{opacity:1;transform:scale(1)}
+
+/* ── SCROLL ── */
+.scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 22px;touch-action:pan-y;overscroll-behavior:contain}
+.scroll::-webkit-scrollbar,.fmt-bar::-webkit-scrollbar{display:none}
+
+/* ── DIVIDERS ── */
+.divider{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);padding:22px 0 9px}
+
+/* ── EMPTY STATE ── */
+.empty-state{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--text3);font-size:13px;font-weight:400;gap:14px;padding:40px 20px}
 .empty-state svg{display:block;flex-shrink:0}
-/* Float animation */
+.empty-label{font-size:13px;color:var(--text3);font-weight:400;letter-spacing:.01em}
+
+/* ── ANIMATIONS ── */
 @keyframes floatUp{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @keyframes floatUpSlow{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-/* Draw line */
-@keyframes drawLine{from{stroke-dashoffset:40}to{stroke-dashoffset:0}}
-/* Check appear */
-@keyframes checkAppear{0%{stroke-dashoffset:20;opacity:0}60%{opacity:1}100%{stroke-dashoffset:0;opacity:1}}
-/* Dot pulse */
 @keyframes dotPulse{0%,100%{opacity:.2;transform:scale(.85)}50%{opacity:.7;transform:scale(1)}}
-/* Cursor blink */
-@keyframes cursorBlink{0%,100%{opacity:0}50%{opacity:1}}
-/* Fade in entire illustration */
 @keyframes illFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.empty-illus{animation:illFadeIn .5s ease both, floatUp 4s ease-in-out 0.5s infinite}
-.empty-illus-slow{animation:illFadeIn .5s ease both, floatUpSlow 5s ease-in-out 0.5s infinite}
+.empty-illus{animation:illFadeIn .5s ease both,floatUp 4s ease-in-out .5s infinite}
+.empty-illus-slow{animation:illFadeIn .5s ease both,floatUpSlow 5s ease-in-out .5s infinite}
 
 /* ── FAB ── */
-.fab{position:absolute;bottom:16px;right:20px;width:50px;height:50px;border-radius:50%;background:var(--accent);color:var(--accent-fg);border:none;cursor:pointer;font-size:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,0,0,.15);z-index:10;transition:transform .15s,opacity .15s;-webkit-user-select:none;line-height:1}
-.fab:active{transform:scale(.92)}
-[data-dark] .fab{box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.fab{position:absolute;bottom:18px;right:20px;width:50px;height:50px;border-radius:16px;background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 28px rgba(108,92,231,.4);z-index:10;transition:transform .12s,box-shadow .12s}
+.fab svg{width:20px;height:20px;stroke:#fff;flex-shrink:0}
+.fab:active{transform:scale(.92);box-shadow:0 3px 14px rgba(108,92,231,.3)}
+[data-dark] .fab{box-shadow:0 6px 28px rgba(108,92,231,.5)}
 
 /* ── ADD SHEET ── */
-.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:40;opacity:0;pointer-events:none;transition:opacity .22s}
+.sheet-overlay{position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:40;opacity:0;pointer-events:none;transition:opacity .22s}
 .sheet-overlay.open{opacity:1;pointer-events:all}
-.add-sheet{
-  position:fixed;left:0;right:0;bottom:0;z-index:50;
-  background:var(--bg);border-radius:16px 16px 0 0;
-  padding:0 0 calc(8px + var(--safe-b));
-  transform:translateY(100%);
-  transition:transform .3s cubic-bezier(.32,1,.55,1);
-  box-shadow:0 -2px 20px rgba(0,0,0,.08)
-}
+.add-sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--bg);border-radius:20px 20px 0 0;padding:0 0 calc(8px + var(--safe-b));transform:translateY(100%);transition:transform .32s cubic-bezier(.32,1,.55,1);box-shadow:0 -1px 0 var(--border),0 -24px 60px rgba(0,0,0,.08)}
 .add-sheet.open{transform:none}
-[data-dark] .add-sheet{box-shadow:0 -2px 20px rgba(0,0,0,.4)}
-.sheet-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:10px auto 0}
-
-/* Инпут + кнопка в одной строке */
-.add-input-row{display:flex;align-items:flex-start;padding:14px 16px 12px;gap:12px;border-bottom:1px solid var(--border)}
-.add-task-input{
-  -webkit-user-select:text;user-select:text;
-  flex:1;background:none;border:none;outline:none;
-  font-family:inherit;font-size:17px;font-weight:400;
-  color:var(--text);line-height:1.45;min-height:24px;resize:none;overflow:hidden
-}
-.add-task-input::placeholder{color:var(--text3)}
-
-/* Кнопка «Добавить» — всегда справа, активна только при наличии текста */
-.add-submit-btn{
-  flex-shrink:0;margin-top:0;background:none;border:none;cursor:pointer;
-  font-family:inherit;font-size:15px;font-weight:500;
-  color:#007aff;padding:10px 4px;-webkit-user-select:none;white-space:nowrap;
-  opacity:0;pointer-events:none;transition:opacity .15s;min-height:44px
-}
+[data-dark] .add-sheet{box-shadow:0 -1px 0 var(--border),0 -24px 60px rgba(0,0,0,.5)}
+.sheet-handle{width:34px;height:4px;background:var(--bg3);border-radius:2px;margin:12px auto 4px}
+.add-input-row{display:flex;align-items:flex-start;padding:14px 20px 12px;gap:12px;border-bottom:1px solid var(--border)}
+.add-task-input,#habitInput,#renameInput,.search-input,.note-title-input,.note-content-input{-webkit-user-select:text;user-select:text;border:none;outline:none;font-family:inherit;color:var(--text)}
+.add-task-input{flex:1;background:none;font-size:17px;font-weight:400;line-height:1.5;min-height:26px;resize:none;overflow:hidden}
+.add-submit-btn{flex-shrink:0;font-size:14px;font-weight:600;color:var(--accent);padding:8px 0 8px 4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s;min-height:44px}
 .add-submit-btn.active{opacity:1;pointer-events:all}
 .add-submit-btn:active{opacity:.5}
 
-/* Строка атрибутов — минималистичная */
-.add-attrs{
-  display:flex;align-items:center;
-  padding:2px 12px 2px;
-  min-height:40px;gap:4px
-}
-
-/* Чип даты — показывается только если дата ≠ сегодня */
-.date-chip{
-  display:none;align-items:center;gap:5px;
-  background:var(--bg2);border-radius:20px;
-  padding:5px 10px 5px 8px;
-  font-size:12px;font-weight:500;color:var(--text);
-  cursor:pointer;border:none;font-family:inherit;
-  -webkit-user-select:none;transition:background .1s
-}
+/* ── DATE ATTRS ── */
+.add-attrs{display:flex;align-items:center;padding:2px 14px;min-height:44px;gap:4px}
+.date-chip{display:none;align-items:center;gap:4px;background:var(--accent-dim);border-radius:20px;padding:5px 10px 5px 8px;font-size:12px;font-weight:600;color:var(--accent);cursor:pointer;border:none;font-family:inherit;-webkit-user-select:none;transition:opacity .1s}
 .date-chip.visible{display:flex}
-.date-chip:active{background:var(--bg3)}
-.date-chip-x{font-size:13px;color:var(--text2);margin-left:2px;line-height:1}
-
-/* Кнопка "добавить дату" — маленькая, когда даты нет */
-.add-date-btn{
-  display:flex;align-items:center;gap:5px;
-  background:none;border:none;cursor:pointer;
-  font-family:inherit;font-size:13px;font-weight:400;
-  color:var(--text2);padding:5px 6px;border-radius:8px;
-  -webkit-user-select:none;transition:background .1s,color .12s
-}
+.date-chip:active{opacity:.6}
+.date-chip-x{font-size:13px;color:var(--accent);opacity:.55;margin-left:1px;line-height:1}
+.add-date-btn{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:500;color:var(--text3);padding:6px 8px;border-radius:10px;-webkit-user-select:none;transition:background .1s}
 .add-date-btn:active{background:var(--bg2)}
 .add-date-btn.hidden{display:none}
 
-/* Пикер — выезжает снизу внутри шторки */
-.date-picker{
-  overflow:hidden;max-height:0;opacity:0;
-  transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .18s
-}
-.date-picker.open{max-height:420px;opacity:1}
-
-/* Список опций */
-.date-opts{border-top:1px solid var(--border);padding:0 16px}
-.date-opt{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 0;border-bottom:1px solid var(--border);
-  cursor:pointer;-webkit-user-select:none;min-height:52px
-}
+/* ── DATE PICKER ── */
+.date-picker{overflow:hidden;max-height:0;opacity:0;transition:max-height .28s cubic-bezier(.4,0,.2,1),opacity .18s}
+.date-picker.open{max-height:440px;opacity:1}
+.date-opts{border-top:1px solid var(--border);padding:0 20px}
+.date-opt{display:flex;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--border);cursor:pointer;min-height:52px}
 .date-opt:last-child{border-bottom:none}
 .date-opt:active{opacity:.5}
 .date-opt-left{display:flex;align-items:center;gap:12px}
-.date-opt-text{font-size:16px;font-weight:400;font-weight:450;color:var(--text)}
-.date-opt-sub{font-size:12px;color:var(--text2);margin-top:1px}
+.date-opt-text{font-size:16px;font-weight:400;color:var(--text)}
+.date-opt-sub{font-size:12px;color:var(--text2);margin-top:2px}
 .date-opt-right{display:flex;align-items:center;gap:8px}
-.date-opt-check{font-size:15px;color:#007aff;opacity:0}
+.date-opt-check{font-size:14px;color:var(--accent);opacity:0}
 .date-opt.selected .date-opt-check{opacity:1}
 
-/* Календарь — заменяет список опций */
-.cal-view{display:none;border-top:1px solid var(--border);padding:0 16px 8px}
+/* ── CALENDAR ── */
+.cal-view{display:none;border-top:1px solid var(--border);padding:0 20px 8px}
 .cal-view.open{display:block}
-.cal-header{display:flex;align-items:center;padding:10px 0 6px}
-.cal-back{font-size:14px;font-weight:500;color:#007aff;cursor:pointer;padding:4px 0;-webkit-user-select:none}
+.cal-header{display:flex;align-items:center;padding:12px 0 8px}
+.cal-back{font-size:14px;font-weight:500;color:var(--accent);cursor:pointer;padding:4px 0}
 .cal-month-label{flex:1;text-align:center;font-size:15px;font-weight:600;color:var(--text)}
-.cal-nav{display:flex;gap:0}
-.cal-nav-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:20px;color:#007aff;cursor:pointer;border-radius:8px;-webkit-user-select:none}
+.cal-nav{display:flex}
+.cal-nav-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--accent);cursor:pointer;border-radius:8px}
 .cal-nav-btn:active{background:var(--bg2)}
-.cal-day-names{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:2px}
-.cal-day-name{text-align:center;font-size:11px;font-weight:500;color:var(--text3);padding:4px 0;font-weight:500}
+.cal-day-names{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px}
+.cal-day-name{text-align:center;font-size:10px;font-weight:600;color:var(--text3);padding:4px 0;letter-spacing:.06em;text-transform:uppercase}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px}
-.cal-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;min-height:44px;color:var(--text);cursor:pointer;border-radius:50%;transition:background .1s}
+.cal-cell{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:14px;min-height:40px;color:var(--text);cursor:pointer;border-radius:10px;transition:background .1s}
 .cal-cell:active:not(.is-past){background:var(--bg2)}
 .cal-cell.other-month{opacity:.2;pointer-events:none}
-.cal-cell.is-today{font-weight:700;color:#007aff}
-.cal-cell.is-selected{background:var(--text);color:var(--bg);font-weight:600}
+.cal-cell.is-today{font-weight:700;color:var(--accent)}
+.cal-cell.is-selected{background:var(--accent);color:#fff;font-weight:600}
 .cal-cell.is-past{opacity:.25;pointer-events:none}
 
 /* ── TASKS ── */
-.task-item{display:flex;align-items:flex-start;gap:12px;padding:14px 0;border-bottom:1px solid var(--border)}
-.task-check{width:24px;height:24px;border:1.5px solid var(--text3);border-radius:50%;flex-shrink:0;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;padding:10px;box-sizing:content-box}
-.task-check.done{background:var(--text);border-color:var(--text)}
-.task-check.done::after{content:'';width:5px;height:3px;border-left:1.5px solid var(--accent-fg);border-bottom:1.5px solid var(--accent-fg);transform:rotate(-45deg) translateY(-1px)}
+.task-item{display:flex;align-items:flex-start;gap:13px;padding:15px 0;border-bottom:1px solid var(--border);position:relative;overflow:hidden;transition:transform .2s ease,opacity .2s ease}
+.task-swipe-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:var(--red);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s}
+.task-swipe-bg svg{width:18px;height:18px;stroke:#fff}
+.task-check{width:22px;height:22px;border:1.5px solid var(--border);border-radius:50%;flex-shrink:0;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;padding:9px;box-sizing:content-box;margin-top:1px}
+.task-check:active{transform:scale(.88)}
+.task-check.done{background:var(--accent);border-color:var(--accent)}
+.task-check.done::after{content:'';width:5px;height:3px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translateY(-1px)}
 .task-text-wrap{flex:1;min-width:0}
 .task-text{font-size:16px;font-weight:400;line-height:1.5;color:var(--text);word-break:break-word}
 .task-text.done{color:var(--text3);text-decoration:line-through;text-decoration-color:var(--text3)}
-.task-date-label{font-size:12px;font-weight:400;color:var(--text3);margin-top:1px}
-.task-delete{color:var(--text3);font-size:18px;cursor:pointer;padding:10px 8px;flex-shrink:0;line-height:1}
-.task-delete:active{color:var(--text)}
-.done-toggle-btn{display:block;width:100%;text-align:left;background:none;border:none;padding:16px 0 8px;font-size:13px;font-weight:400;color:var(--text3);cursor:pointer;font-family:inherit;-webkit-user-select:none;transition:color .15s}
+.task-date-label{font-size:11px;font-weight:500;color:var(--text3);margin-top:2px;letter-spacing:.01em}
+.task-date-label.overdue{color:#ff453a}
+.task-delete{color:var(--text3);font-size:18px;cursor:pointer;padding:10px 6px 10px 10px;flex-shrink:0;line-height:1;opacity:0;transition:opacity .2s}
+.task-item:hover .task-delete{opacity:1}
+.task-delete:active{color:var(--red)}
+.done-toggle-btn{display:block;width:100%;text-align:left;padding:16px 0 8px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);transition:color .15s}
 .done-toggle-btn:active{color:var(--text)}
 .done-list{overflow:hidden;max-height:0;opacity:0;transition:max-height .3s ease,opacity .2s ease}
 .done-list.open{max-height:2000px;opacity:1}
 
 /* ── HABITS ── */
-/* week-row — sticky внутри .scroll, точно совпадает с habit-row по padding */
-.week-row{
-  display:flex;align-items:center;gap:12px;
-  position:sticky;top:0;z-index:2;
-  background:var(--bg);
-  padding:8px 0;
-  margin:0 -20px;
-  padding-left:20px;padding-right:20px;
-  border-bottom:1px solid var(--border);
-}
+.week-row{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:2;background:var(--bg);padding:10px 22px;margin:0 -22px;border-bottom:1px solid var(--border)}
 .week-row-spacer{flex:1;min-width:0}
-.week-labels{display:flex;gap:3px;flex-shrink:0}
-.week-day-label{width:26px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.04em;color:var(--text3);text-transform:uppercase;flex-shrink:0}
-.week-day-label.is-today{color:var(--text);font-weight:600}
-.week-row-del{width:44px;flex-shrink:0}
-
-.habit-row{display:flex;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:12px}
-.habit-name{display:flex;align-items:center;gap:5px;flex:1;min-width:0}
+.week-day-label{width:26px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;flex-shrink:0}
+.week-day-label.is-today{color:var(--accent)}
+.week-row-del{width:26px;flex-shrink:0}
+#habitsList{padding-top:0}
+.habit-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);gap:12px}
+.habit-name{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
 .habit-name-text{font-size:15px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.habit-del{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);font-size:16px;line-height:1;cursor:pointer;border-radius:50%;transition:color .12s,background .12s;-webkit-user-select:none;opacity:.5}
-.habit-del:active{color:var(--text);background:var(--bg2)}
-.habit-streak-badge{flex-shrink:0;font-size:11px;color:var(--text3);white-space:nowrap}
-.habit-dots{display:flex;gap:3px;flex-shrink:0}
-.habit-dot{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--text3);cursor:pointer;transition:background .12s,border-color .12s,opacity .12s;flex-shrink:0;opacity:.35;padding:9px;box-sizing:content-box}
-.habit-dot.checked{background:var(--text);border-color:var(--text);opacity:1}
-.habit-dot.is-future{opacity:.15;pointer-events:none}
-.habit-dot.is-today{border-color:var(--text);opacity:.7}
+.habit-del{width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);font-size:16px;line-height:1;cursor:pointer;border-radius:50%;transition:color .12s,background .12s;opacity:0}
+.habit-row:active .habit-del,.habit-del:hover{opacity:.5}
+.habit-del:active{color:var(--text);background:var(--bg2);opacity:1}
+.habit-streak-badge{flex-shrink:0;font-size:11px;color:var(--text3);white-space:nowrap;font-weight:500}
+.habit-dots,.week-labels{display:flex;gap:4px;flex-shrink:0}
+.habit-dot{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;transition:background .15s,border-color .15s,opacity .12s;flex-shrink:0;opacity:.5}
+.habit-dot.checked{background:var(--accent);border-color:var(--accent);opacity:1}
+.habit-dot.is-future{opacity:.2;pointer-events:none}
+.habit-dot.is-today{border-color:var(--text3);opacity:.7}
+.habit-dot:active:not(.is-future){transform:scale(.88)}
 
-.streak{display:none}
-
-/* ── CONTEXT MENU (habits) ── */
+/* ── CONTEXT MENU ── */
 .ctx-overlay{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.25);opacity:0;pointer-events:none;transition:opacity .2s}
 .ctx-overlay.open{opacity:1;pointer-events:all}
 .ctx-menu{position:fixed;left:12px;right:12px;bottom:calc(12px + var(--safe-b));z-index:71;transform:translateY(120%);transition:transform .28s cubic-bezier(.32,1,.55,1)}
 .ctx-menu.open{transform:none}
 .ctx-group{background:var(--bg2);border-radius:14px;overflow:hidden;margin-bottom:8px}
-.ctx-item{padding:14px 16px;font-size:17px;font-weight:400;min-height:52px;display:flex;align-items:center;color:var(--text);cursor:pointer;-webkit-user-select:none;border-bottom:1px solid var(--border)}
+.ctx-item{padding:14px 16px;font-size:17px;font-weight:400;min-height:52px;display:flex;align-items:center;color:var(--text);cursor:pointer;border-bottom:1px solid var(--border)}
 .ctx-item:last-child{border-bottom:none}
 .ctx-item:active{background:var(--bg3)}
-.ctx-item.destructive{color:#ff3b30}
-.ctx-label{padding:10px 16px 6px;font-size:12px;color:var(--text2);text-align:center}
-.ctx-cancel{background:var(--bg2);border-radius:14px;padding:14px 16px;font-size:17px;font-weight:600;color:var(--text);cursor:pointer;text-align:center;-webkit-user-select:none}
+.ctx-item.destructive{color:var(--red)}
+.ctx-label{padding:10px 16px 6px;font-size:12px;color:var(--text2);text-align:center;font-weight:500}
+.ctx-cancel{background:var(--bg2);border-radius:14px;padding:14px 16px;font-size:17px;font-weight:600;color:var(--text);cursor:pointer;text-align:center}
 .ctx-cancel:active{background:var(--bg3)}
-#renameInput{-webkit-user-select:text;user-select:text;width:100%;background:none;border:none;outline:none;font-family:inherit;font-size:17px;font-weight:400;color:var(--text)}
+.ctx-save{font-weight:600;justify-content:center;text-align:center}
+#renameInput{width:100%;background:none;font-size:17px;font-weight:400;color:var(--text)}
 
-/* ── NOTES ── */
-.notes-top{padding:10px 20px;border-bottom:1px solid var(--border);flex-shrink:0}
-.search-input{-webkit-user-select:text;user-select:text;flex:1;background:var(--bg2);border:none;outline:none;border-radius:10px;padding:8px 12px;font-family:inherit;font-size:15px;font-weight:400;color:var(--text)}
+/* ── NOTES LIST ── */
+.notes-top{padding:10px 22px;border-bottom:1px solid var(--border);flex-shrink:0}
+.search-input{width:100%;background:var(--bg2);border-radius:10px;padding:9px 14px;font-size:15px;font-weight:400;color:var(--text)}
+.note-card{padding:16px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity .12s}
+.note-card:active{opacity:.6}
+.note-title{font-weight:600;font-size:15px;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.note-preview{font-size:13px;font-weight:400;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5}
+.note-meta{font-size:11px;font-weight:500;color:var(--text3);margin-top:5px;letter-spacing:.01em}
 
-.note-card{padding:16px 0;border-bottom:1px solid var(--border);cursor:pointer}
-.note-title{font-weight:500;font-size:15px;color:var(--text);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.note-preview{font-size:13px;font-weight:400;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.note-meta{font-size:12px;font-weight:400;color:var(--text3);margin-top:4px}
-.note-editor{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s cubic-bezier(.32,1,.55,1);z-index:5}
+/* ── NOTE EDITOR ── */
+.note-editor{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .26s cubic-bezier(.32,1,.55,1);z-index:5}
 .note-editor.open{transform:none}
-.editor-top{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);flex-shrink:0;gap:8px}
-.editor-back{font-size:15px;font-weight:400;color:#007aff;cursor:pointer;-webkit-user-select:none;padding:4px 0}
+.editor-top{display:flex;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border);flex-shrink:0;gap:8px}
+.editor-back{font-size:14px;font-weight:600;color:var(--accent);cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:4px}
 .editor-spacer{flex:1}
-.pin-btn{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text2);padding:4px}
-.delete-note-btn{background:none;border:none;cursor:pointer;font-size:18px;color:var(--text2);padding:4px}
-.note-date-label{font-size:12px;color:var(--text3);padding:8px 20px 2px;flex-shrink:0}
-.fmt-bar{display:flex;align-items:center;padding:4px 12px;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto}
-.fmt-bar::-webkit-scrollbar{display:none}
-.fmt-btn{min-width:34px;height:28px;border:none;background:none;border-radius:6px;cursor:pointer;color:var(--text2);font-family:inherit;font-size:14px;font-weight:500;padding:0 8px;white-space:nowrap;transition:background .12s,color .12s;display:flex;align-items:center;justify-content:center}
+.pin-btn,.delete-note-btn{font-size:18px;color:var(--text3);padding:6px;cursor:pointer;transition:color .12s}
+.pin-btn:active,.delete-note-btn:active{color:var(--text)}
+.note-date-label{font-size:11px;color:var(--text3);padding:10px 22px 2px;flex-shrink:0;font-weight:500;letter-spacing:.01em}
+.fmt-bar{display:flex;align-items:center;padding:4px 14px;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;gap:2px}
+.fmt-btn{min-width:34px;height:30px;border-radius:7px;color:var(--text3);font-size:14px;font-weight:500;padding:0 8px;white-space:nowrap;transition:background .12s,color .12s;display:flex;align-items:center;justify-content:center}
 .fmt-btn:active{background:var(--bg2);color:var(--text)}
-.note-title-input{-webkit-user-select:text;user-select:text;font-family:inherit;font-weight:700;font-size:26px;letter-spacing:-.02em;color:var(--text);background:none;border:none;outline:none;width:100%;padding:16px 20px 8px;line-height:1.3;letter-spacing:-.01em}
-.note-content-input{-webkit-user-select:text;user-select:text;font-family:inherit;font-size:16px;font-weight:400;color:var(--text);background:none;border:none;outline:none;width:100%;flex:1;padding:0 20px 20px;line-height:1.6;resize:none}
-
-@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.note-title-input{font-weight:700;font-size:26px;letter-spacing:-.02em;background:none;width:100%;padding:18px 22px 8px;line-height:1.25;color:var(--text)}
+.note-content-input{font-size:16px;font-weight:400;background:none;width:100%;flex:1;padding:4px 22px 20px;line-height:1.65;resize:none;color:var(--text)}
 </style>
+
 </head>
 <body>
+<svg style="display:none"><symbol id="ico-cal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol></svg>
 <div class="app">
-  <div class="header">
-    <div class="logo">dot.</div>
-    <button class="icon-btn" id="themeToggle">
-      <svg id="iconSun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      <svg id="iconMoon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-    </button>
-  </div>
-
-  <div class="screens">
-    <!-- TASKS -->
-    <div class="screen active" id="screen-tasks">
-      <button class="fab" id="addTaskFab">+</button>
-      <!-- ADD SHEET -->
-      <div class="sheet-overlay" id="sheetOverlay"></div>
-      <div class="add-sheet" id="addSheet">
-        <div class="sheet-handle"></div>
-        <!-- Инпут + «Добавить» -->
-        <div class="add-input-row">
-          <textarea class="add-task-input" id="taskInput" placeholder="Новая задача" rows="1" autocomplete="off"></textarea>
-          <button class="add-submit-btn" id="addTaskBtn">Добавить</button>
-        </div>
-        <!-- Атрибуты: чип даты (если выбрана не сегодня) или кнопка добавить дату -->
-        <div class="add-attrs">
-          <!-- Кнопка "добавить дату" — видна когда дата = сегодня -->
-          <button class="add-date-btn" id="addDateBtn">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Сегодня
-          </button>
-          <!-- Чип выбранной даты — видна когда дата ≠ сегодня -->
-          <button class="date-chip" id="dateChip">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span id="dateChipLabel">Завтра</span>
-            <span class="date-chip-x" id="dateChipX">×</span>
-          </button>
-        </div>
-        <!-- Пикер: список опций -->
-        <div class="date-picker" id="datePicker">
-          <div class="date-opts" id="dateOpts">
-            <div class="date-opt selected" data-val="today">
-              <div class="date-opt-left">
-                <div class="date-opt-text">Сегодня</div>
-              </div>
-              <div class="date-opt-right"><div class="date-opt-check">✓</div></div>
-            </div>
-            <div class="date-opt" data-val="tomorrow">
-              <div class="date-opt-left">
-                <div><div class="date-opt-text">Завтра</div><div class="date-opt-sub" id="tomorrowSub"></div></div>
-              </div>
-              <div class="date-opt-right"><div class="date-opt-check">✓</div></div>
-            </div>
-            <div class="date-opt" data-val="week">
-              <div class="date-opt-left">
-                <div><div class="date-opt-text">На этой неделе</div><div class="date-opt-sub" id="weekSub"></div></div>
-              </div>
-              <div class="date-opt-right"><div class="date-opt-check">✓</div></div>
-            </div>
-            <div class="date-opt" data-val="nodate">
-              <div class="date-opt-left">
-                <div class="date-opt-text">Без даты</div>
-              </div>
-              <div class="date-opt-right"><div class="date-opt-check">✓</div></div>
-            </div>
-            <div class="date-opt" data-val="cal">
-              <div class="date-opt-left">
-                <div class="date-opt-text">Выбрать дату</div>
-              </div>
-              <div class="date-opt-right">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".35"><polyline points="9 18 15 12 9 6"/></svg>
-              </div>
-            </div>
-          </div>
-          <!-- Календарь — заменяет список опций -->
-          <div class="cal-view" id="calView">
-            <div class="cal-header">
-              <div class="cal-back" id="calBack">‹ Назад</div>
-              <div class="cal-month-label" id="calMonthLabel"></div>
-              <div class="cal-nav">
-                <div class="cal-nav-btn" id="calPrevBtn">‹</div>
-                <div class="cal-nav-btn" id="calNextBtn">›</div>
-              </div>
-            </div>
-            <div class="cal-day-names">
-              <div class="cal-day-name">Пн</div><div class="cal-day-name">Вт</div><div class="cal-day-name">Ср</div>
-              <div class="cal-day-name">Чт</div><div class="cal-day-name">Пт</div><div class="cal-day-name">Сб</div><div class="cal-day-name">Вс</div>
-            </div>
-            <div class="cal-grid" id="calGrid"></div>
-          </div>
-        </div>
-      </div>
-      <div class="scroll" id="taskList"></div>
-    </div>
-
-    <!-- HABITS -->
-    <div class="screen" id="screen-habits">
-      <button class="fab" id="addHabitFab">+</button>
-      <!-- HABIT ADD SHEET -->
-      <div class="sheet-overlay" id="habitSheetOverlay"></div>
-      <div class="add-sheet" id="habitSheet">
-        <div class="sheet-handle"></div>
-        <div class="add-input-row">
-          <input class="add-task-input" id="habitInput" placeholder="Новая привычка" autocomplete="off" style="-webkit-user-select:text;user-select:text">
-          <button class="add-submit-btn" id="addHabitBtn">Добавить</button>
-        </div>
-      </div>
-      <div class="scroll" id="habitsList" style="padding-top:0"></div>
-    </div>
-
-    <!-- NOTES -->
-    <div class="screen" id="screen-notes">
-      <button class="fab" id="newNoteBtn">+</button>
-      <div class="notes-top">
-        <input class="search-input" id="searchInput" placeholder="Поиск" autocomplete="off">
-      </div>
-      <div class="scroll" id="notesList"></div>
-      <div class="note-editor" id="noteEditor">
-        <div class="editor-top">
-          <div class="editor-back" id="editorBack">← назад</div>
-          <div class="editor-spacer"></div>
-          <button class="pin-btn" id="pinBtn">◇</button>
-          <button class="delete-note-btn" id="deleteNoteBtn">×</button>
-        </div>
-        <div class="note-date-label" id="noteDateLabel"></div>
-        <div class="fmt-bar">
-          <button class="fmt-btn" data-fmt="h1">H1</button>
-          <button class="fmt-btn" data-fmt="h2">H2</button>
-          <button class="fmt-btn" data-fmt="bold">B</button>
-          <button class="fmt-btn" data-fmt="italic">I</button>
-          <button class="fmt-btn" data-fmt="divider">—</button>
-          <button class="fmt-btn" data-fmt="checkbox">☐</button>
-          <button class="fmt-btn" data-fmt="bullet">···</button>
-          <button class="fmt-btn" data-fmt="link">[[]]</button>
-        </div>
-        <input class="note-title-input" id="noteTitleInput" placeholder="Заголовок">
-        <textarea class="note-content-input" id="noteContentInput" placeholder="Начни писать..."></textarea>
-      </div>
-    </div>
-  </div>
-
-  <div class="tabbar">
-    <div class="tab active" data-tab="tasks">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-      задачи
-    </div>
-    <div class="tab" data-tab="habits">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-      привычки
-    </div>
-    <div class="tab" data-tab="notes">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      заметки
-    </div>
-  </div>
-
-  <!-- HABIT CTX MENU -->
-  <div class="ctx-overlay" id="ctxOverlay"></div>
-  <div class="ctx-menu" id="ctxMenu">
-    <div class="ctx-group">
-      <div class="ctx-label" id="ctxLabel"></div>
-      <div class="ctx-item" id="ctxRename">Переименовать</div>
-      <div class="ctx-item destructive" id="ctxDelete">Удалить</div>
-    </div>
-    <div class="ctx-cancel" id="ctxCancel">Отмена</div>
-  </div>
-  <!-- Rename input sheet -->
-  <div class="ctx-overlay" id="renameOverlay"></div>
-  <div class="ctx-menu" id="renameMenu">
-    <div class="ctx-group">
-      <div class="ctx-item"><input id="renameInput" placeholder="Название привычки"></div>
-    </div>
-    <div class="ctx-group">
-      <div class="ctx-item" id="ctxSave" style="font-weight:600;justify-content:center;text-align:center">Сохранить</div>
-    </div>
-    <div class="ctx-cancel" id="renameCancelBtn">Отмена</div>
-  </div>
+<div class="header">
+<div class="logo">dot<span class="logo-dot">.</span></div>
+<button class="icon-btn" id="themeToggle" aria-label="Переключить тему">
+<svg id="iconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+<svg id="iconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+</button>
 </div>
-
+<div class="screens">
+<div class="screen active" id="screen-tasks">
+<button class="fab" id="addTaskFab" aria-label="Добавить задачу"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+<div class="sheet-overlay" id="sheetOverlay"></div>
+<div class="add-sheet" id="addSheet">
+<div class="sheet-handle"></div>
+<div class="add-input-row">
+<textarea class="add-task-input" id="taskInput" placeholder="Новая задача" rows="1" autocomplete="off"></textarea>
+<button class="btn add-submit-btn" id="addTaskBtn">Добавить</button>
+</div>
+<div class="add-attrs">
+<button class="btn add-date-btn" id="addDateBtn">
+<svg width="13" height="13"><use href="#ico-cal"/></svg>
+Сегодня
+</button>
+<button class="date-chip" id="dateChip">
+<svg width="12" height="12"><use href="#ico-cal"/></svg>
+<span id="dateChipLabel">Завтра</span>
+<span class="date-chip-x" id="dateChipX">×</span>
+</button>
+</div>
+<div class="date-picker" id="datePicker">
+<div class="date-opts" id="dateOpts"></div>
+<div class="cal-view" id="calView">
+<div class="cal-header">
+<div class="cal-back" id="calBack">‹ Назад</div>
+<div class="cal-month-label" id="calMonthLabel"></div>
+<div class="cal-nav">
+<div class="cal-nav-btn" id="calPrevBtn">‹</div>
+<div class="cal-nav-btn" id="calNextBtn">›</div>
+</div>
+</div>
+<div class="cal-day-names">
+<div class="cal-day-name">Пн</div><div class="cal-day-name">Вт</div><div class="cal-day-name">Ср</div>
+<div class="cal-day-name">Чт</div><div class="cal-day-name">Пт</div><div class="cal-day-name">Сб</div><div class="cal-day-name">Вс</div>
+</div>
+<div class="cal-grid" id="calGrid"></div>
+</div>
+</div>
+</div>
+<div class="scroll" id="taskList"></div>
+</div>
+<div class="screen" id="screen-habits">
+<button class="fab" id="addHabitFab" aria-label="Добавить привычку"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+<div class="sheet-overlay" id="habitSheetOverlay"></div>
+<div class="add-sheet" id="habitSheet">
+<div class="sheet-handle"></div>
+<div class="add-input-row">
+<input class="add-task-input" id="habitInput" placeholder="Новая привычка" autocomplete="off" >
+<button class="btn add-submit-btn" id="addHabitBtn">Добавить</button>
+</div>
+</div>
+<div class="scroll" id="habitsList"></div>
+</div>
+<div class="screen" id="screen-notes">
+<button class="fab" id="newNoteBtn" aria-label="Новая заметка"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+<div class="notes-top">
+<div style="position:relative;display:flex;align-items:center">
+<svg style="position:absolute;left:12px;width:15px;height:15px;color:var(--text3);pointer-events:none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+<input class="search-input" id="searchInput" placeholder="Поиск" autocomplete="off" style="padding-left:36px;width:100%">
+</div>
+</div>
+<div class="scroll" id="notesList"></div>
+<div class="note-editor" id="noteEditor">
+<div class="editor-top">
+<div class="editor-back" id="editorBack"><svg width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 1 1 7 7 13"/></svg> Назад</div>
+<div class="editor-spacer"></div>
+<button class="btn pin-btn" id="pinBtn" aria-label="Закрепить заметку">◇</button>
+<button class="btn delete-note-btn" id="deleteNoteBtn" aria-label="Удалить заметку">×</button>
+</div>
+<div class="note-date-label" id="noteDateLabel"></div>
+<div class="fmt-bar" id="fmtBar"></div>
+<input class="note-title-input" id="noteTitleInput" placeholder="Заголовок">
+<textarea class="note-content-input" id="noteContentInput" placeholder="Начни писать..."></textarea>
+</div>
+</div>
+</div>
+<div class="tabbar">
+<div class="tab active" data-tab="tasks" aria-label="Задачи">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+<div class="tab-dot"></div>
+</div>
+<div class="tab" data-tab="habits" aria-label="Привычки">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+<div class="tab-dot"></div>
+</div>
+<div class="tab" data-tab="notes" aria-label="Заметки">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+<div class="tab-dot"></div>
+</div>
+</div>
+<div class="ctx-overlay" id="ctxOverlay"></div>
+<div class="ctx-menu" id="ctxMenu">
+<div class="ctx-group">
+<div class="ctx-label" id="ctxLabel"></div>
+<div class="ctx-item" id="ctxRename">Переименовать</div>
+<div class="ctx-item destructive" id="ctxDelete">Удалить</div>
+</div>
+<div class="ctx-cancel" id="ctxCancel">Отмена</div>
+</div>
+<div class="ctx-overlay" id="renameOverlay"></div>
+<div class="ctx-menu" id="renameMenu">
+<div class="ctx-group">
+<div class="ctx-item"><input id="renameInput" placeholder="Название привычки"></div>
+</div>
+<div class="ctx-group">
+<div class="ctx-item ctx-save" id="ctxSave">Сохранить</div>
+</div>
+<div class="ctx-cancel" id="renameCancelBtn">Отмена</div>
+</div>
+</div>
 <script>
-// ── UTILS ──────────────────────────────────────────────────────────────────
 const uid=()=>Math.random().toString(36).slice(2);
+const stripMd=s=>s.replace(/^#+\s/gm,'').replace(/[*_`]/g,'').trim();
 const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const todayStr=()=>new Date().toISOString().slice(0,10);
+const todayStr=()=>iso(new Date());
 const MO_SHORT=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 const MO_FULL=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
 const DAY_RU=['пн','вт','ср','чт','пт','сб','вс'];
-
-// ── STATE ──────────────────────────────────────────────────────────────────
+const findH=id=>S.habits.find(x=>x.id===id);
+const findN=id=>S.notes.find(x=>x.id===id);
+const $=id=>document.getElementById(id);
+const iso=d=>d.toISOString().slice(0,10);
+const show=id=>$(id).classList.add('open');
+const hide=id=>$(id).classList.remove('open');
 let S={theme:'light',tasks:[],habits:[],notes:[],editingNoteId:null,search:'',doneOpen:false};
-
-function save(){localStorage.setItem('dot_v2',JSON.stringify({theme:S.theme,tasks:S.tasks,habits:S.habits,notes:S.notes,doneOpen:S.doneOpen}));}
-function load(){
-  try{
-    const d=JSON.parse(localStorage.getItem('dot_v2')||'{}');
-    S.theme=d.theme||'light';S.tasks=d.tasks||[];S.habits=d.habits||[];S.notes=d.notes||[];S.doneOpen=d.doneOpen||false;
-  }catch(e){}
-}
+function save(){try{localStorage.setItem('dot_v2',JSON.stringify({theme:S.theme,tasks:S.tasks,habits:S.habits,notes:S.notes,doneOpen:S.doneOpen}));}catch(e){console.warn('dot: storage full',e);}}
+let _saveTimer=null;
+function debouncedSave(){clearTimeout(_saveTimer);_saveTimer=setTimeout(save,300);}
+function load(){try{const d=JSON.parse(localStorage.getItem('dot_v2')||'{}');S.theme=d.theme||'light';S.tasks=(d.tasks||[]).map(t=>({done:false,date:'',created:Date.now(),...t}));S.habits=(d.habits||[]).map(h=>({checks:{},...h}));S.notes=(d.notes||[]).map(n=>({pinned:false,createdAt:Date.now(),updatedAt:Date.now(),...n}));S.doneOpen=d.doneOpen||false;}catch(e){}}
 load();
-
-// ── THEME ──────────────────────────────────────────────────────────────────
+function cleanOldChecks(){const cutoff=new Date();cutoff.setDate(cutoff.getDate()-400);const cutStr=cutoff.toISOString().slice(0,10);S.habits.forEach(h=>{if(h.checks)Object.keys(h.checks).forEach(k=>{if(k<cutStr)delete h.checks[k];});});}
+cleanOldChecks();
 function applyTheme(){
   const dark=S.theme==='dark';
   document.documentElement.toggleAttribute('data-dark',dark);
-  document.getElementById('themeColor').content=dark?'#141414':'#ffffff';
-  document.getElementById('iconSun').style.display=dark?'none':'';
-  document.getElementById('iconMoon').style.display=dark?'':'none';
+  $('themeColor').content=dark?'#141414':'#ffffff';
+  $('iconSun').style.display=dark?'none':'';
+  $('iconMoon').style.display=dark?'':'none';
 }
 applyTheme();
-document.getElementById('themeToggle').addEventListener('click',()=>{S.theme=S.theme==='light'?'dark':'light';applyTheme();save();});
-
-// ── TABS ───────────────────────────────────────────────────────────────────
+(()=>{const f=document.createElement('link');f.rel='icon';f.type='image/png';f.href=$('appIcon').href;document.head.appendChild(f);})();
+$('themeToggle').addEventListener('click',()=>{S.theme=S.theme==='light'?'dark':'light';applyTheme();save();});
 const tabs=[...document.querySelectorAll('.tab')];
 const screens=[...document.querySelectorAll('.screen')];
 tabs.forEach(tab=>tab.addEventListener('click',()=>{
   tabs.forEach(x=>x.classList.remove('active'));tab.classList.add('active');
   screens.forEach(x=>x.classList.remove('active'));
-  document.getElementById('screen-'+tab.dataset.tab).classList.add('active');
+  $('screen-'+tab.dataset.tab).classList.add('active');
 }));
-
-// ── DATE HELPERS ───────────────────────────────────────────────────────────
-function fmtDate(d){
-  if(!d)return '';
-  if(d===todayStr())return 'сегодня';
+function relDate(){
+  // возвращает {tom, sun} — строки дат
   const tm=new Date();tm.setDate(tm.getDate()+1);
-  if(d===tm.toISOString().slice(0,10))return 'завтра';
-  const dow=(new Date().getDay()+6)%7,dts=dow===6?7:6-dow;
-  const sun=new Date();sun.setDate(sun.getDate()+dts);
-  if(d===sun.toISOString().slice(0,10))return 'до вс, '+sun.getDate()+' '+MO_SHORT[sun.getMonth()];
+  const dow=(new Date().getDay()+6)%7,dts=dow===6?7:6-dow,s=new Date();s.setDate(s.getDate()+dts);
+  return {tom:iso(tm),sun:s,sunStr:iso(s)};
+}
+function fmtDate(d,group){
+  if(!d)return group?'без даты':'';
+  const {tom,sun,sunStr}=relDate(),today=todayStr();
+  if(d===today)return 'сегодня';
+  if(d===tom)return 'завтра';
+  if(d===sunStr)return group?'на этой неделе':'до вс, '+sun.getDate()+' '+MO_SHORT[sun.getMonth()];
   const dt=new Date(d+'T12:00:00');
   return DAY_RU[(dt.getDay()+6)%7]+', '+dt.getDate()+' '+MO_SHORT[dt.getMonth()];
 }
-function fmtDateGroup(d){
-  if(!d)return 'без даты';
-  if(d===todayStr())return 'сегодня';
-  const tm=new Date();tm.setDate(tm.getDate()+1);
-  if(d===tm.toISOString().slice(0,10))return 'завтра';
-  const dow=(new Date().getDay()+6)%7,dts=dow===6?7:6-dow;
-  const sun=new Date();sun.setDate(sun.getDate()+dts);
-  if(d===sun.toISOString().slice(0,10))return 'на этой неделе';
-  const dt=new Date(d+'T12:00:00');
-  return DAY_RU[(dt.getDay()+6)%7]+', '+dt.getDate()+' '+MO_SHORT[dt.getMonth()];
+const fmtDateGroup=d=>fmtDate(d,true);
+function openSheet(sheetId,overlayId,focusId){
+  show(overlayId);
+  show(sheetId);
+  if(focusId)$(focusId).focus();
 }
-
-// ── ADD SHEET ──────────────────────────────────────────────────────────────
-let taskSelectedDate = todayStr();
-let calViewDate = new Date();
-let datePickerOpen = false;
-
-// Подписи подзаголовков
-(function initDateSubs(){
-  const tom=new Date();tom.setDate(tom.getDate()+1);
-  document.getElementById('tomorrowSub').textContent=DAY_RU[(tom.getDay()+6)%7]+', '+tom.getDate()+' '+MO_SHORT[tom.getMonth()];
-  const dow=(new Date().getDay()+6)%7,dts=dow===6?7:6-dow;
-  const sun=new Date();sun.setDate(sun.getDate()+dts);
-  document.getElementById('weekSub').textContent='до вс, '+sun.getDate()+' '+MO_SHORT[sun.getMonth()];
+function closeSheet(sheetId,overlayId){
+  document.activeElement?.blur();
+  hide(overlayId);
+  const el=$(sheetId);el.classList.remove('open');el.style.transform='';el.style.bottom='';
+}
+if(window.visualViewport){
+  const onVV=()=>{
+    const vv=window.visualViewport;
+    const kb=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);
+    ['addSheet','habitSheet','noteEditor'].forEach(id=>{
+      const el=$(id);
+      if(el&&el.classList.contains('open')) el.style.bottom=kb>0?kb+'px':'';
+    });
+  };
+  window.visualViewport.addEventListener('resize',onVV);
+  window.visualViewport.addEventListener('scroll',onVV);
+}
+document.addEventListener('touchmove',e=>{
+  if(e.target.closest('.scroll,.add-sheet,.ctx-menu,.note-editor'))return;
+  e.preventDefault();
+},{passive:false});
+let taskSelectedDate=todayStr(),calViewDate=new Date(),datePickerOpen=false;
+(()=>{
+const{tom,sun}=relDate();
+const t=new Date(tom+'T12:00:00');
+const tS=DAY_RU[(t.getDay()+6)%7]+', '+t.getDate()+' '+MO_SHORT[t.getMonth()];
+const wS='до вс, '+sun.getDate()+' '+MO_SHORT[sun.getMonth()];
+$('dateOpts').innerHTML=[['today','Сегодня'],['tomorrow','Завтра',tS],['week','На этой неделе',wS],['nodate','Без даты'],['cal','Выбрать дату',,'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" opacity=".35"><polyline points="9 18 15 12 9 6"/></svg>']].map(([v,l,s,ic],i)=>`<div class="date-opt${i===0?' selected':''}" data-val="${v}"><div class="date-opt-left"><div><div class="date-opt-text">${l}</div>${s?`<div class="date-opt-sub">${s}</div>`:''}</div></div><div class="date-opt-right">${ic||'<div class="date-opt-check">✓</div>'}</div></div>`).join('');
 })();
-
-function openAddSheet(){
-  document.getElementById('sheetOverlay').classList.add('open');
-  document.getElementById('addSheet').classList.add('open');
-  document.getElementById('taskInput').focus();
-}
+function openAddSheet(){pushModalState();taskSelectedDate=todayStr();openSheet('addSheet','sheetOverlay','taskInput');}
 function closeAddSheet(){
-  document.getElementById('taskInput').blur();
-  document.getElementById('sheetOverlay').classList.remove('open');
-  document.getElementById('addSheet').classList.remove('open');
-  // Сбрасываем подъём
-  document.getElementById('addSheet').style.transform='';
-  document.getElementById('addSheet').style.bottom='';
+  closeSheet('addSheet','sheetOverlay');
   closeDatePicker();
-  // Сброс
-  const inp=document.getElementById('taskInput');
-  inp.value='';inp.style.height='auto';
-  document.getElementById('addTaskBtn').classList.remove('active');
+  const inp=$('taskInput');inp.value='';inp.style.height='auto';
+  $('addTaskBtn').classList.remove('active');
   setDate('today');
 }
-
-// ── KEYBOARD LIFT: шторки поднимаются вместе с клавиатурой ──────────────────
-function setupKeyboardLift(){
-  if(!window.visualViewport) return;
-  function onViewportChange(){
-    const vv = window.visualViewport;
-    const kbHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-    ['addSheet','habitSheet'].forEach(id=>{
-      const el=document.getElementById(id);
-      if(el && el.classList.contains('open')){
-        if(kbHeight > 0){
-          // Не даём шторке уйти выше видимой области
-          const sheetH = el.getBoundingClientRect().height;
-          const maxBottom = vv.height - sheetH - 8;
-          el.style.bottom = Math.max(0, Math.min(kbHeight, maxBottom < 0 ? kbHeight : kbHeight)) + 'px';
-        } else {
-          el.style.bottom = '';
-        }
-      }
-    });
-  }
-  window.visualViewport.addEventListener('resize', onViewportChange);
-  window.visualViewport.addEventListener('scroll', onViewportChange);
-}
-setupKeyboardLift();
-
-// Глушим scroll/bounce на оверлеях — только скроллируемые .scroll двигаются
-document.addEventListener('touchmove', function(e){
-  // Разрешаем скролл внутри .scroll контейнеров
-  if(e.target.closest('.scroll') || e.target.closest('.add-sheet') || e.target.closest('.ctx-menu') || e.target.closest('.note-editor')){
-    return;
-  }
-  e.preventDefault();
-}, {passive:false});
-
 function openDatePicker(){
   datePickerOpen=true;
-  document.getElementById('dateOpts').style.display='';
-  document.getElementById('calView').classList.remove('open');
-  document.getElementById('datePicker').classList.add('open');
+  $('dateOpts').style.display='';
+  hide('calView');
+  show('datePicker');
 }
 function closeDatePicker(){
   datePickerOpen=false;
-  document.getElementById('datePicker').classList.remove('open');
+  hide('datePicker');
+  hide('calView');
+  $('dateOpts').style.display='';
 }
-
-// Главная функция установки даты
-function setDate(val, customDate){
-  // Вычисляем дату
-  if(val==='today')       taskSelectedDate=todayStr();
-  else if(val==='tomorrow'){const d=new Date();d.setDate(d.getDate()+1);taskSelectedDate=d.toISOString().slice(0,10);}
-  else if(val==='week')   {const dow=(new Date().getDay()+6)%7,dts=dow===6?7:6-dow,s=new Date();s.setDate(s.getDate()+dts);taskSelectedDate=s.toISOString().slice(0,10);}
-  else if(val==='nodate') taskSelectedDate='';
-  else if(customDate)     taskSelectedDate=customDate;
-
-  // Метка для чипа
+function setDate(val,customDate){
+  if(val==='today')      taskSelectedDate=todayStr();
+  else if(val==='tomorrow'){const d=new Date();d.setDate(d.getDate()+1);taskSelectedDate=iso(d);}
+  else if(val==='week')  {const {sunStr}=relDate();taskSelectedDate=sunStr;}
+  else if(val==='nodate')taskSelectedDate='';
+  else if(customDate)    taskSelectedDate=customDate;
   let chipLabel='';
-  if(val==='tomorrow')    chipLabel='Завтра';
-  else if(val==='week')   chipLabel='Эта неделя';
-  else if(customDate){
-    const dt=new Date(customDate+'T12:00:00');
-    chipLabel=dt.getDate()+' '+MO_SHORT[dt.getMonth()];
-  }
-
-  // Показываем чип (≠ сегодня и ≠ без даты) или кнопку добавить дату
-  const isDefault = (val==='today' || val==='nodate');
-  document.getElementById('dateChip').classList.toggle('visible', !isDefault);
-  document.getElementById('addDateBtn').classList.toggle('hidden', !isDefault);
-  if(!isDefault && chipLabel) document.getElementById('dateChipLabel').textContent=chipLabel;
-
-  // Обновляем текст кнопки по умолчанию
-  document.getElementById('addDateBtn').querySelector('span') && null; // no span needed
-  if(val==='nodate'){
-    // Без даты — кнопка показывает "нет даты"
-    document.getElementById('addDateBtn').lastChild.textContent=' Без даты';
-  } else {
-    document.getElementById('addDateBtn').lastChild.textContent=' Сегодня';
-  }
-
-  // Галочки в опциях
+  if(val==='tomorrow')   chipLabel='Завтра';
+  else if(val==='week')  chipLabel='На этой неделе';
+  else if(customDate){const dt=new Date(customDate+'T12:00:00');chipLabel=dt.getDate()+' '+MO_SHORT[dt.getMonth()];}
+  const isDefault=val==='today'||val==='nodate';
+  $('dateChip').classList.toggle('visible',!isDefault);
+  $('addDateBtn').classList.toggle('hidden',!isDefault);
+  if(!isDefault&&chipLabel)$('dateChipLabel').textContent=chipLabel;
+  $('addDateBtn').lastChild.textContent=val==='nodate'?' Без даты':' Сегодня';
   document.querySelectorAll('.date-opt').forEach(o=>o.classList.toggle('selected',o.dataset.val===val));
 }
-
-// Кнопка "добавить дату" / "Сегодня"
-document.getElementById('addDateBtn').addEventListener('click',()=>{
-  if(datePickerOpen){closeDatePicker();}
-  else{openDatePicker();}
+$('addDateBtn').addEventListener('click',()=>datePickerOpen?closeDatePicker():openDatePicker());
+$('dateChip').addEventListener('click',e=>{
+  if(e.target.closest('#dateChipX')){setDate('today');closeDatePicker();return;}
+  datePickerOpen?closeDatePicker():openDatePicker();
 });
-
-// Клик на чип — открывает пикер
-document.getElementById('dateChip').addEventListener('click',e=>{
-  if(e.target.closest('#dateChipX')){
-    setDate('today');
-    closeDatePicker();
-    return;
-  }
-  if(datePickerOpen){closeDatePicker();}
-  else{openDatePicker();}
-});
-
-// Клик по опциям
-document.getElementById('dateOpts').addEventListener('click',e=>{
-  const opt=e.target.closest('.date-opt');
-  if(!opt)return;
+$('dateOpts').addEventListener('click',e=>{
+  const opt=e.target.closest('.date-opt');if(!opt)return;
   const val=opt.dataset.val;
-  if(val==='cal'){
-    // Показываем календарь, скрываем список
-    document.getElementById('dateOpts').style.display='none';
-    document.getElementById('calView').classList.add('open');
-    calViewDate=new Date();renderCal();
-  } else {
-    setDate(val);
-    closeDatePicker();
-    document.getElementById('taskInput').focus();
-  }
+  if(val==='cal'){$('dateOpts').style.display='none';show('calView');calViewDate=new Date();renderCal();}
+  else{setDate(val);closeDatePicker();$('taskInput').focus();}
 });
-
-// Назад из календаря
-document.getElementById('calBack').addEventListener('click',()=>{
-  document.getElementById('dateOpts').style.display='';
-  document.getElementById('calView').classList.remove('open');
-});
-document.getElementById('calPrevBtn').addEventListener('click',()=>{calViewDate.setMonth(calViewDate.getMonth()-1);renderCal();});
-document.getElementById('calNextBtn').addEventListener('click',()=>{calViewDate.setMonth(calViewDate.getMonth()+1);renderCal();});
-
+$('calBack').addEventListener('click',()=>{$('dateOpts').style.display='';hide('calView');});
+$('calPrevBtn').addEventListener('click',()=>{calViewDate.setMonth(calViewDate.getMonth()-1);renderCal();});
+$('calNextBtn').addEventListener('click',()=>{calViewDate.setMonth(calViewDate.getMonth()+1);renderCal();});
 function renderCal(){
   const y=calViewDate.getFullYear(),m=calViewDate.getMonth();
-  document.getElementById('calMonthLabel').textContent=MO_FULL[m]+' '+y;
+  $('calMonthLabel').textContent=MO_FULL[m]+' '+y;
   const todayD=new Date();todayD.setHours(0,0,0,0);
-  const first=new Date(y,m,1),last=new Date(y,m+1,0);
-  const startDow=(first.getDay()+6)%7;
+  const first=new Date(y,m,1),last=new Date(y,m+1,0),startDow=(first.getDay()+6)%7;
   let cells='';
   for(let i=0;i<startDow;i++){const d=new Date(y,m,0-startDow+i+1);cells+=`<div class="cal-cell other-month">${d.getDate()}</div>`;}
   for(let d=1;d<=last.getDate();d++){
     const date=new Date(y,m,d);date.setHours(0,0,0,0);
-    const cls=[date.getTime()===todayD.getTime()?'is-today':'',date<todayD?'is-past':'',taskSelectedDate===date.toISOString().slice(0,10)?'is-selected':''].filter(Boolean).join(' ');
-    cells+=`<div class="cal-cell ${cls}" data-date="${date.toISOString().slice(0,10)}">${d}</div>`;
+    const cls=[date.getTime()===todayD.getTime()?'is-today':'',date<todayD?'is-past':'',taskSelectedDate===iso(date)?'is-selected':''].filter(Boolean).join(' ');
+    cells+=`<div class="cal-cell ${cls}" data-date="${iso(date)}">${d}</div>`;
   }
   const rem=(7-((startDow+last.getDate())%7))%7;
   for(let i=1;i<=rem;i++)cells+=`<div class="cal-cell other-month">${i}</div>`;
-  document.getElementById('calGrid').innerHTML=cells;
+  $('calGrid').innerHTML=cells;
 }
-document.getElementById('calGrid').addEventListener('click',e=>{
+$('calGrid').addEventListener('click',e=>{
   const cell=e.target.closest('.cal-cell');
   if(!cell||cell.classList.contains('is-past')||cell.classList.contains('other-month'))return;
   const ds=cell.dataset.date;if(!ds)return;
-  if(ds===todayStr()){setDate('today');}
-  else{setDate('custom',ds);}
-  closeDatePicker();
-  document.getElementById('taskInput').focus();
+  setDate(ds===todayStr()?'today':'custom',ds);
+  closeDatePicker();$('taskInput').focus();
 });
-
-// Инпут — авторазмер + активация кнопки
-document.getElementById('taskInput').addEventListener('input',function(){
-  this.style.height='auto';
-  this.style.height=Math.min(this.scrollHeight,120)+'px';
-  document.getElementById('addTaskBtn').classList.toggle('active',!!this.value.trim());
+$('taskInput').addEventListener('input',function(){
+  this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px';
+  $('addTaskBtn').classList.toggle('active',!!this.value.trim());
 });
-
-// Overlay → закрыть шторку (но не если пикер открыт)
-document.getElementById('sheetOverlay').addEventListener('click',closeAddSheet);
-document.getElementById('addTaskFab').addEventListener('click',openAddSheet);
-
+$('sheetOverlay').addEventListener('click',closeAddSheet);
+$('addTaskFab').addEventListener('click',openAddSheet);
 function addTask(){
-  const inp=document.getElementById('taskInput'),text=inp.value.trim();
-  if(!text)return;
+  const inp=$('taskInput'),text=inp.value.trim();if(!text)return;
   S.tasks.push({id:uid(),text,date:taskSelectedDate,done:false,created:Date.now()});
   save();renderTasks();closeAddSheet();
 }
-document.getElementById('addTaskBtn').addEventListener('click',addTask);
-document.getElementById('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();addTask();}});
-
-// ── TASKS RENDER ──────────────────────────────────────────────────────────
-function groupTasks(tasks){
-  const g={};
-  tasks.forEach(t=>{const k=t.date||'';if(!g[k])g[k]=[];g[k].push(t);});
-  return Object.keys(g).sort((a,b)=>{if(!a)return 1;if(!b)return -1;return a.localeCompare(b);}).map(k=>({label:k,tasks:g[k]}));
-}
-function taskHTML(t){
+$('addTaskBtn').addEventListener('click',addTask);
+$('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();addTask();}});
+function taskHTML(t,_today){
   const dc=t.done?'done':'';
-  return `<div class="task-item">
-    <div class="task-check ${dc}" data-id="${t.id}"></div>
-    <div class="task-text-wrap">
-      <div class="task-text ${dc}">${esc(t.text)}</div>
-      ${t.date?`<div class="task-date-label">${fmtDate(t.date)}</div>`:''}
-    </div>
-    <span class="task-delete" data-id="${t.id}">×</span>
-  </div>`;
+  const ov=(!t.done&&t.date&&t.date<(_today||todayStr()))?'overdue':'';
+  const swipeBg=`<div class="task-swipe-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></div>`;
+  return `<div class="task-item">${swipeBg}<div class="task-check ${dc}" data-id="${t.id}"></div><div class="task-text-wrap"><div class="task-text ${dc}">${esc(t.text)}</div>${t.date?`<div class="task-date-label ${ov}">${fmtDate(t.date)}</div>`:''}</div><span class="task-delete" data-id="${t.id}">×</span></div>`;
 }
 function renderTasks(){
-  const el=document.getElementById('taskList');
-  const active=S.tasks.filter(t=>!t.done),done=S.tasks.filter(t=>t.done);
-  let html='';
-  if(!active.length&&!done.length){html=`<div class="empty-state">
-  <svg class="empty-illus" width="100" height="88" viewBox="0 0 100 88" fill="none">
-    <!-- Row 1: checked -->
-    <rect x="4" y="6" width="26" height="26" rx="7" stroke="currentColor" stroke-width="1.6" opacity=".4"/>
-    <path d="M11 19l5 5 9-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="24" stroke-dashoffset="24" opacity=".55">
-      <animate attributeName="stroke-dashoffset" from="24" to="0" dur="0.5s" begin="0.4s" fill="freeze"/>
-    </path>
-    <rect x="38" y="14" width="58" height="7" rx="3.5" fill="currentColor" opacity=".12"/>
-    <!-- Row 2: unchecked -->
-    <rect x="4" y="44" width="26" height="26" rx="7" stroke="currentColor" stroke-width="1.6" opacity=".18"/>
-    <rect x="38" y="52" width="44" height="7" rx="3.5" fill="currentColor" opacity=".08"/>
-  </svg>
-</div>`;}
-  else{
-    groupTasks(active).forEach(g=>{
-      html+=`<div class="divider">${fmtDateGroup(g.label)}</div>`;
-      g.tasks.forEach(t=>html+=taskHTML(t));
-    });
-    if(done.length){
-      html+=`<button class="done-toggle-btn" id="doneToggle">выполненные (${done.length})</button>`;
-      html+=`<div class="done-list ${S.doneOpen?'open':''}" id="doneList">`;
-      done.slice().reverse().forEach(t=>html+=taskHTML(t));
-      html+='</div>';
-    }
+  const _today=todayStr();
+  const el=$('taskList'),active=S.tasks.filter(t=>!t.done),done=S.tasks.filter(t=>t.done);
+  if(!active.length&&!done.length){el.innerHTML=`<div class="empty-state"><svg class="empty-illus" width="100" height="88" viewBox="0 0 100 88" fill="none"><rect x="4" y="6" width="26" height="26" rx="7" stroke="currentColor" stroke-width="1.6" opacity=".4"/><path d="M11 19l5 5 9-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="24" stroke-dashoffset="24" opacity=".55"><animate attributeName="stroke-dashoffset" from="24" to="0" dur="0.5s" begin="0.4s" fill="freeze"/></path><rect x="38" y="14" width="58" height="7" rx="3.5" fill="currentColor" opacity=".12"/><rect x="4" y="44" width="26" height="26" rx="7" stroke="currentColor" stroke-width="1.6" opacity=".18"/><rect x="38" y="52" width="44" height="7" rx="3.5" fill="currentColor" opacity=".08"/></svg><span class="empty-label">нет задач</span></div>`;return;}
+  const g={};active.forEach(t=>{const k=t.date||'';if(!g[k])g[k]=[];g[k].push(t);});
+  let html=Object.keys(g).sort((a,b)=>!a?1:!b?-1:a.localeCompare(b)).map(k=>`<div class="divider">${fmtDateGroup(k)}</div>`+g[k].map(t=>taskHTML(t,_today)).join('')).join('');
+  if(done.length){
+    html+=`<button class="btn done-toggle-btn" id="doneToggle">выполненные (${done.length})</button><div class="done-list ${S.doneOpen?'open':''}" id="doneList">${done.slice().reverse().map(t=>taskHTML(t,_today)).join('')}</div>`;
   }
   el.innerHTML=html;
 }
 function toggleTask(id){const t=S.tasks.find(x=>x.id===id);if(t){t.done=!t.done;save();renderTasks();}}
 function deleteTask(id){S.tasks=S.tasks.filter(x=>x.id!==id);save();renderTasks();}
-document.getElementById('taskList').addEventListener('click',e=>{
+$('taskList').addEventListener('click',e=>{
   const ch=e.target.closest('.task-check'),dl=e.target.closest('.task-delete');
   if(ch)toggleTask(ch.dataset.id);
   else if(dl)deleteTask(dl.dataset.id);
   else if(e.target.closest('.done-toggle-btn')){S.doneOpen=!S.doneOpen;save();renderTasks();}
 });
+// Swipe-to-delete на задачах
+(()=>{
+  let sx=0,sy=0,el=null,startT=0;
+  $('taskList').addEventListener('touchstart',e=>{
+    const item=e.target.closest('.task-item');if(!item)return;
+    sx=e.touches[0].clientX;sy=e.touches[0].clientY;el=item;startT=Date.now();
+    el.style.transition='none';
+  },{passive:true});
+  $('taskList').addEventListener('touchmove',e=>{
+    if(!el)return;
+    const dx=e.touches[0].clientX-sx,dy=e.touches[0].clientY-sy;
+    if(Math.abs(dy)>Math.abs(dx)){el=null;return;}
+    if(dx>0){el=null;return;}
+    e.preventDefault();
+    el.style.transform=`translateX(${Math.max(dx,-80)}px)`;
+    el.style.opacity=Math.max(0.4,1+dx/160);
+  },{passive:false});
+  $('taskList').addEventListener('touchend',e=>{
+    if(!el)return;
+    const dx=e.changedTouches[0].clientX-sx;
+    el.style.transition='transform .2s,opacity .2s';
+    if(dx<-60){
+      el.style.transform='translateX(-110%)';el.style.opacity='0';
+      const id=el.querySelector('.task-check')?.dataset.id||el.querySelector('.task-delete')?.dataset.id;
+      setTimeout(()=>{if(id)deleteTask(id);},200);
+    }else{
+      el.style.transform='';el.style.opacity='';
+    }
+    el=null;
+  },{passive:true});
+})();
 renderTasks();
+// History API: кнопка «назад» закрывает шторки/редактор
+function pushModalState(){try{history.pushState({modal:true},'');}catch(e){}}
+function popModalState(){
+  if($('noteEditor').classList.contains('open')){saveNote();hide('noteEditor');return;}
+  if($('addSheet').classList.contains('open')){closeAddSheet();return;}
+  if($('habitSheet').classList.contains('open')){closeHabitSheet();return;}
+  if($('ctxMenu').classList.contains('open')){hide('ctxOverlay');hide('ctxMenu');return;}
+  if($('renameMenu').classList.contains('open')){hide('renameOverlay');hide('renameMenu');return;}
+  if($('datePicker').classList.contains('open')){closeDatePicker();return;}
+}
+window.addEventListener('popstate',e=>{if(e.state&&e.state.modal)popModalState();});
 
-// ── HABITS ────────────────────────────────────────────────────────────────
+// ── Swipe-to-delete на задачах ──────────────────────
+let _sw=null;
+$('taskList').addEventListener('touchstart',e=>{
+  const item=e.target.closest('.task-item');
+  if(!item||e.target.closest('.task-check'))return;
+  _sw={el:item,x0:e.touches[0].clientX,dx:0};
+},{passive:true});
+$('taskList').addEventListener('touchmove',e=>{
+  if(!_sw)return;
+  const dx=e.touches[0].clientX-_sw.x0;
+  if(dx>0){_sw=null;return;}
+  _sw.dx=dx;
+  const clamped=Math.max(dx,-90);
+  _sw.el.style.transform=`translateX(${clamped}px)`;
+  _sw.el.style.transition='none';
+  const bg=_sw.el.querySelector('.task-swipe-bg');
+  if(bg)bg.style.opacity=Math.min(Math.abs(clamped)/90,1);
+},{passive:true});
+$('taskList').addEventListener('touchend',()=>{
+  if(!_sw)return;
+  const {el,dx}=_sw;
+  el.style.transition='transform .22s ease,opacity .18s ease';
+  if(dx<-60){
+    el.style.transform='translateX(-110%)';
+    el.style.opacity='0';
+    const id=el.querySelector('.task-delete')?.dataset.id;
+    setTimeout(()=>{if(id)deleteTask(id);},220);
+  }else{
+    el.style.transform='';
+    const bg=el.querySelector('.task-swipe-bg');
+    if(bg)bg.style.opacity='0';
+  }
+  _sw=null;
+});
 
 function getWeek(){
   const today=new Date(),dow=today.getDay(),diff=dow===0?6:dow-1,days=[];
-  for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()-diff+i);days.push(d.toISOString().slice(0,10));}
+  for(let i=0;i<7;i++){const d=new Date(today);d.setDate(today.getDate()-diff+i);days.push(iso(d));}
   return days;
 }
 function dayLabel(ds){return ['вс','пн','вт','ср','чт','пт','сб'][new Date(ds+'T12:00:00').getDay()];}
 function calcStreak(h){
   const today=todayStr(),yd=new Date();yd.setDate(yd.getDate()-1);
-  let d=new Date(((h.checks&&h.checks[today])?today:yd.toISOString().slice(0,10))+'T12:00:00');
-  let s=0;
-  while(true){const k=d.toISOString().slice(0,10);if(!h.checks||!h.checks[k])break;s++;d.setDate(d.getDate()-1);}
+  let d=new Date(((h.checks&&h.checks[today])?today:iso(yd))+'T12:00:00'),s=0;
+  while(s<366){const k=iso(d);if(!h.checks||!h.checks[k])break;s++;d.setDate(d.getDate()-1);}
   return s;
 }
 function renderHabits(){
   const week=getWeek(),today=todayStr();
-  const weekHeader=`<div class="week-row">`+
-    `<div class="week-row-spacer"></div>`+
-    `<div class="week-labels">`+week.map(d=>`<div class="week-day-label ${d===today?'is-today':''}">${dayLabel(d).toUpperCase()}</div>`).join('')+`</div>`+
-    `<div class="week-row-del"></div></div>`;
-  const el=document.getElementById('habitsList');
-  if(!S.habits.length){el.innerHTML=weekHeader+`<div class="empty-state">
-  <svg class="empty-illus-slow" width="120" height="64" viewBox="0 0 120 64" fill="none">
-    <rect x="2"  y="12" width="14" height="28" rx="5" fill="currentColor" opacity=".38" style="animation:dotPulse 1.6s ease-in-out 0s infinite"/>
-    <rect x="19" y="12" width="14" height="28" rx="5" fill="currentColor" opacity=".32" style="animation:dotPulse 1.6s ease-in-out 0.14s infinite"/>
-    <rect x="36" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".25" style="animation:dotPulse 1.6s ease-in-out 0.28s infinite"/>
-    <rect x="53" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".18" style="animation:dotPulse 1.6s ease-in-out 0.42s infinite"/>
-    <rect x="70" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".13" style="animation:dotPulse 1.6s ease-in-out 0.56s infinite"/>
-    <rect x="87" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".1" style="animation:dotPulse 1.6s ease-in-out 0.70s infinite"/>
-    <rect x="104" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".08" style="animation:dotPulse 1.6s ease-in-out 0.84s infinite"/>
-  </svg>
-</div>`;return;}
+  const weekHeader=`<div class="week-row"><div class="week-row-spacer"></div><div class="week-labels">${week.map(d=>`<div class="week-day-label ${d===today?'is-today':''}">${dayLabel(d).toUpperCase()}</div>`).join('')}</div><div class="week-row-del"></div></div>`;
+  const el=$('habitsList');
+  if(!S.habits.length){el.innerHTML=weekHeader+`<div class="empty-state" style="min-height:auto;padding-top:48px"><svg class="empty-illus-slow" width="120" height="64" viewBox="0 0 120 64" fill="none"><rect x="2" y="12" width="14" height="28" rx="5" fill="currentColor" opacity=".38" style="animation:dotPulse 1.6s ease-in-out 0s infinite"/><rect x="19" y="12" width="14" height="28" rx="5" fill="currentColor" opacity=".32" style="animation:dotPulse 1.6s ease-in-out 0.14s infinite"/><rect x="36" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".25" style="animation:dotPulse 1.6s ease-in-out 0.28s infinite"/><rect x="53" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".18" style="animation:dotPulse 1.6s ease-in-out 0.42s infinite"/><rect x="70" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".13" style="animation:dotPulse 1.6s ease-in-out 0.56s infinite"/><rect x="87" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".1" style="animation:dotPulse 1.6s ease-in-out 0.70s infinite"/><rect x="104" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".08" style="animation:dotPulse 1.6s ease-in-out 0.84s infinite"/></svg><span class="empty-label">нет привычек</span></div>`;return;}
   el.innerHTML=weekHeader+S.habits.map(h=>{
     const streak=calcStreak(h);
-    const streakBadge=streak>1?`<span class="habit-streak-badge">${streak}🔥</span>`:'';
     const dots=week.map(d=>{
-      const checked=h.checks&&h.checks[d],isFuture=d>today,isToday=d===today;
-      return `<div class="habit-dot ${checked?'checked':''} ${isFuture?'is-future':''} ${isToday?'is-today':''}" data-id="${h.id}" data-date="${d}"></div>`;
+      const chk=h.checks&&h.checks[d];
+      return `<div class="habit-dot${chk?' checked':''}${d>today?' is-future':''}${d===today?' is-today':''}" data-id="${h.id}" data-date="${d}"></div>`;
     }).join('');
-    return `<div class="habit-row" data-id="${h.id}">
-      <div class="habit-name"><span class="habit-name-text">${esc(h.name)}</span>${streakBadge}</div>
-      <div class="habit-dots">${dots}</div>
-      <div class="habit-del" data-del="${h.id}">×</div>
-    </div>`;
+    return `<div class="habit-row" data-id="${h.id}"><div class="habit-name"><span class="habit-name-text">${esc(h.name)}</span>${streak>1?`<span class="habit-streak-badge">${streak}🔥</span>`:''}</div><div class="habit-dots">${dots}</div><div class="habit-del" data-del="${h.id}">×</div></div>`;
   }).join('');
 }
-function openHabitSheet(){
-  document.getElementById('habitSheetOverlay').classList.add('open');
-  document.getElementById('habitSheet').classList.add('open');
-  document.getElementById('habitInput').focus();
-}
+function openHabitSheet(){pushModalState();openSheet('habitSheet','habitSheetOverlay','habitInput');}
 function closeHabitSheet(){
-  document.getElementById('habitInput').blur();
-  document.getElementById('habitSheetOverlay').classList.remove('open');
-  document.getElementById('habitSheet').classList.remove('open');
-  document.getElementById('habitSheet').style.transform='';
-  document.getElementById('habitSheet').style.bottom='';
-  document.getElementById('habitInput').value='';
-  document.getElementById('addHabitBtn').classList.remove('active');
+  closeSheet('habitSheet','habitSheetOverlay');
+  $('habitInput').value='';
+  $('addHabitBtn').classList.remove('active');
 }
 function addHabit(){
-  const name=document.getElementById('habitInput').value.trim();
-  if(!name)return;
+  const name=$('habitInput').value.trim();if(!name)return;
   S.habits.push({id:uid(),name,checks:{}});
   save();renderHabits();closeHabitSheet();
 }
 function toggleHabit(id,date){
-  const h=S.habits.find(x=>x.id===id);
-  if(!h)return;
+  const h=findH(id);if(!h)return;
   if(!h.checks)h.checks={};
   h.checks[date]?delete h.checks[date]:(h.checks[date]=true);
-  save();renderHabits();
+  debouncedSave();renderHabits();
 }
 function deleteHabit(id){S.habits=S.habits.filter(x=>x.id!==id);save();renderHabits();}
-document.getElementById('addHabitFab').addEventListener('click',openHabitSheet);
-document.getElementById('habitSheetOverlay').addEventListener('click',closeHabitSheet);
-document.getElementById('addHabitBtn').addEventListener('click',addHabit);
-document.getElementById('habitInput').addEventListener('input',function(){
-  document.getElementById('addHabitBtn').classList.toggle('active',!!this.value.trim());
-});
-document.getElementById('habitInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addHabit();}});
-
-let longPressTimer=null,ctxHabitId=null;
-document.getElementById('habitsList').addEventListener('click',e=>{
+$('addHabitFab').addEventListener('click',openHabitSheet);
+$('habitSheetOverlay').addEventListener('click',closeHabitSheet);
+$('addHabitBtn').addEventListener('click',addHabit);
+$('habitInput').addEventListener('input',function(){$('addHabitBtn').classList.toggle('active',!!this.value.trim());});
+$('habitInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addHabit();}});
+function addLongPress(el,onPress,ignore){
+  let t=null,id=null;
+  const start=e=>{const row=e.target.closest('.habit-row');if(!row||e.target.closest(ignore))return;clearTimeout(t);id=row.dataset.id;t=setTimeout(()=>onPress(id),500);};
+  const cancel=()=>clearTimeout(t);
+  el.addEventListener('mousedown',start);
+  el.addEventListener('mouseup',cancel);
+  el.addEventListener('mouseleave',cancel);
+  el.addEventListener('touchstart',start,{passive:true});
+  el.addEventListener('touchend',cancel);
+  el.addEventListener('touchmove',cancel);
+}
+let ctxHabitId=null;
+$('habitsList').addEventListener('click',e=>{
   const del=e.target.closest('.habit-del');
   if(del){deleteHabit(del.dataset.del);return;}
   const dot=e.target.closest('.habit-dot');
   if(dot&&!dot.classList.contains('is-future'))toggleHabit(dot.dataset.id,dot.dataset.date);
 });
-document.getElementById('habitsList').addEventListener('mousedown',e=>{
-  const row=e.target.closest('.habit-row');
-  if(!row||e.target.closest('.habit-dot'))return;
-  ctxHabitId=row.dataset.id;
-  longPressTimer=setTimeout(()=>showHabitMenu(ctxHabitId),500);
-});
-document.getElementById('habitsList').addEventListener('mouseup',()=>clearTimeout(longPressTimer));
-document.getElementById('habitsList').addEventListener('mouseleave',()=>clearTimeout(longPressTimer));
-document.getElementById('habitsList').addEventListener('touchstart',e=>{
-  const row=e.target.closest('.habit-row');
-  if(!row||e.target.closest('.habit-dot'))return;
-  ctxHabitId=row.dataset.id;
-  longPressTimer=setTimeout(()=>showHabitMenu(ctxHabitId),500);
-},{passive:true});
-document.getElementById('habitsList').addEventListener('touchend',()=>clearTimeout(longPressTimer));
-document.getElementById('habitsList').addEventListener('touchmove',()=>clearTimeout(longPressTimer));
-
+addLongPress($('habitsList'),id=>{ctxHabitId=id;showHabitMenu(id);},' .habit-dot');
 function showHabitMenu(id){
-  const h=S.habits.find(x=>x.id===id);if(!h)return;
-  document.getElementById('ctxLabel').textContent=h.name;
-  document.getElementById('ctxOverlay').classList.add('open');
-  document.getElementById('ctxMenu').classList.add('open');
+  const h=findH(id);if(!h)return;
+  pushModalState();
+  $('ctxLabel').textContent=h.name;
+  show('ctxOverlay');
+  show('ctxMenu');
 }
 function hideHabitMenu(){
-  document.getElementById('ctxOverlay').classList.remove('open');
-  document.getElementById('ctxMenu').classList.remove('open');
+  hide('ctxOverlay');
+  hide('ctxMenu');
 }
-document.getElementById('ctxCancel').addEventListener('click',hideHabitMenu);
-document.getElementById('ctxOverlay').addEventListener('click',hideHabitMenu);
-document.getElementById('ctxDelete').addEventListener('click',()=>{deleteHabit(ctxHabitId);hideHabitMenu();});
-document.getElementById('ctxRename').addEventListener('click',()=>{
+function hideRenameMenu(){
+  hide('renameOverlay');
+  hide('renameMenu');
+}
+$('ctxCancel').addEventListener('click',hideHabitMenu);
+$('ctxOverlay').addEventListener('click',hideHabitMenu);
+$('ctxDelete').addEventListener('click',()=>{deleteHabit(ctxHabitId);hideHabitMenu();});
+$('ctxRename').addEventListener('click',()=>{
   hideHabitMenu();
-  const h=S.habits.find(x=>x.id===ctxHabitId);
-  if(!h)return;
-  document.getElementById('renameInput').value=h.name;
-  document.getElementById('renameOverlay').classList.add('open');
-  document.getElementById('renameMenu').classList.add('open');
-  setTimeout(()=>document.getElementById('renameInput').focus(),100);
+  const h=findH(ctxHabitId);if(!h)return;
+  $('renameInput').value=h.name;
+  show('renameOverlay');
+  show('renameMenu');
+  setTimeout(()=>$('renameInput').focus(),100);
 });
-document.getElementById('renameCancelBtn').addEventListener('click',()=>{
-  document.getElementById('renameOverlay').classList.remove('open');
-  document.getElementById('renameMenu').classList.remove('open');
-});
-document.getElementById('ctxSave').addEventListener('click',()=>{
-  const name=document.getElementById('renameInput').value.trim();
-  if(name){const h=S.habits.find(x=>x.id===ctxHabitId);if(h){h.name=name;save();renderHabits();}}
-  document.getElementById('renameOverlay').classList.remove('open');
-  document.getElementById('renameMenu').classList.remove('open');
+$('renameCancelBtn').addEventListener('click',hideRenameMenu);
+$('ctxSave').addEventListener('click',()=>{
+  const name=$('renameInput').value.trim();
+  if(name){const h=findH(ctxHabitId);if(h){h.name=name;save();renderHabits();}}
+  hideRenameMenu();
 });
 renderHabits();
-
-// ── NOTES ─────────────────────────────────────────────────────────────────
 function renderNotes(){
   const q=S.search.toLowerCase();
   const list=S.notes.filter(n=>!q||(n.title+n.content).toLowerCase().includes(q));
-  const el=document.getElementById('notesList');
-  if(!list.length){el.innerHTML=`<div class="empty-state">
-  <svg class="empty-illus" width="76" height="92" viewBox="0 0 76 92" fill="none">
-    <!-- Лист -->
-    <rect x="4" y="4" width="56" height="68" rx="9" stroke="currentColor" stroke-width="1.6" opacity=".28"/>
-    <!-- Загнутый уголок -->
-    <path d="M44 4 v14 h14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity=".18"/>
-    <!-- Курсор (мигает) -->
-    <rect x="13" y="27" width="2" height="10" rx="1" fill="currentColor" opacity=".5">
-      <animate attributeName="opacity" values="0.5;0;0.5" dur="1.1s" repeatCount="indefinite"/>
-    </rect>
-    <!-- Строки -->
-    <rect x="13" y="42" width="38" height="5" rx="2.5" fill="currentColor" opacity=".16"/>
-    <rect x="13" y="52" width="30" height="5" rx="2.5" fill="currentColor" opacity=".11"/>
-    <rect x="13" y="62" width="22" height="5" rx="2.5" fill="currentColor" opacity=".07"/>
-  </svg>
-</div>`;return;}
-  const pinned=list.filter(n=>n.pinned),unpinned=list.filter(n=>!n.pinned);
-  const noteCard=n=>`<div class="note-card" data-id="${n.id}">
-    <div class="note-title">${n.pinned?'◆ ':''} ${esc(n.title)||'Без заголовка'}</div>
-    <div class="note-preview">${esc(n.content.slice(0,80))||'Нет текста'}</div>
-    <div class="note-meta">${n.updatedAt?new Date(n.updatedAt).toLocaleDateString('ru',{day:'numeric',month:'short'}):''}</div>
-  </div>`;
-  el.innerHTML=[...pinned,...unpinned].map(noteCard).join('');
+  const el=$('notesList');
+  if(!list.length){el.innerHTML=`<div class="empty-state"><svg class="empty-illus" width="76" height="92" viewBox="0 0 76 92" fill="none"><rect x="4" y="4" width="56" height="68" rx="9" stroke="currentColor" stroke-width="1.6" opacity=".28"/><path d="M44 4 v14 h14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" opacity=".18"/><rect x="13" y="27" width="2" height="10" rx="1" fill="currentColor" opacity=".5"><animate attributeName="opacity" values="0.5;0;0.5" dur="1.1s" repeatCount="indefinite"/></rect><rect x="13" y="42" width="38" height="5" rx="2.5" fill="currentColor" opacity=".16"/><rect x="13" y="52" width="30" height="5" rx="2.5" fill="currentColor" opacity=".11"/><rect x="13" y="62" width="22" height="5" rx="2.5" fill="currentColor" opacity=".07"/></svg><span class="empty-label">нет заметок</span></div>`;return;}
+  const noteCard=n=>`<div class="note-card" data-id="${n.id}"><div class="note-title">${n.pinned?'◆ ':''} ${esc(n.title)||'Без заголовка'}</div><div class="note-preview">${esc(stripMd(n.content).slice(0,80))||'Нет текста'}</div><div class="note-meta">${n.updatedAt?new Date(n.updatedAt).toLocaleDateString('ru',{day:'numeric',month:'short'}):''}</div></div>`;
+  el.innerHTML=list.slice().sort((a,b)=>b.pinned-a.pinned).map(noteCard).join('');
 }
 function openNote(id){
-  const n=S.notes.find(x=>x.id===id);if(!n)return;
+  const n=findN(id);if(!n)return;
+  pushModalState();
   S.editingNoteId=id;
-  document.getElementById('noteTitleInput').value=n.title;
-  document.getElementById('noteContentInput').value=n.content;
-  document.getElementById('pinBtn').textContent=n.pinned?'◆':'◇';
-  const d=n.updatedAt?new Date(n.updatedAt):new Date();
-  document.getElementById('noteDateLabel').textContent=d.toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'});
-  document.getElementById('noteEditor').classList.add('open');
+  $('noteTitleInput').value=n.title;
+  $('noteContentInput').value=n.content;
+  $('pinBtn').textContent=n.pinned?'◆':'◇';
+  $('noteDateLabel').textContent=(n.updatedAt?new Date(n.updatedAt):new Date()).toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'});
+  show('noteEditor');
 }
 function saveNote(){
-  const n=S.notes.find(x=>x.id===S.editingNoteId);
-  if(!n)return;
-  n.title=document.getElementById('noteTitleInput').value;
-  n.content=document.getElementById('noteContentInput').value;
+  const n=findN(S.editingNoteId);if(!n)return;
+  n.title=$('noteTitleInput').value;
+  n.content=$('noteContentInput').value;
   n.updatedAt=Date.now();
+  $('noteDateLabel').textContent=new Date().toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'});
   save();renderNotes();
 }
 let noteAutoSave=null;
-document.getElementById('noteTitleInput').addEventListener('input',()=>{clearTimeout(noteAutoSave);noteAutoSave=setTimeout(saveNote,600);});
-document.getElementById('noteContentInput').addEventListener('input',()=>{clearTimeout(noteAutoSave);noteAutoSave=setTimeout(saveNote,600);});
-document.getElementById('editorBack').addEventListener('click',()=>{saveNote();document.getElementById('noteEditor').classList.remove('open');});
-document.getElementById('pinBtn').addEventListener('click',()=>{
-  const n=S.notes.find(x=>x.id===S.editingNoteId);if(!n)return;
-  n.pinned=!n.pinned;document.getElementById('pinBtn').textContent=n.pinned?'◆':'◇';save();renderNotes();
+const onNoteInput=()=>{clearTimeout(noteAutoSave);noteAutoSave=setTimeout(saveNote,600);};
+$('noteTitleInput').addEventListener('input',onNoteInput);
+$('noteContentInput').addEventListener('input',onNoteInput);
+$('editorBack').addEventListener('click',()=>{saveNote();hide('noteEditor');});
+$('pinBtn').addEventListener('click',()=>{
+  const n=findN(S.editingNoteId);if(!n)return;
+  n.pinned=!n.pinned;$('pinBtn').textContent=n.pinned?'◆':'◇';save();renderNotes();
 });
-document.getElementById('deleteNoteBtn').addEventListener('click',()=>{
+$('deleteNoteBtn').addEventListener('click',()=>{
   S.notes=S.notes.filter(x=>x.id!==S.editingNoteId);
-  document.getElementById('noteEditor').classList.remove('open');save();renderNotes();
+  hide('noteEditor');save();renderNotes();
 });
-document.getElementById('newNoteBtn').addEventListener('click',()=>{
+$('newNoteBtn').addEventListener('click',()=>{
   const n={id:uid(),title:'',content:'',pinned:false,createdAt:Date.now(),updatedAt:Date.now()};
   S.notes.unshift(n);save();openNote(n.id);
-  setTimeout(()=>document.getElementById('noteTitleInput').focus(),300);
+  setTimeout(()=>$('noteTitleInput').focus(),300);
 });
-document.getElementById('notesList').addEventListener('click',e=>{
-  const card=e.target.closest('.note-card');if(card)openNote(card.dataset.id);
-});
-document.getElementById('searchInput').addEventListener('input',function(){S.search=this.value;renderNotes();});
-document.querySelectorAll('.fmt-btn').forEach(btn=>btn.addEventListener('click',()=>{
-  const ta=document.getElementById('noteContentInput');
-  const map={h1:'\n# ',h2:'\n## ',bold:'**',italic:'_',bullet:'\n— ',checkbox:'\n☐ ',divider:'\n\n···\n\n',link:'[[]]'};
-  const ins=map[btn.dataset.fmt]||'';
-  const s=ta.selectionStart,e2=ta.selectionEnd;
-  ta.value=ta.value.slice(0,s)+ins+ta.value.slice(e2);
-  ta.selectionStart=ta.selectionEnd=s+ins.length;
-  ta.focus();saveNote();
-}));
+$('notesList').addEventListener('click',e=>{const card=e.target.closest('.note-card');if(card)openNote(card.dataset.id);});
+$('searchInput').addEventListener('input',function(){S.search=this.value;renderNotes();});
+$('fmtBar').innerHTML=[['h1','H1'],['h2','H2'],['bold','B'],['italic','I'],['divider','—'],['checkbox','☐'],['bullet','···'],['link','[[]]']].map(([f,l])=>`<button class="btn fmt-btn" data-fmt="${f}">${l}</button>`).join('');
+$('fmtBar').addEventListener('click',e=>{const b=e.target.closest('.fmt-btn');if(!b)return;const ta=$('noteContentInput'),ins={h1:'\n# ',h2:'\n## ',bold:'**',italic:'_',bullet:'\n— ',checkbox:'\n☐ ',divider:'\n\n···\n\n',link:'[[]]'}[b.dataset.fmt]||'';const s=ta.selectionStart,e2=ta.selectionEnd;ta.value=ta.value.slice(0,s)+ins+ta.value.slice(e2);ta.selectionStart=ta.selectionEnd=s+ins.length;ta.focus();saveNote();});
 renderNotes();
 </script>
 </body>

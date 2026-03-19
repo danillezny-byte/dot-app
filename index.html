@@ -169,19 +169,19 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 /* ── HABITS ── */
 .week-row{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:2;background:var(--bg);padding:10px 22px;margin:0 -22px;border-bottom:1px solid var(--border)}
 .week-row-spacer{flex:1;min-width:0}
-.week-day-label{width:30px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;flex-shrink:0}
+.week-day-label{width:24px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;flex-shrink:0}
 .week-day-label.is-today{color:var(--accent)}
-.week-row-del{width:26px;flex-shrink:0}
+.week-row-del{width:22px;flex-shrink:0}
 #habitsList{padding-top:0}
 .habit-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);gap:12px;position:relative}
 .habit-name{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
 .habit-name-text{font-size:15px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.habit-del{width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);font-size:16px;line-height:1;cursor:pointer;border-radius:50%;transition:color .12s,background .12s;opacity:0}
+.habit-del{width:20px;height:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);font-size:16px;line-height:1;cursor:pointer;border-radius:50%;transition:color .12s,background .12s;opacity:0}
 .habit-row:active .habit-del{opacity:.5}
 .habit-del:active{opacity:.6}
 .habit-streak-badge{flex-shrink:0;font-size:11px;color:var(--text3);white-space:nowrap;font-weight:500}
 .habit-dots,.week-labels{display:flex;gap:0;flex-shrink:0}
-.habit-dot{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;transition:background .15s,border-color .15s,opacity .12s;flex-shrink:0;opacity:.5;padding:0;margin:0 2px;-webkit-tap-highlight-color:rgba(108,92,231,.15)}
+.habit-dot{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer;transition:background .15s,border-color .15s,opacity .12s;flex-shrink:0;opacity:.5;padding:0;margin:0 2px;-webkit-tap-highlight-color:rgba(108,92,231,.15)}
 .habit-dot.checked{background:var(--accent);border-color:var(--accent);opacity:1}
 .habit-dot.is-future{opacity:.2;pointer-events:none}
 .habit-dot.is-today{border-color:var(--text3);opacity:.7}
@@ -784,14 +784,11 @@ function renderHabits(){
   if(!S.habits.length){el.innerHTML=weekHeader+`<div class="empty-state" style="min-height:calc(100% - 56px)"><svg class="empty-illus-slow" width="120" height="64" viewBox="0 0 120 64" fill="none"><rect x="2" y="12" width="14" height="28" rx="5" fill="currentColor" opacity=".38" style="animation:dotPulse 1.6s ease-in-out 0s infinite"/><rect x="19" y="12" width="14" height="28" rx="5" fill="currentColor" opacity=".32" style="animation:dotPulse 1.6s ease-in-out 0.14s infinite"/><rect x="36" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".25" style="animation:dotPulse 1.6s ease-in-out 0.28s infinite"/><rect x="53" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".18" style="animation:dotPulse 1.6s ease-in-out 0.42s infinite"/><rect x="70" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".13" style="animation:dotPulse 1.6s ease-in-out 0.56s infinite"/><rect x="87" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".1" style="animation:dotPulse 1.6s ease-in-out 0.70s infinite"/><rect x="104" y="12" width="14" height="28" rx="5" stroke="currentColor" stroke-width="1.4" opacity=".08" style="animation:dotPulse 1.6s ease-in-out 0.84s infinite"/></svg><span class="empty-label">нет привычек</span></div>`;return;}
   el.innerHTML=weekHeader+S.habits.map(h=>{
     const streak=calcStreak(h);
-    const checked=week.filter(d=>h.checks&&h.checks[d]).length;
-    const pct=Math.round(checked/7*100);
     const dots=week.map(d=>{
       const chk=h.checks&&h.checks[d];
       return `<div class="habit-dot${chk?' checked':''}${d>today?' is-future':''}${d===today?' is-today':''}" data-id="${h.id}" data-date="${d}"></div>`;
     }).join('');
-    const pctColor=pct>=80?'var(--accent)':pct>=50?'#fdcb6e':'var(--text3)';
-    return `<div class="habit-row" data-id="${h.id}"><div class="habit-name"><span class="habit-name-text">${esc(h.name)}</span>${streak>0?`<span class="habit-streak-badge">${streak}${streak>=3?'🔥':'д'}</span>`:''}<span style="font-size:10px;font-weight:600;color:${pctColor};margin-left:auto;flex-shrink:0">${pct}%</span></div><div class="habit-dots">${dots}</div><div class="habit-del" data-del="${h.id}">×</div></div>`;
+    return `<div class="habit-row" data-id="${h.id}"><div class="habit-name"><span class="habit-name-text">${esc(h.name)}</span>${streak>0?`<span class="habit-streak-badge">${streak}${streak>=3?'🔥':'д'}</span>`:''}</div><div class="habit-dots">${dots}</div><div class="habit-del" data-del="${h.id}">×</div></div>`;
   }).join('');
 }
 function openHabitSheet(){pushModalState();openSheet('habitSheet','habitSheetOverlay','habitInput');}

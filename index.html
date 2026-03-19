@@ -174,19 +174,19 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 /* ── HABITS ── */
 .week-row{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:2;background:var(--bg);padding:10px 22px;margin:0 -22px;border-bottom:1px solid var(--border)}
 .week-row-spacer{flex:1;min-width:0}
-.week-day-label{width:26px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;flex-shrink:0}
+.week-day-label{width:22px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;flex-shrink:0}
 .week-day-label.is-today{color:var(--accent)}
-.week-row-del{width:26px;flex-shrink:0}
+.week-row-del{width:22px;flex-shrink:0}
 #habitsList{padding-top:0}
 .habit-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);gap:12px}
 .habit-name{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
 .habit-name-text{font-size:15px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.habit-del{width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);font-size:16px;line-height:1;cursor:pointer;border-radius:50%;transition:color .12s,background .12s;opacity:0}
+.habit-del{width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);font-size:16px;line-height:1;cursor:pointer;border-radius:50%;transition:color .12s,background .12s;opacity:0}
 .habit-row:active .habit-del{opacity:.5}
 .habit-del:active{opacity:.6}
 .habit-streak-badge{flex-shrink:0;font-size:11px;color:var(--text3);white-space:nowrap;font-weight:500}
 .habit-dots,.week-labels{display:flex;gap:4px;flex-shrink:0}
-.habit-dot{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;transition:background .15s,border-color .15s,opacity .12s;flex-shrink:0;opacity:.5}
+.habit-dot{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--border);cursor:pointer;transition:background .15s,border-color .15s,opacity .12s;flex-shrink:0;opacity:.5}
 .habit-dot.checked{background:var(--accent);border-color:var(--accent);opacity:1}
 .habit-dot.is-future{opacity:.2;pointer-events:none}
 .habit-dot.is-today{border-color:var(--text3);opacity:.7}
@@ -481,7 +481,7 @@ function doExport(){
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([data],{type:'application/json'}));
   a.download='dot-backup-'+iso(new Date())+'.json';
-  a.click();URL.revokeObjectURL(a.href);
+  a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000);
   showToast('Данные экспортированы');
 }
 // Settings sheet
@@ -745,12 +745,12 @@ renderTasks();updateTaskBadge();
 // History API: кнопка «назад» закрывает шторки/редактор
 function pushModalState(){try{history.pushState({modal:true},'');}catch(e){}}
 function popModalState(){
-  if($('noteEditor').classList.contains('open')){const n=findN(S.editingNoteId);if(n&&!n.title.trim()&&!n.content.replace(/<[^>]*>/g,'').trim()){const idx=S.notes.indexOf(n);if(idx>=0){S.notes.splice(idx,1);save();}}else saveNote();hide('noteEditor');$('newNoteBtn').style.opacity='';$('newNoteBtn').style.pointerEvents='';return;}
+  if($('noteEditor').classList.contains('open')){const n=findN(S.editingNoteId);if(n&&!n.title.trim()&&!n.content.replace(/<[^>]*>/g,'').trim()){const idx=S.notes.indexOf(n);if(idx>=0){S.notes.splice(idx,1);save();renderNotes();}}else saveNote();hide('noteEditor');$('newNoteBtn').style.opacity='';$('newNoteBtn').style.pointerEvents='';return;}
   if($('addSheet').classList.contains('open')){closeAddSheet();return;}
   if($('habitSheet').classList.contains('open')){closeHabitSheet();return;}
   if($('noteCtxMenu').classList.contains('open')){hideNoteMenu();return;}
   if($('ctxMenu').classList.contains('open')){hide('ctxOverlay');hide('ctxMenu');return;}
-  if($('renameMenu').classList.contains('open')){hide('renameOverlay');hide('renameMenu');return;}
+  if($('renameMenu').classList.contains('open')){hideRenameMenu();return;}
   if($('datePicker').classList.contains('open')){closeDatePicker();return;}
 }
 window.addEventListener('popstate',e=>{if(e.state&&e.state.modal)popModalState();});
@@ -817,7 +817,7 @@ function renderHabits(){
       return `<div class="habit-dot${chk?' checked':''}${d>today?' is-future':''}${d===today?' is-today':''}" data-id="${h.id}" data-date="${d}"></div>`;
     }).join('');
     const pctColor=pct>=80?'var(--accent)':pct>=50?'#fdcb6e':'var(--text3)';
-    return `<div class="habit-row" data-id="${h.id}"><div class="habit-name"><span class="habit-name-text">${esc(h.name)}</span>${streak>=3?`<span class="habit-streak-badge">${streak}🔥</span>`:''}</div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><div class="habit-pct-bar"><div class="habit-pct-fill" style="width:${pct}%;background:${pctColor}"></div></div><span style="font-size:10px;font-weight:600;color:${pctColor};width:28px;text-align:right;flex-shrink:0">${pct}%</span></div><div class="habit-dots">${dots}</div><div class="habit-del" data-del="${h.id}">×</div></div>`;
+    return `<div class="habit-row" data-id="${h.id}"><div class="habit-name"><span class="habit-name-text">${esc(h.name)}</span>${streak>=3?`<span class="habit-streak-badge">${streak}🔥</span>`:''}<span style="font-size:10px;font-weight:600;color:${pctColor};margin-left:auto;flex-shrink:0">${pct}%</span></div><div class="habit-dots">${dots}</div><div class="habit-del" data-del="${h.id}">×</div></div>`;
   }).join('');
 }
 function openHabitSheet(){pushModalState();openSheet('habitSheet','habitSheetOverlay','habitInput');}
@@ -863,6 +863,7 @@ function addLongPress(el,rowSel,onPress,ignore){
   el.addEventListener('touchstart',start,{passive:true});
   el.addEventListener('touchend',cancel);
   el.addEventListener('touchmove',moveCancel,{passive:true});
+  el.addEventListener('touchcancel',cancel);
 }
 let ctxHabitId=null;
 $('habitsList').addEventListener('click',e=>{
@@ -896,6 +897,7 @@ $('ctxRename').addEventListener('click',()=>{
   hideHabitMenu();
   const h=findH(ctxHabitId);if(!h)return;
   $('renameInput').value=h.name;
+  pushModalState();
   show('renameOverlay');
   show('renameMenu');
   setTimeout(()=>$('renameInput').focus(),100);
@@ -1042,7 +1044,7 @@ $('notesList').addEventListener('touchend',()=>{
     setTimeout(()=>{
       const idx=S.notes.findIndex(x=>x.id===id);if(idx<0)return;
       const n=S.notes[idx];S.notes.splice(idx,1);save();renderNotes();
-      showToast('Заметка удалена',()=>{S.notes.splice(idx,0,n);save();renderNotes();});
+      showToast('Запись удалена',()=>{S.notes.splice(idx,0,n);save();renderNotes();});
     },220);
   }else{
     el.style.transform='';

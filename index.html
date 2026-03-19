@@ -64,9 +64,6 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 .tab-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.02em;margin-top:3px;line-height:1}
 .tab.active .tab-label{color:var(--accent)}
 
-.tab-icon-wrap{position:relative;display:inline-flex}
-.task-badge{position:absolute;top:-5px;right:-8px;min-width:16px;height:16px;background:var(--red);color:#fff;border-radius:8px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;opacity:0;transform:scale(0);transition:opacity .2s,transform .2s;pointer-events:none}
-.task-badge.visible{opacity:1;transform:scale(1)}
 /* ── SCROLL ── */
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 22px 80px;touch-action:pan-y;overscroll-behavior:contain}
 .scroll::-webkit-scrollbar,.fmt-bar::-webkit-scrollbar{display:none}
@@ -369,7 +366,7 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 </div>
 <div class="tabbar">
 <div class="tab active" data-tab="tasks" aria-label="Задачи">
-<div class="tab-icon-wrap"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg><span class="task-badge" id="taskBadge"></span></div>
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
 <span class="tab-label">Задачи</span>
 </div>
 <div class="tab" data-tab="habits" aria-label="Привычки">
@@ -719,15 +716,7 @@ function renderTasks(){
     html+=`<button class="btn done-toggle-btn" id="doneToggle">выполненные (${done.length})</button><div class="done-list ${S.doneOpen?'open':''}" id="doneList"><div>${done.slice().reverse().map(t=>taskHTML(t,_today)).join('')}</div></div>`;
   }
   el.innerHTML=html;
-  updateTaskBadge();
-}
-function updateTaskBadge(){
-  const today=todayStr();
-  const n=S.tasks.filter(t=>!t.done&&t.date&&t.date<=today).length;
-  const b=$('taskBadge');if(!b)return;
-  b.textContent=n||'';
-  b.classList.toggle('visible',n>0);
-}
+  }
 function toggleTask(id){const t=S.tasks.find(x=>x.id===id);if(t){t.done=!t.done;save();renderTasks();}}
 function deleteTask(id){const idx=S.tasks.findIndex(x=>x.id===id);if(idx<0)return;const t=S.tasks[idx];S.tasks.splice(idx,1);save();renderTasks();showToast('Задача удалена',()=>{S.tasks.splice(idx,0,t);save();renderTasks();});}
 $('taskList').addEventListener('click',e=>{
@@ -755,8 +744,7 @@ $('taskCtxOverlay').addEventListener('click',hideTaskMenu);
 $('taskCtxEdit').addEventListener('click',()=>{hideTaskMenu();openEditTask(_ctxTaskId);});
 $('taskCtxDel').addEventListener('click',()=>{deleteTask(_ctxTaskId);hideTaskMenu();});
 addLongPress($('taskList'),'.task-item',id=>{const ch=document.querySelector(`.task-check[data-id="${id}"]`);if(ch)showTaskMenu(id);},'.task-check');
-renderTasks();updateTaskBadge();
-// History API: кнопка «назад» закрывает шторки/редактор
+renderTasks();// History API: кнопка «назад» закрывает шторки/редактор
 function pushModalState(){try{history.pushState({modal:true},'');}catch(e){}}
 function popModalState(){
   if($('noteEditor').classList.contains('open')){const n=findN(S.editingNoteId);if(n&&!n.title.trim()&&!n.content.replace(/<[^>]*>/g,'').trim()){const idx=S.notes.indexOf(n);if(idx>=0){S.notes.splice(idx,1);save();renderNotes();}}else saveNote();hide('noteEditor');$('newNoteBtn').style.opacity='';$('newNoteBtn').style.pointerEvents='';return;}

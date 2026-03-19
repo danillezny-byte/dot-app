@@ -386,6 +386,15 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 <span class="tab-label">База</span>
 </div>
 </div>
+<div class="ctx-overlay" id="noteCtxOverlay"></div>
+<div class="ctx-menu" id="noteCtxMenu">
+<div class="ctx-group">
+<div class="ctx-label" id="noteCtxLabel"></div>
+<div class="ctx-item" id="noteCtxPin">Закрепить</div>
+<div class="ctx-item destructive" id="noteCtxDel">Удалить</div>
+</div>
+<div class="ctx-cancel" id="noteCtxCancel">Отмена</div>
+</div>
 <div class="ctx-overlay" id="ctxOverlay"></div>
 <div class="ctx-menu" id="ctxMenu">
 <div class="ctx-group">
@@ -739,6 +748,7 @@ function popModalState(){
   if($('noteEditor').classList.contains('open')){saveNote();hide('noteEditor');return;}
   if($('addSheet').classList.contains('open')){closeAddSheet();return;}
   if($('habitSheet').classList.contains('open')){closeHabitSheet();return;}
+  if($('noteCtxMenu').classList.contains('open')){hideNoteMenu();return;}
   if($('ctxMenu').classList.contains('open')){hide('ctxOverlay');hide('ctxMenu');return;}
   if($('renameMenu').classList.contains('open')){hide('renameOverlay');hide('renameMenu');return;}
   if($('datePicker').classList.contains('open')){closeDatePicker();return;}
@@ -833,16 +843,26 @@ $('habitSheetOverlay').addEventListener('click',closeHabitSheet);
 $('addHabitBtn').addEventListener('click',addHabit);
 $('habitInput').addEventListener('input',function(){$('addHabitBtn').classList.toggle('active',!!this.value.trim());});
 $('habitInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addHabit();}});
-function addLongPress(el,onPress,ignore){
-  let t=null,id=null;
-  const start=e=>{const row=e.target.closest('.habit-row');if(!row||e.target.closest(ignore))return;clearTimeout(t);id=row.dataset.id;t=setTimeout(()=>onPress(id),500);};
+function addLongPress(el,rowSel,onPress,ignore){
+  let t=null,x0=0,y0=0;
+  const start=e=>{
+    const row=e.target.closest(rowSel);if(!row||(ignore&&e.target.closest(ignore)))return;
+    clearTimeout(t);
+    x0=e.touches?e.touches[0].clientX:e.clientX;y0=e.touches?e.touches[0].clientY:e.clientY;
+    t=setTimeout(()=>{t=null;onPress(row.dataset.id);},500);
+  };
   const cancel=()=>clearTimeout(t);
+  const moveCancel=e=>{
+    if(!t)return;
+    const cx=e.touches?e.touches[0].clientX:e.clientX,cy=e.touches?e.touches[0].clientY:e.clientY;
+    if((cx-x0)*(cx-x0)+(cy-y0)*(cy-y0)>81)cancel();
+  };
   el.addEventListener('mousedown',start);
   el.addEventListener('mouseup',cancel);
   el.addEventListener('mouseleave',cancel);
   el.addEventListener('touchstart',start,{passive:true});
   el.addEventListener('touchend',cancel);
-  el.addEventListener('touchmove',cancel);
+  el.addEventListener('touchmove',moveCancel,{passive:true});
 }
 let ctxHabitId=null;
 $('habitsList').addEventListener('click',e=>{
@@ -851,7 +871,7 @@ $('habitsList').addEventListener('click',e=>{
   const dot=e.target.closest('.habit-dot');
   if(dot&&!dot.classList.contains('is-future'))toggleHabit(dot.dataset.id,dot.dataset.date);
 });
-addLongPress($('habitsList'),id=>{ctxHabitId=id;showHabitMenu(id);},' .habit-dot');
+addLongPress($('habitsList'),'.habit-row',id=>{ctxHabitId=id;showHabitMenu(id);},'.habit-dot');
 function showHabitMenu(id){
   const h=findH(id);if(!h)return;
   pushModalState();
@@ -900,7 +920,7 @@ function renderTagFilter(){
 function renderEditorTags(n){
   const el=$('editorTags');if(!el)return;
   const tags=n.tags||[];
-  el.innerHTML=tags.map(t=>`<span class="tag-pill" style="background:${tagColor(t)}">${esc(t)}<span class="tag-pill-x" data-tag="${esc(t)}">×</span></span>`).join('')+`<input class="editor-tag-input" id="tagInput" placeholder="${tags.length?'':'+ тег'}" autocomplete="off">`;
+  el.innerHTML=tags.map(t=>`<span class="tag-pill" style="background:${tagColor(t)}">${esc(t)}<span class="tag-pill-x" data-tag="${esc(t)}">×</span></span>`).join('')+`<input class="editor-tag-input" id="tagInput" placeholder="${tags.length?'+ тег':'+ тег'}" autocomplete="off" enterkeyhint="done">`;
   el.querySelectorAll('.tag-pill-x').forEach(x=>x.addEventListener('click',e=>{
     e.stopPropagation();const n2=findN(S.editingNoteId);if(!n2)return;
     n2.tags=(n2.tags||[]).filter(t=>t!==x.dataset.tag);save();renderNotes();renderEditorTags(n2);
@@ -972,6 +992,14 @@ $('newNoteBtn').addEventListener('click',()=>{
   setTimeout(()=>$('noteTitleInput').focus(),300);
 });
 $('notesList').addEventListener('click',e=>{const card=e.target.closest('.note-card');if(card)openNote(card.dataset.id);});
+let _ctxNoteId=null;
+function showNoteMenu(id){const n=findN(id);if(!n)return;_ctxNoteId=id;pushModalState();$('noteCtxLabel').textContent=n.title||'Без заголовка';$('noteCtxPin').textContent=n.pinned?'Открепить':'Закрепить';show('noteCtxOverlay');show('noteCtxMenu');}
+function hideNoteMenu(){if(history.state?.modal)history.back();hide('noteCtxOverlay');hide('noteCtxMenu');}
+$('noteCtxCancel').addEventListener('click',hideNoteMenu);
+$('noteCtxOverlay').addEventListener('click',hideNoteMenu);
+$('noteCtxPin').addEventListener('click',()=>{const n=findN(_ctxNoteId);if(!n)return;n.pinned=!n.pinned;save();renderNotes();hideNoteMenu();});
+$('noteCtxDel').addEventListener('click',()=>{const idx=S.notes.findIndex(x=>x.id===_ctxNoteId);if(idx<0)return;const n=S.notes[idx];S.notes.splice(idx,1);save();renderNotes();hideNoteMenu();showToast('Запись удалена',()=>{S.notes.splice(idx,0,n);save();renderNotes();});});
+addLongPress($('notesList'),'.note-card',id=>{showNoteMenu(id);},null);
 // Swipe-to-delete для заметок
 let _nw=null;
 $('notesList').addEventListener('touchstart',e=>{

@@ -169,9 +169,9 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 /* ── HABITS ── */
 .week-row{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:2;background:var(--bg);padding:10px 22px;margin:0 -22px;border-bottom:1px solid var(--border)}
 .week-row-spacer{flex:1;min-width:0}
-.week-day-label{width:22px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;flex-shrink:0}
+.week-day-label{width:30px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;flex-shrink:0}
 .week-day-label.is-today{color:var(--accent)}
-.week-row-del{width:22px;flex-shrink:0}
+.week-row-del{width:26px;flex-shrink:0}
 #habitsList{padding-top:0}
 .habit-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);gap:12px;position:relative}
 .habit-name{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
@@ -180,8 +180,8 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 .habit-row:active .habit-del{opacity:.5}
 .habit-del:active{opacity:.6}
 .habit-streak-badge{flex-shrink:0;font-size:11px;color:var(--text3);white-space:nowrap;font-weight:500}
-.habit-dots,.week-labels{display:flex;gap:4px;flex-shrink:0}
-.habit-dot{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--border);cursor:pointer;transition:background .15s,border-color .15s,opacity .12s;flex-shrink:0;opacity:.5}
+.habit-dots,.week-labels{display:flex;gap:0;flex-shrink:0}
+.habit-dot{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;transition:background .15s,border-color .15s,opacity .12s;flex-shrink:0;opacity:.5;padding:0;margin:0 2px;-webkit-tap-highlight-color:rgba(108,92,231,.15)}
 .habit-dot.checked{background:var(--accent);border-color:var(--accent);opacity:1}
 .habit-dot.is-future{opacity:.2;pointer-events:none}
 .habit-dot.is-today{border-color:var(--text3);opacity:.7}
@@ -708,7 +708,7 @@ function taskHTML(t,_today){
 function renderTasks(){
   const _today=todayStr(),el=$('taskList');
   const active=S.tasks.filter(t=>!t.done),done=S.tasks.filter(t=>t.done);
-  if(!active.length&&!done.length){el.innerHTML=`<div class="empty-state"><svg class="empty-illus" width="100" height="88" viewBox="0 0 100 88" fill="none"><rect x="4" y="6" width="26" height="26" rx="7" stroke="currentColor" stroke-width="1.6" opacity=".4"/><path d="M11 19l5 5 9-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="24" stroke-dashoffset="24" opacity=".55"><animate attributeName="stroke-dashoffset" from="24" to="0" dur="0.5s" begin="0.4s" fill="freeze"/></path><rect x="38" y="14" width="58" height="7" rx="3.5" fill="currentColor" opacity=".12"/><rect x="4" y="44" width="26" height="26" rx="7" stroke="currentColor" stroke-width="1.6" opacity=".18"/><rect x="38" y="52" width="44" height="7" rx="3.5" fill="currentColor" opacity=".08"/></svg><span class="empty-label">нет задач</span></div>`;updateTaskBadge();return;}
+  if(!active.length&&!done.length){el.innerHTML=`<div class="empty-state"><svg class="empty-illus" width="100" height="88" viewBox="0 0 100 88" fill="none"><rect x="4" y="6" width="26" height="26" rx="7" stroke="currentColor" stroke-width="1.6" opacity=".4"/><path d="M11 19l5 5 9-10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="24" stroke-dashoffset="24" opacity=".55"><animate attributeName="stroke-dashoffset" from="24" to="0" dur="0.5s" begin="0.4s" fill="freeze"/></path><rect x="38" y="14" width="58" height="7" rx="3.5" fill="currentColor" opacity=".12"/><rect x="4" y="44" width="26" height="26" rx="7" stroke="currentColor" stroke-width="1.6" opacity=".18"/><rect x="38" y="52" width="44" height="7" rx="3.5" fill="currentColor" opacity=".08"/></svg><span class="empty-label">нет задач</span></div>`;;return;}
   const g={};active.forEach(t=>{const k=t.date||'';if(!g[k])g[k]=[];g[k].push(t);});
   let html=Object.keys(g).sort((a,b)=>!a?1:!b?-1:a.localeCompare(b)).map(k=>{
     const sorted=g[k].slice().sort((a,b)=>(b.priority?1:0)-(a.priority?1:0));

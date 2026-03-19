@@ -914,7 +914,7 @@ function getAllTags(){const s=new Set();S.notes.forEach(n=>(n.tags||[]).forEach(
 function renderTagFilter(){
   const tags=getAllTags(),el=$('tagFilter');
   if(!tags.length){el.innerHTML='';return;}
-  el.innerHTML=`<div class="tf-chip ${!S.tagFilter?'on':''}" data-tag="">Все</div>`+tags.map(t=>`<div class="tf-chip ${S.tagFilter===t?'on':''}" data-tag="${esc(t)}" style="${S.tagFilter!==t?'border-color:'+tagColor(t)+';color:'+tagColor(t):''}">${esc(t)}</div>`).join('');
+  el.innerHTML=`<div class="tf-chip ${!S.tagFilter?'on':''}" data-tag="">Все</div>`+tags.map(t=>`<div class="tf-chip ${S.tagFilter===t?'on':''}" data-tag="${esc(t)}" style="border-color:${tagColor(t)};color:${S.tagFilter===t?'#fff':tagColor(t)};${S.tagFilter===t?'background:'+tagColor(t)+';':''}">${esc(t)}</div>`).join('');
   el.querySelectorAll('.tf-chip').forEach(c=>c.addEventListener('click',()=>{S.tagFilter=c.dataset.tag||null;renderNotes();}));
 }
 function renderEditorTags(n){

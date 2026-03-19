@@ -65,7 +65,7 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 .tab.active .tab-label{color:var(--accent)}
 
 .tab-icon-wrap{position:relative;display:inline-flex}
-.task-badge{position:absolute;top:-5px;right:-8px;min-width:16px;height:16px;background:var(--accent);color:#fff;border-radius:8px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;opacity:0;transform:scale(0);transition:opacity .2s,transform .2s;pointer-events:none}
+.task-badge{position:absolute;top:-5px;right:-8px;min-width:16px;height:16px;background:var(--red);color:#fff;border-radius:8px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;padding:0 4px;opacity:0;transform:scale(0);transition:opacity .2s,transform .2s;pointer-events:none}
 .task-badge.visible{opacity:1;transform:scale(1)}
 /* ── SCROLL ── */
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 22px 80px;touch-action:pan-y;overscroll-behavior:contain}
@@ -723,7 +723,7 @@ function renderTasks(){
 }
 function updateTaskBadge(){
   const today=todayStr();
-  const n=S.tasks.filter(t=>!t.done&&t.date===today).length;
+  const n=S.tasks.filter(t=>!t.done&&t.date&&t.date<=today).length;
   const b=$('taskBadge');if(!b)return;
   b.textContent=n||'';
   b.classList.toggle('visible',n>0);

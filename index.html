@@ -178,7 +178,9 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 .week-day-label.is-today{color:var(--accent)}
 .week-row-del{width:22px;flex-shrink:0}
 #habitsList{padding-top:0}
-.habit-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);gap:12px}
+.habit-row{display:flex;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);gap:12px;position:relative;overflow:hidden;transition:transform .2s ease,opacity .2s ease}
+.habit-swipe-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:var(--red);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;pointer-events:none}
+.habit-swipe-bg svg{width:18px;height:18px;stroke:#fff}
 .habit-name{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
 .habit-name-text{font-size:15px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .habit-del{width:22px;height:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text3);font-size:16px;line-height:1;cursor:pointer;border-radius:50%;transition:color .12s,background .12s;opacity:0}
@@ -817,7 +819,8 @@ function renderHabits(){
       return `<div class="habit-dot${chk?' checked':''}${d>today?' is-future':''}${d===today?' is-today':''}" data-id="${h.id}" data-date="${d}"></div>`;
     }).join('');
     const pctColor=pct>=80?'var(--accent)':pct>=50?'#fdcb6e':'var(--text3)';
-    return `<div class="habit-row" data-id="${h.id}"><div class="habit-name"><span class="habit-name-text">${esc(h.name)}</span>${streak>=3?`<span class="habit-streak-badge">${streak}🔥</span>`:''}<span style="font-size:10px;font-weight:600;color:${pctColor};margin-left:auto;flex-shrink:0">${pct}%</span></div><div class="habit-dots">${dots}</div><div class="habit-del" data-del="${h.id}">×</div></div>`;
+    const swipeBgH=`<div class="habit-swipe-bg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg></div>`;
+    return `<div class="habit-row" data-id="${h.id}">${swipeBgH}<div class="habit-name"><span class="habit-name-text">${esc(h.name)}</span>${streak>=3?`<span class="habit-streak-badge">${streak}🔥</span>`:''}<span style="font-size:10px;font-weight:600;color:${pctColor};margin-left:auto;flex-shrink:0">${pct}%</span></div><div class="habit-dots">${dots}</div><div class="habit-del" data-del="${h.id}">×</div></div>`;
   }).join('');
 }
 function openHabitSheet(){pushModalState();openSheet('habitSheet','habitSheetOverlay','habitInput');}
@@ -873,6 +876,37 @@ $('habitsList').addEventListener('click',e=>{
   if(dot&&!dot.classList.contains('is-future'))toggleHabit(dot.dataset.id,dot.dataset.date);
 });
 addLongPress($('habitsList'),'.habit-row',id=>{ctxHabitId=id;showHabitMenu(id);},'.habit-dot');
+// Swipe-to-delete для привычек
+let _hw=null;
+$('habitsList').addEventListener('touchstart',e=>{
+  const row=e.target.closest('.habit-row');
+  if(!row||e.target.closest('.habit-dot'))return;
+  _hw={el:row,x0:e.touches[0].clientX,dx:0};
+},{passive:true});
+$('habitsList').addEventListener('touchmove',e=>{
+  if(!_hw)return;
+  const dx=e.touches[0].clientX-_hw.x0;
+  if(dx>0){_hw=null;return;}
+  _hw.dx=dx;
+  const clamped=Math.max(dx,-90);
+  _hw.el.style.transform=`translateX(${clamped}px)`;
+  _hw.el.style.transition='none';
+  const bg=_hw.el.querySelector('.habit-swipe-bg');
+  if(bg)bg.style.opacity=String(Math.min(Math.abs(clamped)/90,1));
+  if(Math.abs(clamped)>=88)navigator.vibrate?.(8);
+},{passive:true});
+function _hwReset(el){el.style.transition='transform .22s ease';el.style.transform='';const bg=el.querySelector('.habit-swipe-bg');if(bg)bg.style.opacity='0';}
+$('habitsList').addEventListener('touchend',()=>{
+  if(!_hw)return;
+  const {el,dx}=_hw;_hw=null;
+  el.style.transition='transform .22s ease,opacity .18s ease';
+  if(dx<-60){
+    el.style.transform='translateX(-110%)';el.style.opacity='0';
+    const id=el.dataset.id;
+    setTimeout(()=>{if(id)deleteHabit(id);},220);
+  }else _hwReset(el);
+});
+$('habitsList').addEventListener('touchcancel',()=>{if(_hw){_hwReset(_hw.el);_hw=null;}});
 function showHabitMenu(id){
   const h=findH(id);if(!h)return;
   pushModalState();

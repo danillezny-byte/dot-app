@@ -227,7 +227,7 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 .tag-filter::-webkit-scrollbar{display:none}
 .tf-chip{flex-shrink:0;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;border:1.5px solid var(--border);color:var(--text3);cursor:pointer;transition:background .12s,color .12s,border-color .12s;-webkit-user-select:none;user-select:none}
 .tf-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.editor-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 22px 12px;min-height:44px;border-bottom:1px solid var(--border);-webkit-user-select:none;user-select:none}
+.editor-tags{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 22px 12px;min-height:44px;border-bottom:1px solid var(--border)}
 .editor-tag-input{border:none;outline:none;font-family:inherit;font-size:13px;color:var(--text);background:none;min-width:80px;flex:1;-webkit-user-select:text;user-select:text}
 .editor-tag-input::placeholder{color:var(--text3)}
 
@@ -1085,8 +1085,9 @@ $('noteContentInput').addEventListener('keyup',updateFmtBar);
 $('noteContentInput').addEventListener('mouseup',updateFmtBar);
 $('noteContentInput').addEventListener('touchend',()=>setTimeout(updateFmtBar,50));
 document.addEventListener('selectionchange',()=>{if(document.activeElement===$('noteContentInput'))updateFmtBar();});
-// mousedown preventDefault — не даём потерять фокус на десктопе
+// preventDefault — не даём потерять фокус из редактора
 $('fmtBar').addEventListener('mousedown',e=>{if(e.target.closest('.fmt-btn'))e.preventDefault();});
+$('fmtBar').addEventListener('touchstart',e=>{if(e.target.closest('.fmt-btn'))e.preventDefault();},{passive:false});
 $('fmtBar').addEventListener('click',e=>{
   const b=e.target.closest('.fmt-btn');if(!b)return;
   const ce=$('noteContentInput'),fmt=b.dataset.fmt;

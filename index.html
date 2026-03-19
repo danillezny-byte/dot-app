@@ -232,7 +232,7 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 .editor-tag-input::placeholder{color:var(--text3)}
 
 /* ── NOTE EDITOR ── */
-.note-editor{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .26s cubic-bezier(.32,1,.55,1);z-index:5}
+.note-editor{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .26s cubic-bezier(.32,1,.55,1);z-index:15}
 .note-editor.open{transform:none}
 .editor-top{display:flex;align-items:center;padding:12px 18px;border-bottom:1px solid var(--border);flex-shrink:0;gap:8px}
 .editor-back{font-size:14px;font-weight:600;color:var(--accent);cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:4px}
@@ -745,7 +745,7 @@ renderTasks();updateTaskBadge();
 // History API: кнопка «назад» закрывает шторки/редактор
 function pushModalState(){try{history.pushState({modal:true},'');}catch(e){}}
 function popModalState(){
-  if($('noteEditor').classList.contains('open')){saveNote();hide('noteEditor');return;}
+  if($('noteEditor').classList.contains('open')){const n=findN(S.editingNoteId);if(n&&!n.title.trim()&&!n.content.replace(/<[^>]*>/g,'').trim()){const idx=S.notes.indexOf(n);if(idx>=0){S.notes.splice(idx,1);save();}}else saveNote();hide('noteEditor');$('newNoteBtn').style.opacity='';$('newNoteBtn').style.pointerEvents='';return;}
   if($('addSheet').classList.contains('open')){closeAddSheet();return;}
   if($('habitSheet').classList.contains('open')){closeHabitSheet();return;}
   if($('noteCtxMenu').classList.contains('open')){hideNoteMenu();return;}
@@ -935,6 +935,10 @@ function renderEditorTags(n){
       n2.tags=n2.tags.slice(0,-1);save();renderNotes();renderEditorTags(n2);
     }
   });
+  inp.addEventListener('blur',()=>{
+    const val=inp.value.trim();
+    if(val){const n2=findN(S.editingNoteId);if(!n2)return;if(!(n2.tags||[]).includes(val)){n2.tags=[...(n2.tags||[]),val];save();renderNotes();}renderEditorTags(n2);}
+  });
 }
 function renderNotes(){
   const q=S.search.toLowerCase();
@@ -958,6 +962,7 @@ function openNote(id){
   $('pinBtn').classList.toggle('pinned',!!n.pinned);
   $('noteDateLabel').textContent=(n.updatedAt?new Date(n.updatedAt):new Date()).toLocaleDateString('ru',{day:'numeric',month:'long',year:'numeric'});
   renderEditorTags(n);
+  $('newNoteBtn').style.opacity='0';$('newNoteBtn').style.pointerEvents='none';
   show('noteEditor');
   setTimeout(updateFmtBar,50);
 }
@@ -975,7 +980,14 @@ $('noteTitleInput').addEventListener('input',onNoteInput);
 $('noteContentInput').addEventListener('input',onNoteInput);
 // Выравниваем Enter — всегда вставляем <br> вместо <div>/<p>
 $('noteContentInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.execCommand('insertLineBreak');}});
-$('editorBack').addEventListener('click',()=>{saveNote();hide('noteEditor');if(history.state?.modal)history.back();});
+$('editorBack').addEventListener('click',()=>{
+  const n=findN(S.editingNoteId);
+  if(n&&!n.title.trim()&&!n.content.replace(/<[^>]*>/g,'').trim()){const idx=S.notes.indexOf(n);if(idx>=0){S.notes.splice(idx,1);save();}}
+  else saveNote();
+  hide('noteEditor');
+  $('newNoteBtn').style.opacity='';$('newNoteBtn').style.pointerEvents='';
+  if(history.state?.modal)history.back();
+});
 $('pinBtn').addEventListener('click',()=>{
   const n=findN(S.editingNoteId);if(!n)return;
   n.pinned=!n.pinned;$('pinBtn').classList.toggle('pinned',n.pinned);save();renderNotes();
@@ -984,7 +996,8 @@ $('deleteNoteBtn').addEventListener('click',()=>{
   const idx=S.notes.findIndex(x=>x.id===S.editingNoteId);if(idx<0)return;
   const n=S.notes[idx];S.notes.splice(idx,1);
   if(history.state?.modal)history.back();hide('noteEditor');save();renderNotes();
-  showToast('Заметка удалена',()=>{S.notes.splice(idx,0,n);save();renderNotes();});
+  $('newNoteBtn').style.opacity='';$('newNoteBtn').style.pointerEvents='';
+  showToast('Запись удалена',()=>{S.notes.splice(idx,0,n);save();renderNotes();});
 });
 $('newNoteBtn').addEventListener('click',()=>{
   const n={id:uid(),title:'',content:'',pinned:false,tags:[],createdAt:Date.now(),updatedAt:Date.now()};

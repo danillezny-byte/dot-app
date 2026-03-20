@@ -268,7 +268,6 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 <div class="header">
 <div class="logo">dot<span class="logo-dot">.</span></div>
 <input type="file" id="importFile" accept=".json" style="display:none">
-<svg id="iconSun" style="display:none"></svg><svg id="iconMoon" style="display:none"></svg>
 <div style="flex:1"></div>
 <button class="icon-btn" id="moreBtn" aria-label="Настройки">
 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.2" fill="currentColor" stroke="none"/></svg>
@@ -464,8 +463,6 @@ function applyTheme(){
   const dark=S.theme==='dark';
   document.documentElement.toggleAttribute('data-dark',dark);
   $('themeColor').content=dark?'#0e0e10':'#ffffff';
-  $('iconSun').style.display=dark?'none':'';
-  $('iconMoon').style.display=dark?'':'none';
 }
 applyTheme();
 function doExport(){

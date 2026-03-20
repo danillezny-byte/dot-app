@@ -1021,19 +1021,25 @@ $('noteContentInput').addEventListener('keyup',updateFmtBar);
 $('noteContentInput').addEventListener('mouseup',updateFmtBar);
 $('noteContentInput').addEventListener('touchend',()=>setTimeout(updateFmtBar,50));
 document.addEventListener('selectionchange',()=>{if(document.activeElement===$('noteContentInput'))updateFmtBar();});
-// preventDefault — не даём потерять фокус из редактора
-$('fmtBar').addEventListener('mousedown',e=>{if(e.target.closest('.fmt-btn'))e.preventDefault();});
-$('fmtBar').addEventListener('touchstart',e=>{if(e.target.closest('.fmt-btn'))e.preventDefault();},{passive:false});
-$('fmtBar').addEventListener('click',e=>{
-  const b=e.target.closest('.fmt-btn');if(!b)return;
-  const ce=$('noteContentInput'),fmt=b.dataset.fmt;
-  ce.focus();_restoreSel();
+// Форматирование: не даём потерять фокус + обрабатываем и touch и mouse
+function applyFmt(btn){
+  const ce=$('noteContentInput'),fmt=btn.dataset.fmt;
+  ce.focus();
+  if(_savedRange){try{const sel=window.getSelection();sel.removeAllRanges();sel.addRange(_savedRange);}catch(e){}}
   if(fmt==='bold')document.execCommand('bold');
   else if(fmt==='italic')document.execCommand('italic');
   else if(fmt==='h1'||fmt==='h2'){const cur=document.queryCommandValue('formatBlock').toLowerCase();document.execCommand('formatBlock',false,cur===fmt?'p':fmt);}
   else if(fmt==='bullet')document.execCommand('insertHTML',false,'<br>• ');
-  saveNote();
-});
+  saveNote();updateFmtBar();
+}
+$('fmtBar').addEventListener('mousedown',e=>{if(e.target.closest('.fmt-btn'))e.preventDefault();});
+$('fmtBar').addEventListener('click',e=>{const b=e.target.closest('.fmt-btn');if(b)applyFmt(b);});
+$('fmtBar').addEventListener('touchstart',e=>{
+  const b=e.target.closest('.fmt-btn');
+  if(!b)return;
+  e.preventDefault();
+  applyFmt(b);
+},{passive:false});
 renderNotes();
 </script>
 </body>

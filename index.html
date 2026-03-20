@@ -62,13 +62,14 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 .tab.active svg{color:var(--accent)}
 .tab-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.02em;margin-top:3px;line-height:1}
 .tab.active .tab-label{color:var(--accent)}
+.tab.active::after{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:20px;height:2.5px;background:var(--accent);border-radius:0 0 2px 2px}
 
 /* ── SCROLL ── */
 .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 22px 80px;touch-action:pan-y;overscroll-behavior:contain}
 .scroll::-webkit-scrollbar,.fmt-bar::-webkit-scrollbar{display:none}
 
 /* ── DIVIDERS ── */
-.divider{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);padding:22px 0 9px}
+.divider{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);padding:22px 0 9px;opacity:.7}
 
 /* ── EMPTY STATE ── */
 .empty-state{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;color:var(--text3);font-size:13px;font-weight:400;gap:14px;padding:40px 20px}
@@ -84,7 +85,7 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 .empty-illus-slow{animation:illFadeIn .5s ease both,floatUpSlow 5s ease-in-out .5s infinite}
 
 /* ── FAB ── */
-.fab{position:absolute;bottom:18px;right:20px;width:50px;height:50px;border-radius:16px;background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 28px rgba(108,92,231,.4);z-index:10;transition:transform .12s,box-shadow .12s}
+.fab{position:absolute;bottom:18px;right:20px;width:50px;height:50px;border-radius:16px;background:var(--accent);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(108,92,231,.35),0 8px 32px rgba(108,92,231,.2);z-index:10;transition:transform .12s,box-shadow .12s}
 .fab svg{width:20px;height:20px;stroke:#fff;flex-shrink:0}
 .fab:active{transform:scale(.92);box-shadow:0 3px 14px rgba(108,92,231,.3)}
 [data-dark] .fab{box-shadow:0 6px 28px rgba(108,92,231,.5)}
@@ -148,7 +149,7 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 
 /* ── TASKS ── */
 .task-item{display:flex;align-items:flex-start;gap:13px;padding:15px 0;border-bottom:1px solid var(--border);position:relative}
-.task-check{width:22px;height:22px;border:1.5px solid var(--border);border-radius:50%;flex-shrink:0;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;padding:5px;box-sizing:content-box;margin-top:2px}
+.task-check{width:22px;height:22px;border:2px solid var(--text3);border-radius:50%;flex-shrink:0;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;padding:5px;box-sizing:content-box;margin-top:2px}
 .task-check:active{transform:scale(.88)}
 .task-check.done{background:var(--accent);border-color:var(--accent)}
 .task-check.done::after{content:'';width:5px;height:3px;border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;transform:rotate(-45deg) translateY(-1px)}
@@ -161,6 +162,8 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 .task-delete:active{opacity:.6}
 .done-toggle-btn{display:block;width:100%;text-align:left;padding:16px 0 8px;font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text3);transition:color .15s}
 .done-toggle-btn:active{color:var(--text)}
+.done-arrow{display:inline-block;transition:transform .2s;font-size:10px}
+.done-arrow.open{transform:rotate(90deg)}
 .done-list{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .28s ease,opacity .2s ease}
 .done-list.open{grid-template-rows:1fr;opacity:1}
 .done-list>div{overflow:hidden}
@@ -168,7 +171,7 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 /* ── HABITS ── */
 .week-row{display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:2;background:var(--bg);padding:10px 22px;margin:0 -22px;border-bottom:1px solid var(--border)}
 .week-row-spacer{flex:1;min-width:0}
-.week-day-label{width:24px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;flex-shrink:0}
+.week-day-label{width:26px;text-align:center;font-size:10px;font-weight:600;letter-spacing:.05em;color:var(--text3);text-transform:uppercase;flex-shrink:0}
 .week-day-label.is-today{color:var(--accent)}
 .week-row-del{width:22px;flex-shrink:0}
 #habitsList{padding-top:0}
@@ -180,10 +183,10 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 .habit-del:active{opacity:.6}
 .habit-streak-badge{flex-shrink:0;font-size:11px;color:var(--text3);white-space:nowrap;font-weight:500}
 .habit-dots,.week-labels{display:flex;gap:0;flex-shrink:0}
-.habit-dot{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer;transition:background .15s,border-color .15s,opacity .12s;flex-shrink:0;opacity:.65;padding:0;margin:0 2px;-webkit-tap-highlight-color:rgba(108,92,231,.15)}
+.habit-dot{width:22px;height:22px;border-radius:7px;border:1.5px solid var(--text3);cursor:pointer;transition:background .15s,border-color .15s,opacity .12s;flex-shrink:0;opacity:.45;padding:0;margin:0 2px;-webkit-tap-highlight-color:rgba(108,92,231,.15)}
 .habit-dot.checked{background:var(--accent);border-color:var(--accent);opacity:1}
 .habit-dot.is-future{opacity:.2;pointer-events:none}
-.habit-dot.is-today{border-color:var(--accent);border-width:2px;opacity:.85}
+.habit-dot.is-today{border-color:var(--accent);border-width:2px;opacity:.7}
 .habit-dot.checked.is-today{opacity:1}
 .habit-dot:active:not(.is-future){transform:scale(.88);transform-origin:center}
 
@@ -710,7 +713,7 @@ function renderTasks(){
     return `<div class="divider">${fmtDateGroup(k)}</div>`+g[k].map(t=>taskHTML(t,_today,k)).join('');
   }).join('');
   if(done.length){
-    html+=`<button class="btn done-toggle-btn" id="doneToggle">выполненные (${done.length})</button><div class="done-list ${S.doneOpen?'open':''}" id="doneList"><div>${done.slice().reverse().map(t=>taskHTML(t,_today,'')).join('')}</div></div>`;
+    html+=`<button class="btn done-toggle-btn" id="doneToggle"><span class="done-arrow ${S.doneOpen?'open':''}">▸</span> выполненные (${done.length})</button><div class="done-list ${S.doneOpen?'open':''}" id="doneList"><div>${done.slice().reverse().map(t=>taskHTML(t,_today,'')).join('')}</div></div>`;
   }
   el.innerHTML=html;
   }

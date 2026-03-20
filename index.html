@@ -900,6 +900,7 @@ function renderEditorTags(n){
   inp.addEventListener('keydown',e=>{
     if(e.key==='Enter'||e.key===','){
       e.preventDefault();const val=inp.value.trim().replace(/,/g,'');
+      inp.value='';
       if(val){const n2=findN(S.editingNoteId);if(!n2)return;if(!(n2.tags||[]).includes(val)){n2.tags=[...(n2.tags||[]),val];save();renderNotes();}renderEditorTags(n2);}
     }else if(e.key==='Backspace'&&!inp.value){
       const n2=findN(S.editingNoteId);if(!n2||!n2.tags||!n2.tags.length)return;
@@ -948,8 +949,15 @@ let noteAutoSave=null;
 const onNoteInput=()=>{clearTimeout(noteAutoSave);noteAutoSave=setTimeout(saveNote,600);};
 $('noteTitleInput').addEventListener('input',onNoteInput);
 $('noteContentInput').addEventListener('input',onNoteInput);
-// Выравниваем Enter — всегда вставляем <br> вместо <div>/<p>
-$('noteContentInput').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();document.execCommand('insertLineBreak');}});
+// Enter: внутри H1/H2 — выходим из заголовка, иначе <br>
+$('noteContentInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    e.preventDefault();
+    const block=document.queryCommandValue('formatBlock').toLowerCase();
+    if(block==='h1'||block==='h2'){document.execCommand('formatBlock',false,'p');}
+    else{document.execCommand('insertLineBreak');}
+  }
+});
 $('editorBack').addEventListener('click',()=>{
   const n=findN(S.editingNoteId);
   if(n&&!n.title.trim()&&!n.content.replace(/<[^>]*>/g,'').trim()){const idx=S.notes.indexOf(n);if(idx>=0){S.notes.splice(idx,1);save();}}
@@ -966,8 +974,10 @@ $('pinBtn').addEventListener('click',()=>{
 $('deleteNoteBtn').addEventListener('click',()=>{
   const idx=S.notes.findIndex(x=>x.id===S.editingNoteId);if(idx<0)return;
   const n=S.notes[idx];S.notes.splice(idx,1);
-  if(history.state?.modal)history.back();hide('noteEditor');save();renderNotes();
+  const ne=$('noteEditor');ne.style.bottom='';ne.style.transition='';ne.classList.remove('open');
+  save();renderNotes();
   $('newNoteBtn').style.opacity='';$('newNoteBtn').style.pointerEvents='';
+  if(history.state?.modal)history.back();
   showToast('Запись удалена',()=>{S.notes.splice(idx,0,n);save();renderNotes();});
 });
 $('newNoteBtn').addEventListener('click',()=>{
@@ -1004,7 +1014,6 @@ $('fmtBar').innerHTML=Object.entries(fmtIcons).map(([f,l])=>`<button class="btn 
 let _savedRange=null;
 $('noteContentInput').addEventListener('blur',()=>{const sel=window.getSelection();if(sel&&sel.rangeCount)_savedRange=sel.getRangeAt(0).cloneRange();});
 $('noteContentInput').addEventListener('focus',()=>{_savedRange=null;});
-function _restoreSel(){try{const sel=window.getSelection();sel.removeAllRanges();if(_savedRange)sel.addRange(_savedRange);}catch(e){_savedRange=null;}}
 // Подсветка активных кнопок по позиции курсора
 function updateFmtBar(){
   try{

@@ -60,7 +60,6 @@ button,input,textarea,a,[class*="-btn"],[class*="-check"],[class*="-dot"],[class
 .tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;cursor:pointer;color:var(--text3);position:relative}
 .tab svg{flex-shrink:0;width:22px;height:22px;transition:color .15s}
 .tab.active svg{color:var(--accent)}
-.tab-dot{display:none}
 .tab-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.02em;margin-top:3px;line-height:1}
 .tab.active .tab-label{color:var(--accent)}
 
@@ -461,6 +460,8 @@ function load(){try{const d=JSON.parse(localStorage.getItem('dot_v2')||'{}');S.t
 load();
 function cleanOldChecks(){const cutoff=new Date();cutoff.setFullYear(cutoff.getFullYear()-5);const cutStr=iso(cutoff);S.habits.forEach(h=>{if(h.checks)Object.keys(h.checks).forEach(k=>{if(k<cutStr)delete h.checks[k];});});}
 cleanOldChecks();
+function cleanOldDone(){const cutoff=Date.now()-30*24*60*60*1000;const before=S.tasks.length;S.tasks=S.tasks.filter(t=>!t.done||!t.created||(t.created>cutoff));if(S.tasks.length<before)save();}
+cleanOldDone();
 function applyTheme(){
   const dark=S.theme==='dark';
   document.documentElement.toggleAttribute('data-dark',dark);
@@ -492,9 +493,11 @@ $('sThemeRow').addEventListener('click',()=>{
   $('sThemeVal').textContent=S.theme==='dark'?'Вкл':'Выкл';
 });
 $('sExportRow').addEventListener('click',()=>{doExport();closeSettings();});
-$('sImportRow').addEventListener('click',()=>{$('importFile').click();closeSettings();});
+$('sImportRow').addEventListener('click',()=>{closeSettings();$('importFile').click();});
 $('importFile').addEventListener('change',e=>{
   const file=e.target.files[0];if(!file)return;
+  const has=S.tasks.length||S.habits.length||S.notes.length;
+  if(has&&!confirm('Текущие данные будут заменены. Продолжить?')){e.target.value='';return;}
   const reader=new FileReader();
   reader.onload=ev=>{
     try{
@@ -554,7 +557,6 @@ if(window.visualViewport){
     const kb=Math.round(Math.max(0,window.innerHeight-vv.height-vv.offsetTop));
     if(kb===_lastKb)return;
     _lastKb=kb;
-    document.documentElement.style.setProperty('--kb',kb+'px');
     ['addSheet','habitSheet'].forEach(id=>{
       const el=$(id);
       if(!el||!el.classList.contains('open'))return;
@@ -998,7 +1000,8 @@ $('noteCtxOverlay').addEventListener('click',hideNoteMenu);
 $('noteCtxPin').addEventListener('click',()=>{const n=findN(_ctxNoteId);if(!n)return;n.pinned=!n.pinned;save();renderNotes();hideNoteMenu();});
 $('noteCtxDel').addEventListener('click',()=>{const idx=S.notes.findIndex(x=>x.id===_ctxNoteId);if(idx<0)return;const n=S.notes[idx];S.notes.splice(idx,1);save();renderNotes();hideNoteMenu();showToast('Запись удалена',()=>{S.notes.splice(idx,0,n);save();renderNotes();});});
 addLongPress($('notesList'),'.note-card',id=>{showNoteMenu(id);},null);
-$('searchInput').addEventListener('input',function(){S.search=this.value;renderNotes();});
+let _searchTimer=null;
+$('searchInput').addEventListener('input',function(){const v=this.value;clearTimeout(_searchTimer);_searchTimer=setTimeout(()=>{S.search=v;renderNotes();},150);});
 if(S.editingNoteId&&findN(S.editingNoteId)){
   tabs.forEach(x=>x.classList.toggle('active',x.dataset.tab==='notes'));
   screens.forEach(x=>x.classList.toggle('active',x.id==='screen-notes'));

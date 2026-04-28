@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<title>dot. — Supabase Connection Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #0d0d0f;
+    --panel: #18181b;
+    --panel-2: #1f1f23;
+    --border: #2a2a2f;
+    --text: #ececef;
+    --muted: #8a8a92;
+    --accent: #3ecf8e;
+    --accent-hover: #2eb87a;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --info: #60a5fa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 32px 16px;
+  }
+  .wrap {
+    max-width: 880px;
+    margin: 0 auto;
+  }
+  h1 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+  }
+  input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  button {
+    padding: 10px 16px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #0d0d0f;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.15s;
+  }
+  button:hover:not(:disabled) { background: var(--accent-hover); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.secondary {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  button.secondary:hover:not(:disabled) { background: var(--border); }
+  button.danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1px solid var(--danger);
+  }
+  button.danger:hover:not(:disabled) { background: var(--danger); color: #fff; }
+
+  .status {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+  }
+  .status.ok    { color: var(--accent); border-color: var(--accent); }
+  .status.warn  { color: var(--warn);   border-color: var(--warn);   }
+  .status.error { color: var(--danger); border-color: var(--danger); }
+
+  .log {
+    background: #08080a;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: "SF Mono", "Monaco", "Menlo", monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    max-height: 360px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .log .l-info { color: var(--info); }
+  .log .l-ok   { color: var(--accent); }
+  .log .l-err  { color: var(--danger); }
+  .log .l-warn { color: var(--warn); }
+  .log .l-meta { color: var(--muted); }
+
+  .tasks { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  .task {
+    display: flex; gap: 10px; align-items: center;
+    padding: 10px 12px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+  }
+  .task .check {
+    width: 18px; height: 18px; border-radius: 4px;
+    border: 1.5px solid var(--muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .task.done .check { background: var(--accent); border-color: var(--accent); color: #0d0d0f; }
+  .task.done .title { color: var(--muted); text-decoration: line-through; }
+  .task .title { flex: 1; }
+  .task .del { color: var(--muted); cursor: pointer; padding: 4px 8px; }
+  .task .del:hover { color: var(--danger); }
+
+  .empty { color: var(--muted); font-size: 13px; padding: 12px 0; }
+
+  .meta {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+  .meta b { color: var(--text); font-weight: 500; }
+  code {
+    font-family: "SF Mono", monospace;
+    font-size: 11px;
+    background: var(--panel-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>dot. — Supabase Connection Test 🧪</h1>
+  <p class="subtitle">Проверяем регистрацию, авторизацию, профиль и CRUD задач с RLS</p>
+
+  <!-- 0. Connection -->
+  <div class="card">
+    <h2>0. Подключение к Supabase</h2>
+    <div class="row">
+      <span id="conn-status" class="status">⏳ Проверяю...</span>
+      <span class="meta"><code>yhhqctadcqjdsuhyhlvv.supabase.co</code></span>
+    </div>
+  </div>
+
+  <!-- 1. Auth -->
+  <div class="card" id="auth-card">
+    <h2>1. Авторизация</h2>
+    <div id="auth-logged-out">
+      <div class="row">
+        <input type="email" id="email" placeholder="email@example.com" autocomplete="email" />
+        <input type="password" id="password" placeholder="пароль (мин. 6 символов)" autocomplete="new-password" />
+      </div>
+      <div class="row">
+        <button id="btn-signup">Sign Up (новый юзер)</button>
+        <button id="btn-signin" class="secondary">Sign In (войти)</button>
+      </div>
+      <p class="meta" style="margin-top: 8px;">
+        Можно вводить любой email — Supabase по умолчанию не требует подтверждения на dev-проекте.
+      </p>
+    </div>
+    <div id="auth-logged-in" style="display: none;">
+      <div class="meta" id="user-info"></div>
+      <div class="row" style="margin-top: 12px;">
+        <button id="btn-signout" class="danger">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Profile -->
+  <div class="card" id="profile-card" style="display: none;">
+    <h2>2. Профиль (создан триггером)</h2>
+    <div class="meta" id="profile-info">Загружаю...</div>
+  </div>
+
+  <!-- 3. Tasks CRUD -->
+  <div class="card" id="tasks-card" style="display: none;">
+    <h2>3. Задачи (CRUD + RLS)</h2>
+    <div class="row">
+      <input type="text" id="task-title" placeholder="Название задачи" />
+      <button id="btn-add-task">+ Добавить</button>
+      <button id="btn-reload-tasks" class="secondary">Обновить</button>
+    </div>
+    <div class="tasks" id="tasks-list"></div>
+  </div>
+
+  <!-- 4. Log -->
+  <div class="card">
+    <h2>4. Лог</h2>
+    <div class="log" id="log"></div>
+  </div>
+</div>
+
+<!-- Supabase JS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+// ── Конфиг ───────────────────────────────────────────────────
+const SUPABASE_URL = 'https://yhhqctadcqjdsuhyhlvv.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_m8B9O9-1ijFrjckj9foerg_3GFA6xtN';
+
+// ── Создаём клиент ───────────────────────────────────────────
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── Логгер ───────────────────────────────────────────────────
+const logEl = document.getElementById('log');
+function log(msg, kind = 'info') {
+  const time = new Date().toLocaleTimeString();
+  const span = document.createElement('div');
+  span.innerHTML = `<span class="l-meta">${time}</span> <span class="l-${kind}">${msg}</span>`;
+  logEl.prepend(span);
+  console.log(`[${kind}]`, msg);
+}
+
+// ── Проверка подключения ─────────────────────────────────────
+async function checkConnection() {
+  try {
+    // Пингуем что-то максимально лёгкое — ping endpoint через auth.getSession
+    const { error } = await sb.auth.getSession();
+    if (error) throw error;
+    document.getElementById('conn-status').className = 'status ok';
+    document.getElementById('conn-status').textContent = '✓ Connected';
+    log('Подключение к Supabase работает', 'ok');
+  } catch (e) {
+    document.getElementById('conn-status').className = 'status error';
+    document.getElementById('conn-status').textContent = '✗ Error';
+    log('Ошибка подключения: ' + e.message, 'err');
+  }
+}
+
+// ── UI: переключение состояний ───────────────────────────────
+function showLoggedOut() {
+  document.getElementById('auth-logged-out').style.display = '';
+  document.getElementById('auth-logged-in').style.display = 'none';
+  document.getElementById('profile-card').style.display = 'none';
+  document.getElementById('tasks-card').style.display = 'none';
+}
+
+function showLoggedIn(user) {
+  document.getElementById('auth-logged-out').style.display = 'none';
+  document.getElementById('auth-logged-in').style.display = '';
+  document.getElementById('profile-card').style.display = '';
+  document.getElementById('tasks-card').style.display = '';
+  document.getElementById('user-info').innerHTML =
+    `<b>Email:</b> ${user.email}<br>
+     <b>User ID:</b> <code>${user.id}</code><br>
+     <b>Created:</b> ${new Date(user.created_at).toLocaleString()}`;
+  loadProfile();
+  loadTasks();
+}
+
+// ── 1. Авторизация ───────────────────────────────────────────
+document.getElementById('btn-signup').onclick = async () => {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  if (!email || !password) { log('Введите email и пароль', 'warn'); return; }
+
+  log(`Регистрирую ${email}...`);
+  const { data, error } = await sb.auth.signUp({ email, password });
+  if (error) { log('Sign Up error: ' + error.message, 'err'); return; }
+  if (!data.session) {
+    log('Sign Up OK, но требуется подтверждение email. Проверьте Auth → Settings → "Confirm email" = OFF.', 'warn');
+    return;
+  }
+  log(`Зарегистрирован: ${data.user.email}`, 'ok');
+  showLoggedIn(data.user);
+};
+
+document.getElementById('btn-signin').onclick = async () => {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  if (!email || !password) { log('Введите email и пароль', 'warn'); return; }
+
+  log(`Вход ${email}...`);
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) { log('Sign In error: ' + error.message, 'err'); return; }
+  log(`Вошёл: ${data.user.email}`, 'ok');
+  showLoggedIn(data.user);
+};
+
+document.getElementById('btn-signout').onclick = async () => {
+  await sb.auth.signOut();
+  log('Вышел', 'ok');
+  showLoggedOut();
+};
+
+// ── 2. Профиль (создан триггером handle_new_user) ────────────
+async function loadProfile() {
+  const { data: { user } } = await sb.auth.getUser();
+  const { data, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if (error) {
+    document.getElementById('profile-info').innerHTML =
+      `<span style="color: var(--danger)">Ошибка: ${error.message}</span>`;
+    log('Profile error: ' + error.message, 'err');
+    return;
+  }
+  document.getElementById('profile-info').innerHTML = `
+    <b>Name:</b> ${data.name || '—'}<br>
+    <b>Email:</b> ${data.email}<br>
+    <b>Plan:</b> ${data.plan}<br>
+    <b>Created:</b> ${new Date(data.created_at).toLocaleString()}
+  `;
+  log('Профиль загружен (создан триггером ✓)', 'ok');
+}
+
+// ── 3. Tasks CRUD ────────────────────────────────────────────
+async function loadTasks() {
+  const { data, error } = await sb
+    .from('tasks')
+    .select('*')
+    .is('deleted_at', null)
+    .order('created_at', { ascending: false });
+  if (error) { log('Load tasks error: ' + error.message, 'err'); return; }
+  renderTasks(data);
+  log(`Загружено задач: ${data.length} (видны только свои благодаря RLS)`, 'ok');
+}
+
+function renderTasks(tasks) {
+  const list = document.getElementById('tasks-list');
+  list.innerHTML = '';
+  if (!tasks.length) {
+    list.innerHTML = '<div class="empty">Задач пока нет. Добавьте первую ↑</div>';
+    return;
+  }
+  for (const t of tasks) {
+    const el = document.createElement('div');
+    el.className = 'task' + (t.done ? ' done' : '');
+    el.innerHTML = `
+      <span class="check" data-id="${t.id}" data-done="${t.done}">${t.done ? '✓' : ''}</span>
+      <span class="title">${escapeHtml(t.title)}</span>
+      <span class="del" data-id="${t.id}">✕</span>
+    `;
+    list.appendChild(el);
+  }
+  list.querySelectorAll('.check').forEach(el => {
+    el.onclick = () => toggleTask(el.dataset.id, el.dataset.done === 'true');
+  });
+  list.querySelectorAll('.del').forEach(el => {
+    el.onclick = () => deleteTask(el.dataset.id);
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c =>
+    ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+document.getElementById('btn-add-task').onclick = addTask;
+document.getElementById('task-title').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTask();
+});
+
+async function addTask() {
+  const titleEl = document.getElementById('task-title');
+  const title = titleEl.value.trim();
+  if (!title) { log('Введите название задачи', 'warn'); return; }
+
+  const { data: { user } } = await sb.auth.getUser();
+  const { error } = await sb.from('tasks').insert({
+    title,
+    owner_id: user.id,  // RLS-политика проверит, что owner_id == auth.uid()
+  });
+  if (error) { log('Add task error: ' + error.message, 'err'); return; }
+  log(`Добавлена задача: "${title}"`, 'ok');
+  titleEl.value = '';
+  loadTasks();
+}
+
+async function toggleTask(id, currentlyDone) {
+  const newDone = !currentlyDone;
+  const { error } = await sb.from('tasks')
+    .update({ done: newDone, done_at: newDone ? new Date().toISOString() : null })
+    .eq('id', id);
+  if (error) { log('Toggle error: ' + error.message, 'err'); return; }
+  loadTasks();
+}
+
+async function deleteTask(id) {
+  // Soft delete: проставляем deleted_at, а не физически удаляем
+  const { error } = await sb.from('tasks')
+    .update({ deleted_at: new Date().toISOString() })
+    .eq('id', id);
+  if (error) { log('Delete error: ' + error.message, 'err'); return; }
+  log('Задача удалена (soft delete)', 'ok');
+  loadTasks();
+}
+
+document.getElementById('btn-reload-tasks').onclick = loadTasks;
+
+// ── Старт ────────────────────────────────────────────────────
+checkConnection();
+
+// Восстановление сессии (если уже залогинен)
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) {
+    log(`Сессия восстановлена: ${session.user.email}`, 'ok');
+    showLoggedIn(session.user);
+  } else {
+    showLoggedOut();
+  }
+});
+
+// Реагируем на изменения авторизации
+sb.auth.onAuthStateChange((event, session) => {
+  log(`Auth event: ${event}`, 'meta');
+});
+</script>
+</body>
+</html>

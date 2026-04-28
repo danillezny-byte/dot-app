@@ -1,0 +1,43 @@
+# ─── Секреты (НИКОГДА не коммитить!) ────────────────────────
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+service-account*.json
+
+# ─── Зависимости (если позже добавим Node) ──────────────────
+node_modules/
+.pnp/
+.pnp.js
+
+# ─── Сборки ─────────────────────────────────────────────────
+dist/
+build/
+.next/
+.vercel/
+.cache/
+
+# ─── Логи ───────────────────────────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─── IDE и ОС ───────────────────────────────────────────────
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+Thumbs.db
+
+# ─── Локальные служебные файлы проекта ──────────────────────
+.design-canvas.state.json
+uploads/
+scraps/
+
+# ─── Supabase локально (если когда-нибудь поднимем) ─────────
+supabase/.branches
+supabase/.temp

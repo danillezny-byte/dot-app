@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dot. — экспорт для Figma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Figtree:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: #f5f3ee; font-family: 'Inter', system-ui, sans-serif; }
+  *  { box-sizing: border-box; }
+  #root { padding: 80px 0; display: flex; flex-direction: column; gap: 0; width: max-content; min-width: 100vw; }
+</style>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#fffbf0"/><circle cx="50" cy="50" r="14" fill="#6D3CF0"/></svg>
+</template>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" src="dot/tokens.jsx"></script>
+<script type="text/babel" src="dot/icons.jsx"></script>
+<script type="text/babel" src="dot/phone.jsx"></script>
+<script type="text/babel" src="dot/keyboard.jsx"></script>
+<script type="text/babel" src="dot/composers.jsx"></script>
+<script type="text/babel" src="dot/settings.jsx"></script>
+<script type="text/babel" src="dot/auth.jsx"></script>
+<script type="text/babel" src="dot/onboarding.jsx"></script>
+<script type="text/babel" src="dot/app-screens.jsx"></script>
+<script type="text/babel" src="dot/flow-diagram.jsx"></script>
+<script type="text/babel" src="dot/composer-variants.jsx"></script>
+<script type="text/babel" src="dot/settings-deep.jsx"></script>
+<script type="text/babel" src="dot/settings-deep2.jsx"></script>
+<script type="text/babel" src="dot/task-pickers.jsx"></script>
+<script type="text/babel" src="dot/habit-pickers.jsx"></script>
+<script type="text/babel" src="dot/profile-screens.jsx"></script>
+<script type="text/babel" src="dot/verify-email.jsx"></script>
+<script type="text/babel" src="dot/note-editor.jsx"></script>
+<script type="text/babel" src="dot/note-blocks.jsx"></script>
+
+<script type="text/babel">
+  const { useState } = React;
+
+  // Tokens for the Style Guide
+  const STYLE_COLORS = [
+    { name: 'Color/Accent/Primary',     hex: '#6D3CF0', note: 'violet — основной акцент' },
+    { name: 'Color/Accent/Soft',        hex: 'rgba(109,60,240,0.12)', note: 'violet 12% — фон чипов и состояний' },
+    { name: 'Color/Surface/Background', hex: '#F5F5F7', note: 'фон экрана (light)' },
+    { name: 'Color/Surface/Card',       hex: '#FFFFFF', note: 'карточки, поля, листы' },
+    { name: 'Color/Surface/Background-Dark', hex: '#000000', note: 'фон экрана (dark)' },
+    { name: 'Color/Surface/Card-Dark',  hex: '#1C1C1E', note: 'карточки (dark)' },
+    { name: 'Color/Surface/Background-Warm', hex: '#F4F0E8', note: 'фон экрана (warm beige)' },
+    { name: 'Color/Surface/Card-Warm',  hex: '#FBF8F1', note: 'карточки (warm beige)' },
+    { name: 'Color/Text/Primary',       hex: '#111111', note: 'основной текст' },
+    { name: 'Color/Text/Secondary',     hex: 'rgba(60,60,67,0.6)', note: 'подписи, метки' },
+    { name: 'Color/Border/Hairline',    hex: 'rgba(60,60,67,0.12)', note: '1px разделитель' },
+    { name: 'Color/Status/Danger',      hex: '#E44444', note: 'ошибки, удаление' },
+  ];
+  const STYLE_TYPE = [
+    { name: 'Type/Display',  size: 28, weight: 700, sample: 'С возвращением' },
+    { name: 'Type/Title',    size: 22, weight: 600, sample: 'Сегодня' },
+    { name: 'Type/Body',     size: 16, weight: 400, sample: 'Обычный текст в строках и полях' },
+    { name: 'Type/Label',    size: 13, weight: 500, sample: 'Email' },
+    { name: 'Type/Caption',  size: 12, weight: 500, sample: 'Подсказка / метка раздела' },
+    { name: 'Type/Button',   size: 15, weight: 600, sample: 'Войти' },
+  ];
+
+  function StyleGuide() {
+    return (
+      <section data-name="Section / Style Guide" style={{ marginBottom: 80, width: 'max-content' }}>
+        <div style={{ padding: '0 60px 40px' }}>
+          <div style={{ fontSize: 11, letterSpacing: 0.16, textTransform: 'uppercase', color: '#888', marginBottom: 6, fontFamily: 'ui-monospace, Menlo, monospace' }}>dot. — Design Tokens</div>
+          <h2 data-name="Section Title" style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.4, margin: 0, marginBottom: 6, color: '#222' }}>Стили: цвета и типографика</h2>
+          <div data-name="Section Subtitle" style={{ fontSize: 15, color: 'rgba(60,60,67,0.7)', maxWidth: 720 }}>
+            Имена слоёв соответствуют названиям стилей в Figma. После импорта создайте Color &amp; Text Styles c теми же именами — слои уже разложены, останется правый клик → Create Style.
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 48, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+          <div data-name="Card / Colors" style={{ width: 460, padding: 28, background: '#fff', borderRadius: 24, border: '1px solid rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: 0.08 }}>Цвета</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {STYLE_COLORS.map((c) => (
+                <div key={c.name} data-name={c.name} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: 8, borderRadius: 10, background: 'rgba(0,0,0,0.02)' }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 8, background: c.hex, border: '1px solid rgba(0,0,0,0.1)', flexShrink: 0 }} />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, fontFamily: 'ui-monospace, Menlo, monospace' }}>{c.name}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(60,60,67,0.7)' }}>{c.hex} · {c.note}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div data-name="Card / Typography" style={{ width: 460, padding: 28, background: '#fff', borderRadius: 24, border: '1px solid rgba(0,0,0,0.08)', display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#666', textTransform: 'uppercase', letterSpacing: 0.08 }}>Типографика — Inter</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+              {STYLE_TYPE.map((t) => (
+                <div key={t.name} data-name={t.name}>
+                  <div style={{ fontSize: 11, color: '#888', fontFamily: 'ui-monospace, Menlo, monospace', marginBottom: 2 }}>
+                    {t.name} · {t.size}/{t.weight}
+                  </div>
+                  <div style={{ fontSize: t.size, fontWeight: t.weight, lineHeight: 1.25, letterSpacing: t.size > 22 ? -0.4 : 0 }}>
+                    {t.sample}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 8, fontSize: 12, color: 'rgba(60,60,67,0.7)', lineHeight: 1.5 }}>
+              <b>Шрифты в проекте:</b> Inter (основной), Figtree, Plus Jakarta Sans — все три есть в Google Fonts. Если в Figma подменился на дефолт — установите шрифт через Figma Font Installer или системно.
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // Local helpers used by the embedded JSX (copied from the source design)
+  function InteractivePhone({ variant, accent, font, screen: initScreen = 'login' }) {
+    const [screen, setScreen] = useState(initScreen);
+    const props = { onGo: setScreen };
+    return (
+      <Phone variant={variant} accent={accent} font={font}>
+        {screen === 'login'      && <Login {...props} />}
+        {screen === 'register'   && <Register {...props} />}
+        {screen === 'reset'      && <Reset {...props} />}
+        {screen === 'onboarding' && <Onboarding {...props} />}
+        {screen === 'migration'  && <Migration {...props} />}
+        {screen === 'home'       && <Home {...props} />}
+        {screen === 'plans'      && <Plans {...props} />}
+      </Phone>
+    );
+  }
+
+  function ForcedTab({ tab }) {
+    return <Home initialTab={tab} />;
+  }
+
+  function Slot({ name, w, h, children }) {
+    return (
+      <div data-name={'Screen / ' + name} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, flexShrink: 0 }}>
+        <div style={{ width: w, minHeight: h }}>{children}</div>
+        <div style={{ fontFamily: 'ui-monospace, Menlo, monospace', fontSize: 11, color: '#666', maxWidth: w, textAlign: 'center' }}>{name}</div>
+      </div>
+    );
+  }
+
+  function Export() {
+    const accent = 'violet';
+    const font = 'inter';
+    return (
+      <>
+        <StyleGuide />
+        <section data-name="Section / Вход и онбординг" style={{ marginBottom: 80, width: 'max-content' }}>
+       <div style={{ padding: '0 60px 40px' }}>
+         <h2 data-name="Section Title" style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.4, margin: 0, marginBottom: 6, color: '#222' }}>Вход и онбординг</h2>
+         <div data-name="Section Subtitle" style={{ fontSize: 15, color: 'rgba(60,60,67,0.7)' }}>Онбординг → Auth → После регистрации → Миграция</div>
+       </div>
+       <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 48, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+              {/* 1. Первый запуск — онбординг */}
+              <Slot name="1 · Онбординг · Добро пожаловать" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><OnboardingStep step={0} /></Phone>
+              </Slot>
+              <Slot name="2 · Онбординг · Одна цель" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><OnboardingStep step={1} /></Phone>
+              </Slot>
+              <Slot name="3 · Онбординг · Везде под рукой" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><OnboardingStep step={2} /></Phone>
+              </Slot>
+              {/* 2. Auth — вход / регистрация / восстановление */}
+              <Slot name="4 · Вход" w={390} h={800}>
+                <InteractivePhone variant="light" accent={accent} font={font} screen="login" />
+              </Slot>
+              <Slot name="5 · Регистрация" w={390} h={800}>
+                <InteractivePhone variant="light" accent={accent} font={font} screen="register" />
+              </Slot>
+              <Slot name="6 · Восстановление пароля" w={390} h={800}>
+                <InteractivePhone variant="light" accent={accent} font={font} screen="reset" />
+              </Slot>
+              {/* 3. После регистрации — подтверждение почты */}
+              <Slot name="7 · После регистрации · Проверьте почту" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><VerifyEmailSent /></Phone>
+              </Slot>
+              <Slot name="8a · Пока не подтверждена · Главный в ограниченном режиме" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><HomeUnverified /></Phone>
+              </Slot>
+              <Slot name="8b · Пока не подтверждена · Аккаунт" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><UnverifiedAccountSection /></Phone>
+              </Slot>
+              <Slot name="9 · Переход по ссылке из письма · Почта подтверждена" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><VerifyEmailSuccess /></Phone>
+              </Slot>
+              {/* 4. После входа — миграция локальных данных */}
+              <Slot name="10 · После входа · Миграция локальных данных" w={390} h={800}>
+                <InteractivePhone variant="light" accent={accent} font={font} screen="migration" />
+              </Slot>
+              {/* Сводная диаграмма */}
+              <Slot name="Схема флоу (сводка)" w={640} h={800}>
+                <FlowDiagram />
+              </Slot>
+            </div></section>
+
+            {/* ——— Main app — сгруппировано по вкладкам таббара ——— */}
+            <section data-name="Section / Главное приложение · Вкладка «Задачи»" style={{ marginBottom: 80, width: 'max-content' }}>
+       <div style={{ padding: '0 60px 40px' }}>
+         <h2 data-name="Section Title" style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.4, margin: 0, marginBottom: 6, color: '#222' }}>Главное приложение · Вкладка «Задачи»</h2>
+         <div data-name="Section Subtitle" style={{ fontSize: 15, color: 'rgba(60,60,67,0.7)' }}>Список → создание</div>
+       </div>
+       <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 48, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+              <Slot name="Задачи · список" w={390} h={800}>
+                <InteractivePhone variant="light" accent={accent} font={font} screen="home" />
+              </Slot>
+              <Slot name="Задачи · создание" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><ComposerFullscreen /></Phone>
+              </Slot>
+              <Slot name="Задачи · выбор даты (календарь + пресеты)" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><TaskDateField /></Phone>
+              </Slot>
+              <Slot name="Задачи · выбор напоминания" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><TaskReminderField /></Phone>
+              </Slot>
+              <Slot name="Задачи · выбор приоритета" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><TaskPriorityField /></Phone>
+              </Slot>
+              <Slot name="Задачи · все поля заполнены" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><TaskAllFilled /></Phone>
+              </Slot>
+            </div></section>
+
+            <section data-name="Section / База знаний · A. Первое использование" style={{ marginBottom: 80, width: 'max-content' }}>
+       <div style={{ padding: '0 60px 40px' }}>
+         <h2 data-name="Section Title" style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.4, margin: 0, marginBottom: 6, color: '#222' }}>База знаний · A. Первое использование</h2>
+         <div data-name="Section Subtitle" style={{ fontSize: 15, color: 'rgba(60,60,67,0.7)' }}>Пустая база → создание пространства → пустое пространство → новая страница</div>
+       </div>
+       <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 48, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+              <Slot name="1 · База пустая" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><BaseEmpty /></Phone>
+              </Slot>
+              <Slot name="2 · Создание пространства" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><CreateSpaceSheet /></Phone>
+              </Slot>
+              <Slot name="3 · Одно пустое пространство в дереве" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><BaseOneSpaceScreen /></Phone>
+              </Slot>
+              <Slot name="4 · Внутри пустого пространства" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SpaceEmpty /></Phone>
+              </Slot>
+              <Slot name="5 · Новая пустая страница" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteEmpty /></Phone>
+              </Slot>
+              <Slot name="5a · Заголовок введён — курсор на первом блоке" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteTitleTyped /></Phone>
+              </Slot>
+              <Slot name="5b · Напечатали «/» — поповер у курсора" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteSlashPopover /></Phone>
+              </Slot>
+              <Slot name="5c · Превратили в чек-лист + второй пункт" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteChecklist /></Phone>
+              </Slot>
+              <Slot name="5d · Напечатали «/ссылка» — выбираем «Ссылка»" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteSlashLink /></Phone>
+              </Slot>
+              <Slot name="5e · Пустой блок-ссылка — поле «Вставьте URL»" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteLinkBlockEmpty /></Phone>
+              </Slot>
+              <Slot name="5f · Загружаем превью" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteLinkBlockLoading /></Phone>
+              </Slot>
+              <Slot name="5g · Карточка подтянулась (favicon + название + домен)" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteLinkBlockReady /></Phone>
+              </Slot>
+              <Slot name="5h · Напечатали «/изобр» — выбираем «Изображение»" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteSlashImage /></Phone>
+              </Slot>
+              <Slot name="5i · Блок-изображение вставлен" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteImageBlock /></Phone>
+              </Slot>
+              <Slot name="5j · Long-press по блоку — меню действий" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteBlockActions /></Phone>
+              </Slot>
+              <Slot name="5k · Кнопка «+ Добавить свойство» в шапке" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NotePropTap /></Phone>
+              </Slot>
+              <Slot name="5l · Лист «Тип свойства» — 6 типов" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NotePropTypes /></Phone>
+              </Slot>
+              <Slot name="5m · Текст — ввод имени свойства" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NotePropTextName /></Phone>
+              </Slot>
+              <Slot name="5n · Текст — ввод значения «Настя»" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NotePropTextFilled /></Phone>
+              </Slot>
+              <Slot name="5o · Дата — колёсный date picker" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NotePropDateWheel /></Phone>
+              </Slot>
+              <Slot name="5p · Число — цифровая клавиатура" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NotePropNumberKb /></Phone>
+              </Slot>
+              <Slot name="5q · Рейтинг — 5 звёзд, выбрали 4" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NotePropRatingStars /></Phone>
+              </Slot>
+              <Slot name="5r · Чек-бокс — тоггл" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NotePropCheckbox /></Phone>
+              </Slot>
+              <Slot name="5s · Ссылка — URL-клавиатура" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NotePropLinkInput /></Phone>
+              </Slot>
+              <Slot name="5t · Финал — три свойства в шапке" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NotePropsAll /></Phone>
+              </Slot>
+            </div></section>
+
+            <section data-name="Section / База знаний · B. База в работе" style={{ marginBottom: 80, width: 'max-content' }}>
+       <div style={{ padding: '0 60px 40px' }}>
+         <h2 data-name="Section Title" style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.4, margin: 0, marginBottom: 6, color: '#222' }}>База знаний · B. База в работе</h2>
+         <div data-name="Section Subtitle" style={{ fontSize: 15, color: 'rgba(60,60,67,0.7)' }}>Дерево → навигация → страница-книга (свойства) → страница-проект (блоки) → форматирование</div>
+       </div>
+       <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 48, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+              <Slot name="1 · Дерево базы" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><ForcedTab tab="base" /></Phone>
+              </Slot>
+              <Slot name="2 · Long-press по странице (в дереве)" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><PageLongPress /></Phone>
+              </Slot>
+              <Slot name="2b · Меню пространства (⋯)" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SpaceMenu /></Phone>
+              </Slot>
+              <Slot name="2c · Меню страницы (⋯)" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><PageMenu /></Phone>
+              </Slot>
+
+              {/* ——— Пример 1: страница-книга (про свойства и форматирование текста) ——— */}
+              <Slot name="3 · Книга · чтение" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteReading /></Phone>
+              </Slot>
+              <Slot name="4 · Книга · редактирование" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteEditing /></Phone>
+              </Slot>
+              <Slot name="5 · Книга · выделение текста" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteFormatBar /></Phone>
+              </Slot>
+              <Slot name="5a · 🔗 активна в FooterBar" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteLinkButton /></Phone>
+              </Slot>
+              <Slot name="5b · Попап «Вставьте ссылку»" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteLinkInput /></Phone>
+              </Slot>
+              <Slot name="5c · Готово — inline-ссылка в тексте" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteLinkApplied /></Phone>
+              </Slot>
+
+              {/* ——— Пример 2: страница-проект (свойства + разнообразные блоки) ——— */}
+              <Slot name="6 · Проект · готовая страница (свойства + блоки)" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><NoteProject /></Phone>
+              </Slot>
+            </div></section>
+
+            <section data-name="Section / Главное приложение · Вкладка «Привычки»" style={{ marginBottom: 80, width: 'max-content' }}>
+       <div style={{ padding: '0 60px 40px' }}>
+         <h2 data-name="Section Title" style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.4, margin: 0, marginBottom: 6, color: '#222' }}>Главное приложение · Вкладка «Привычки»</h2>
+         <div data-name="Section Subtitle" style={{ fontSize: 15, color: 'rgba(60,60,67,0.7)' }}>Сетка привычек → создание</div>
+       </div>
+       <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 48, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+              <Slot name="1 · Привычки · сетка" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><ForcedTab tab="habits" /></Phone>
+              </Slot>
+              <Slot name="2 · Привычки · создание" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><ComposerFullscreenHabit /></Phone>
+              </Slot>
+              <Slot name="3 · Повторение" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><HabitRepeatField /></Phone>
+              </Slot>
+              <Slot name="3a · По дням недели" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><HabitRepeatWeekdays /></Phone>
+              </Slot>
+              <Slot name="3b · Раз в N дней" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><HabitRepeatEveryN /></Phone>
+              </Slot>
+              <Slot name="4 · Цель" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><HabitGoalField /></Phone>
+              </Slot>
+              <Slot name="5 · Напоминание" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><HabitReminderField /></Phone>
+              </Slot>
+            </div></section>
+
+            <section data-name="Section / Главное приложение · Вкладка «Я»" style={{ marginBottom: 80, width: 'max-content' }}>
+       <div style={{ padding: '0 60px 40px' }}>
+         <h2 data-name="Section Title" style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.4, margin: 0, marginBottom: 6, color: '#222' }}>Главное приложение · Вкладка «Я»</h2>
+         <div data-name="Section Subtitle" style={{ fontSize: 15, color: 'rgba(60,60,67,0.7)' }}>Профиль → редактирование / подписка / помощь / тариф</div>
+       </div>
+       <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 48, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+              <Slot name="1 · Профиль" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><ForcedTab tab="me" /></Phone>
+              </Slot>
+              <Slot name="2a · Редактирование профиля" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><ProfileEdit /></Phone>
+              </Slot>
+              <Slot name="2b · Управление подпиской" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SubscriptionManage /></Phone>
+              </Slot>
+              <Slot name="2b-i · Способ оплаты" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><PaymentMethod /></Phone>
+              </Slot>
+              <Slot name="2b-ii · История платежей" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><BillingHistory /></Phone>
+              </Slot>
+              <Slot name="2b-iii · Отмена подписки" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><CancelSubscription /></Phone>
+              </Slot>
+              <Slot name="2d · Помощь и поддержка" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><HelpSupport /></Phone>
+              </Slot>
+              <Slot name="2c · Тариф Plus (экран апгрейда)" w={390} h={800}>
+                <InteractivePhone variant="light" accent={accent} font={font} screen="plans" />
+              </Slot>
+            </div></section>
+
+            {/* ——— Settings — все экраны раскрыты ——— */}
+            <section data-name="Section / Настройки" style={{ marginBottom: 80, width: 'max-content' }}>
+       <div style={{ padding: '0 60px 40px' }}>
+         <h2 data-name="Section Title" style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.4, margin: 0, marginBottom: 6, color: '#222' }}>Настройки</h2>
+         <div data-name="Section Subtitle" style={{ fontSize: 15, color: 'rgba(60,60,67,0.7)' }}>Главный экран + детальные экраны для каждой ветки: аккаунт, синхронизация, оформление, уведомления, приватность, о приложении</div>
+       </div>
+       <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 48, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+              <Slot name="Главный экран настроек" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsShell id="index" /></Phone>
+              </Slot>
+              <Slot name="Аккаунт и подписка" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsShell id="account" /></Phone>
+              </Slot>
+              <Slot name="Аккаунт · Сменить пароль" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsChangePassword /></Phone>
+              </Slot>
+              <Slot name="Аккаунт · Устройства" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsDevices /></Phone>
+              </Slot>
+              <Slot name="Аккаунт · Удаление" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsDeleteAccount /></Phone>
+              </Slot>
+              <Slot name="Синхронизация" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsShell id="sync" /></Phone>
+              </Slot>
+              <Slot name="Синхро · Статус и журнал" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsSyncStatus /></Phone>
+              </Slot>
+              <Slot name="Синхро · Конфликт" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsSyncConflicts /></Phone>
+              </Slot>
+              <Slot name="Оформление" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsShell id="theme" /></Phone>
+              </Slot>
+              <Slot name="Оформление · Шрифт" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsFont /></Phone>
+              </Slot>
+              <Slot name="Уведомления" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsShell id="notif" /></Phone>
+              </Slot>
+              <Slot name="Уведомления · За сколько предупреждать" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsTaskLead /></Phone>
+              </Slot>
+              <Slot name="Уведомления · Время напоминаний" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsReminderTime /></Phone>
+              </Slot>
+              <Slot name="Уведомления · Тихие часы" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsQuietHours /></Phone>
+              </Slot>
+              <Slot name="Уведомления · Звуки" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsSounds /></Phone>
+              </Slot>
+              <Slot name="Приватность" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsShell id="privacy" /></Phone>
+              </Slot>
+              <Slot name="Приватность · Экспорт данных" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsExport /></Phone>
+              </Slot>
+              <Slot name="Приватность · История активности" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsActivity /></Phone>
+              </Slot>
+              <Slot name="Приватность · Автозамок" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsAutoLock /></Phone>
+              </Slot>
+              <Slot name="О приложении" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsShell id="about" /></Phone>
+              </Slot>
+              <Slot name="О · Обновления и changelog" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsChangelog /></Phone>
+              </Slot>
+              <Slot name="О · Помощь и FAQ" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><HelpSupport /></Phone>
+              </Slot>
+              <Slot name="О · Документы и политика" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsPolicy /></Phone>
+              </Slot>
+              <Slot name="О · Лицензии open source" w={390} h={800}>
+                <Phone variant="light" accent={accent} font={font}><SettingsLicenses /></Phone>
+              </Slot>
+            </div></section>
+
+            {/* ——— Dark variant ——— */}
+            <section data-name="Section / Тёмная тема" style={{ marginBottom: 80, width: 'max-content' }}>
+       <div style={{ padding: '0 60px 40px' }}>
+         <h2 data-name="Section Title" style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.4, margin: 0, marginBottom: 6, color: '#222' }}>Тёмная тема</h2>
+         <div data-name="Section Subtitle" style={{ fontSize: 15, color: 'rgba(60,60,67,0.7)' }}>Тот же минимализм, тот же фиолет</div>
+       </div>
+       <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 48, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+              <Slot name="Вход" w={390} h={800}>
+                <InteractivePhone variant="dark" accent={accent} font={font} screen="login" />
+              </Slot>
+              <Slot name="Задачи" w={390} h={800}>
+                <InteractivePhone variant="dark" accent={accent} font={font} screen="home" />
+              </Slot>
+              <Slot name="Создание задачи" w={390} h={800}>
+                <Phone variant="dark" accent={accent} font={font}>
+                  <ForcedTab tab="tasks" /><AddTaskComposer />
+                </Phone>
+              </Slot>
+              <Slot name="База" w={390} h={800}>
+                <Phone variant="dark" accent={accent} font={font}><ForcedTab tab="base" /></Phone>
+              </Slot>
+              <Slot name="Привычки" w={390} h={800}>
+                <Phone variant="dark" accent={accent} font={font}><ForcedTab tab="habits" /></Phone>
+              </Slot>
+            </div></section>
+
+            {/* ——— Warm variant ——— */}
+            <section data-name="Section / Тёплая бежевая" style={{ marginBottom: 80, width: 'max-content' }}>
+       <div style={{ padding: '0 60px 40px' }}>
+         <h2 data-name="Section Title" style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.4, margin: 0, marginBottom: 6, color: '#222' }}>Тёплая бежевая</h2>
+         <div data-name="Section Subtitle" style={{ fontSize: 15, color: 'rgba(60,60,67,0.7)' }}>Для тех, кто любит бумагу и уют</div>
+       </div>
+       <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 48, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+              <Slot name="Вход" w={390} h={800}>
+                <InteractivePhone variant="warm" accent={accent} font={font} screen="login" />
+              </Slot>
+              <Slot name="Задачи" w={390} h={800}>
+                <InteractivePhone variant="warm" accent={accent} font={font} screen="home" />
+              </Slot>
+              <Slot name="База" w={390} h={800}>
+                <Phone variant="warm" accent={accent} font={font}><ForcedTab tab="base" /></Phone>
+              </Slot>
+            </div></section>
+
+            {/* ——— Typography study ——— */}
+            <section data-name="Section / Типографика" style={{ marginBottom: 80, width: 'max-content' }}>
+       <div style={{ padding: '0 60px 40px' }}>
+         <h2 data-name="Section Title" style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.4, margin: 0, marginBottom: 6, color: '#222' }}>Типографика</h2>
+         <div data-name="Section Subtitle" style={{ fontSize: 15, color: 'rgba(60,60,67,0.7)' }}>Inter (текущая) · Figtree · Plus Jakarta Sans</div>
+       </div>
+       <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: 48, padding: '0 60px', alignItems: 'flex-start', width: 'max-content' }}>
+              <Slot name="Inter" w={390} h={800}>
+                <InteractivePhone variant="light" accent={accent} font="inter"   screen="home" />
+              </Slot>
+              <Slot name="Figtree" w={390} h={800}>
+                <InteractivePhone variant="light" accent={accent} font="figtree" screen="home" />
+              </Slot>
+              <Slot name="Plus Jakarta Sans" w={390} h={800}>
+                <InteractivePhone variant="light" accent={accent} font="jakarta" screen="home" />
+              </Slot>
+            </div></section>
+      </>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('root')).render(<Export />);
+</script>
+</body>
+</html>

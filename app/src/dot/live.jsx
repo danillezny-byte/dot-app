@@ -78,6 +78,20 @@ window.live = {
     if (sb) await sb.auth.signOut();
   },
 
+  // Google OAuth. Открывает редирект на accounts.google.com → после успеха
+  // возвращает на window.location.origin (этот URL должен быть в Supabase
+  // Authentication → URL Configuration → Redirect URLs).
+  // Чтобы заработало: в Supabase Dashboard → Authentication → Providers
+  // включить Google и вставить Client ID + Client Secret из Google Cloud Console.
+  async signInWithGoogle() {
+    if (!sb) return { error: { message: 'Supabase не подключён' } };
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    });
+    return { error };
+  },
+
   async getUser() {
     if (!sb) return null;
     const { data } = await sb.auth.getUser();

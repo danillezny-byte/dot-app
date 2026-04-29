@@ -16,7 +16,7 @@ export default defineConfig({
       // и увидеть зарегистрированный Service Worker.
       devOptions: { enabled: true, type: 'module' },
 
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'favicon.ico', 'apple-touch-icon-180x180.png'],
 
       manifest: {
         name: 'dot.',
@@ -29,16 +29,13 @@ export default defineConfig({
         lang: 'ru',
         scope: '/',
         start_url: '/',
+        // Иконки сгенерированы из public/dot-icon.svg через @vite-pwa/assets-generator.
+        // Перегенерация: `npx pwa-assets-generator` (см. pwa-assets.config.js).
         icons: [
-          // SVG масштабируется на любой размер — современные браузеры (Chrome, Edge,
-          // Safari iOS 16+) принимают это для установки как PWA.
-          // TODO заменить на брендовый «dot.» SVG + PNG 192/512 для iOS Touch Icon.
-          {
-            src: 'favicon.svg',
-            sizes: 'any',
-            type: 'image/svg+xml',
-            purpose: 'any maskable',
-          },
+          { src: 'pwa-64x64.png',         sizes: '64x64',   type: 'image/png' },
+          { src: 'pwa-192x192.png',       sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png',       sizes: '512x512', type: 'image/png' },
+          { src: 'maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
 

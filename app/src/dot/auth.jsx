@@ -79,8 +79,13 @@ function Login({ onGo, live }) {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <Button kind="ghost" full><GoogleIcon /> Продолжить с Google</Button>
-        <Button kind="ghost" full><AppleIcon /> Продолжить с Apple</Button>
+        <Button kind="ghost" full onClick={async () => {
+          const res = await window.live.signInWithGoogle();
+          if (res?.error) alert('Не удалось войти через Google: ' + res.error.message);
+          // При успехе Supabase сам редиректит на accounts.google.com,
+          // потом обратно на origin — в этот момент LiveApp заметит сессию через getUser().
+        }}><GoogleIcon /> Продолжить с Google</Button>
+        <Button kind="ghost" full onClick={() => alert('Apple Sign In скоро — пока используй Google или email.')}><AppleIcon /> Продолжить с Apple</Button>
       </div>
 
       <div style={{ marginTop: 'auto', paddingTop: 18, display: 'flex', justifyContent: 'center', gap: 6, fontSize: 14 }}>

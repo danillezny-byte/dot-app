@@ -35,7 +35,9 @@ async function loadAll() {
   await import('./dot/auth.jsx');
   await import('./dot/onboarding.jsx');
   await import('./dot/app-screens.jsx');
-  await import('./dot/flow-diagram.jsx');
+  // flow-diagram.jsx — наследие figma-canvas, не нужен в live-режиме.
+  // Если когда-нибудь понадобится — раскомментируй и добавь вызов <FlowDiagram /> где-то в UI.
+  // await import('./dot/flow-diagram.jsx');
   await import('./dot/composer-variants.jsx');
   await import('./dot/settings-deep.jsx');
   await import('./dot/settings-deep2.jsx');
@@ -118,10 +120,73 @@ function SettingsLive({ onBack }) {
   );
 }
 
+// ErrorBoundary — ловит любой неперехваченный рендер-эксепшен в дереве LiveApp
+// и показывает дружелюбный экран вместо белого. По дизайн-аналогии: это как
+// «assets/error-state» frame, который показываем когда инстанс компонента сломался.
+//
+// React 19 для error boundary всё ещё требует class component — хук-API нет.
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+  componentDidCatch(error, info) {
+    console.error('[dot] Поймал краш в дереве:', error, info);
+    // Сюда же позже можно подцепить Sentry/PostHog
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <div style={{
+          flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+          padding: '32px 24px', textAlign: 'center', gap: 16,
+        }}>
+          <div style={{ fontSize: 48 }}>·····</div>
+          <div style={{ fontSize: 20, fontWeight: 600 }}>Что-то пошло не так</div>
+          <div style={{ fontSize: 14, color: 'var(--sub)', maxWidth: 320, lineHeight: 1.5 }}>
+            Где-то в коде икнуло. Перезагрузи приложение, обычно помогает. Если повторяется — пинговать разработчика.
+          </div>
+          <button
+            onClick={() => location.reload()}
+            style={{
+              marginTop: 8, padding: '12px 28px', borderRadius: 12, border: 'none',
+              background: 'var(--accent)', color: '#fff', fontSize: 15, fontWeight: 600,
+              cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            Перезагрузить
+          </button>
+          {import.meta.env.DEV && (
+            <details style={{ marginTop: 24, fontSize: 12, color: 'var(--sub)', textAlign: 'left', maxWidth: 480 }}>
+              <summary style={{ cursor: 'pointer' }}>Подробности (dev only)</summary>
+              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', marginTop: 8 }}>
+                {String(this.state.error?.stack || this.state.error)}
+              </pre>
+            </details>
+          )}
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// Singleton root — иначе Vite HMR при каждом обновлении модуля зовёт createRoot
+// заново, и React 19 ругается «container already passed to createRoot».
+const rootEl = document.getElementById('root');
+const root = window.__dotRoot || (window.__dotRoot = createRoot(rootEl));
+
 loadAll().then(() => {
-  createRoot(document.getElementById('root')).render(<LiveApp />);
+  root.render(
+    <ErrorBoundary>
+      <LiveApp />
+    </ErrorBoundary>
+  );
 }).catch((err) => {
   console.error('[dot] Не удалось загрузить модули:', err);
-  document.getElementById('root').innerHTML =
+  rootEl.innerHTML =
     `<div style="padding:24px;font-family:system-ui;color:#E44">Ошибка загрузки модулей. Смотри консоль.</div>`;
 });

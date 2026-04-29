@@ -20,6 +20,41 @@ const sb = (SUPABASE_URL && SUPABASE_ANON_KEY)
   : null;
 window.sb = sb;
 
+// ─── Warm cache в localStorage ─────────────────────────────────
+// Идея: при первом заходе после открытия приложения мы РИСУЕМ
+// прошлые данные из кэша мгновенно (без сети), параллельно фетчим
+// свежие. UI: setState в начало = кэш, потом второй setState = свежак.
+// На быстром коннекте разница 200мс, на 3G — 3 секунды без пустого экрана.
+//
+// Что инвалидирует кэш:
+//   - signOut (чтобы следующий юзер не увидел чужие данные)
+//   - createTask / updateTask / deleteTask и аналоги тоже подтягивают,
+//     но для простоты MVP: только при чтении (write-through).
+//
+// Версия CACHE_VER в ключе — если меняется форма данных, инкрементируем
+// и старые ключи становятся невалидными (читать не будем).
+const CACHE_VER = 1;
+const CACHE_KEY = (k) => `dot-cache-v${CACHE_VER}:${k}`;
+function cacheGet(key) {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY(key));
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function cacheSet(key, value) {
+  try {
+    localStorage.setItem(CACHE_KEY(key), JSON.stringify(value));
+  } catch { /* quota / privacy mode — фейлим тихо */ }
+}
+function cacheClearAll() {
+  try {
+    Object.keys(localStorage)
+      .filter((k) => k.startsWith(`dot-cache-v${CACHE_VER}:`))
+      .forEach((k) => localStorage.removeItem(k));
+  } catch {}
+}
+window.dotCache = { get: cacheGet, set: cacheSet, clearAll: cacheClearAll };
+
 // ── Маппинг БД-задачи → UI-форма (как в window.TASKS) ──────────
 function bucketFromDueAt(due) {
   if (!due) return 'Без даты';
@@ -76,6 +111,17 @@ window.live = {
 
   async signOut() {
     if (sb) await sb.auth.signOut();
+    cacheClearAll(); // важно: чужой кэш не показываем
+  },
+
+  // Sync-геттеры из кэша. Возвращают [] если нет данных.
+  // Используются как initial state в useState(() => getCachedX()).
+  getCachedTasks()  { return cacheGet('tasks')  || []; },
+  getCachedHabits() { return cacheGet('habits') || []; },
+  getCachedSpaces() { return cacheGet('spaces') || []; },
+  getCachedPages(spaceId) {
+    const all = cacheGet('pages') || [];
+    return spaceId ? all.filter((p) => p.space_id === spaceId) : all;
   },
 
   // Google OAuth. Открывает редирект на accounts.google.com → после успеха
@@ -112,7 +158,9 @@ window.live = {
       .select('*')
       .is('deleted_at', null)
       .order('created_at', { ascending: false });
-    return { tasks: (data || []).map(toUiTask), error };
+    const tasks = (data || []).map(toUiTask);
+    if (!error) cacheSet('tasks', tasks);
+    return { tasks, error };
   },
 
   async toggleTask(id, done) {
@@ -246,7 +294,9 @@ window.live = {
       .select('*')
       .is('deleted_at', null)
       .order('created_at', { ascending: true });
-    return { habits: data || [], error };
+    const habits = data || [];
+    if (!error) cacheSet('habits', habits);
+    return { habits, error };
   },
 
   async loadLogsForWeek(refDate = new Date()) {
@@ -360,7 +410,9 @@ window.live = {
       .is('deleted_at', null)
       .order('position', { ascending: true })
       .order('created_at', { ascending: true });
-    return { spaces: data || [], error };
+    const spaces = data || [];
+    if (!error) cacheSet('spaces', spaces);
+    return { spaces, error };
   },
 
   async createSpace({ name, icon = 'briefcase', color = '#6E2BF5', description = '' }) {
@@ -429,7 +481,11 @@ window.live = {
     if (spaceId) q = q.eq('space_id', spaceId);
     q = q.order('position', { ascending: true }).order('created_at', { ascending: true });
     const { data, error } = await q;
-    return { pages: data || [], error };
+    const pages = data || [];
+    // Кэшируем только полный список (без фильтра) — иначе случайно
+    // перетрём кэш частичной выборкой одного спейса.
+    if (!error && !spaceId) cacheSet('pages', pages);
+    return { pages, error };
   },
 
   async loadPage(id) {
@@ -558,3 +614,71 @@ window.dotTheme = {
   apply() { window.dotTheme.set(window.dotTheme.get()); },
 };
 window.dotTheme.apply();
+
+// ─── Toast-уведомления ─────────────────────────────────────────
+// Лёгкая замена alert(): мягкая плашка сверху, сама уезжает через 3.5с.
+// API: window.dotToast('текст', 'error' | 'info' | 'success').
+//
+// Реализация без React — просто DOM-элемент через portal-стиле,
+// чтобы можно было вызывать из любого места (даже не из компонента).
+let _toastContainer = null;
+window.dotToast = function (message, type = 'info') {
+  if (!_toastContainer) {
+    _toastContainer = document.createElement('div');
+    _toastContainer.setAttribute('aria-live', 'polite');
+    _toastContainer.style.cssText = `
+      position: fixed;
+      top: calc(env(safe-area-inset-top, 0px) + 12px);
+      left: 50%; transform: translateX(-50%);
+      z-index: 9999;
+      display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none;
+      max-width: 92vw;
+    `;
+    document.body.appendChild(_toastContainer);
+  }
+
+  const palette = {
+    error:   { bg: '#FEE2E2', text: '#991B1B', border: '#FCA5A5' },
+    success: { bg: '#D1FAE5', text: '#065F46', border: '#6EE7B7' },
+    info:    { bg: 'var(--surface, #fff)', text: 'var(--text, #111)', border: 'var(--line, rgba(60,60,67,0.12))' },
+  };
+  const c = palette[type] || palette.info;
+
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    background: ${c.bg};
+    color: ${c.text};
+    border: 1px solid ${c.border};
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
+    line-height: 1.4;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    pointer-events: auto;
+    transform: translateY(-12px);
+    opacity: 0;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    cursor: pointer;
+    word-break: break-word;
+  `;
+  toast.textContent = message;
+  toast.addEventListener('click', () => dismiss());
+  _toastContainer.appendChild(toast);
+
+  requestAnimationFrame(() => {
+    toast.style.transform = 'translateY(0)';
+    toast.style.opacity = '1';
+  });
+
+  let dismissed = false;
+  function dismiss() {
+    if (dismissed) return;
+    dismissed = true;
+    toast.style.transform = 'translateY(-12px)';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 300);
+  }
+  setTimeout(dismiss, 3500);
+};

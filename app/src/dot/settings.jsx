@@ -135,7 +135,7 @@ function AccountDetail() {
     if (!window.live) return;
     const { error } = await window.live.deleteAccount();
     if (error) {
-      alert('Ошибка: ' + error.message + '\n\nЕсли видите «function delete_my_account does not exist» — выполни SQL-миграцию backend/03-delete-account.sql.');
+      window.dotToast('Ошибка: ' + error.message, 'error');
       return;
     }
     window.location.reload();

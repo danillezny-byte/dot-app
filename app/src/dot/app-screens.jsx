@@ -7,8 +7,12 @@ const { useState: useStateH, useEffect: useEffectH } = React;
 
 function Home({ onGo, initialTab, live }) {
   const [tab, setTab] = useStateH(initialTab || 'tasks');
-  const [tasks, setTasks] = useStateH(live ? [] : window.TASKS);
-  const [loading, setLoading] = useStateH(!!live);
+  // initial state из кэша → первый paint без пустого экрана.
+  // Если кэша нет (первый заход) — пустой массив, грузим как раньше.
+  const [tasks, setTasks] = useStateH(live ? (window.live?.getCachedTasks?.() || []) : window.TASKS);
+  // loading = true только если КЭША НЕТ. Если есть — UI уже показывает данные,
+  // фоновый рефреш проходит молча.
+  const [loading, setLoading] = useStateH(!!live && !(window.live?.getCachedTasks?.() || []).length);
   const [composerOpen, setComposerOpen] = useStateH(false);
   const [editingTask, setEditingTask] = useStateH(null); // task object or null
   const [habitComposerOpen, setHabitComposerOpen] = useStateH(false);
@@ -78,7 +82,7 @@ function Home({ onGo, initialTab, live }) {
         // но проще: вызываем createPage здесь.
         (async () => {
           const { page, error } = await window.live.createPage({ spaceId: baseRoute.id, title: '' });
-          if (error) { alert('Ошибка: ' + error.message); return; }
+          if (error) { window.dotToast('Ошибка: ' + error.message, 'error'); return; }
           if (page) setBaseRoute({ kind: 'page', id: page.id, spaceId: baseRoute.id });
           setBaseTick((n) => n + 1);
         })();
@@ -161,7 +165,7 @@ function Home({ onGo, initialTab, live }) {
     }
     else if (action === 'pin') {
       const { error } = await window.live.togglePin('space', sp.id);
-      if (error) alert('Закрепление недоступно — выполни SQL-миграцию из README');
+      if (error) window.dotToast('Закрепление недоступно — выполни SQL-миграцию из README', 'error');
       setBaseTick((n) => n + 1);
     }
     else if (action === 'delete') {
@@ -186,12 +190,12 @@ function Home({ onGo, initialTab, live }) {
     }
     else if (action === 'pin') {
       const { error } = await window.live.togglePin('page', pg.id);
-      if (error) alert('Закрепление недоступно — выполни SQL-миграцию из README');
+      if (error) window.dotToast('Закрепление недоступно — выполни SQL-миграцию из README', 'error');
       setBaseTick((n) => n + 1);
     }
     else if (action === 'addsubpage') {
       const { page, error } = await window.live.createPage({ spaceId: pg.space_id, parentPageId: pg.id, title: '' });
-      if (error) { alert('Ошибка: ' + error.message); return; }
+      if (error) { window.dotToast('Ошибка: ' + error.message, 'error'); return; }
       if (page) setBaseRoute({ kind: 'page', id: page.id, spaceId: pg.space_id });
       setBaseTick((n) => n + 1);
     }
@@ -216,7 +220,7 @@ function Home({ onGo, initialTab, live }) {
       space_id: targetSpaceId,
       parent_page_id: parentPageId,
     }).eq('id', pageId);
-    if (error) alert('Ошибка: ' + error.message);
+    if (error) window.dotToast('Ошибка: ' + error.message, 'error');
     setBaseTick((n) => n + 1);
   };
 
@@ -233,11 +237,11 @@ function Home({ onGo, initialTab, live }) {
     const dbPriority = prioMap[priority] || null;
     if (editingTask) {
       const { task, error } = await window.live.updateTask(editingTask.id, { title, dueIso, priority: dbPriority });
-      if (error) { alert('Ошибка: ' + error.message); return; }
+      if (error) { window.dotToast('Ошибка: ' + error.message, 'error'); return; }
       if (task) setTasks((ts) => ts.map((t) => t.id === task.id ? task : t));
     } else {
       const { task, error } = await window.live.createTask(title, dueIso, dbPriority);
-      if (error) { alert('Ошибка: ' + error.message); return; }
+      if (error) { window.dotToast('Ошибка: ' + error.message, 'error'); return; }
       if (task) setTasks((ts) => [task, ...ts]);
     }
   };
@@ -616,10 +620,12 @@ function HabitsView({ live, onAdd, onEdit }) {
 }
 
 function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
-  const [habits, setHabits] = useStateH([]);
+  const cachedHabits = window.live?.getCachedHabits?.() || [];
+  const [habits, setHabits] = useStateH(cachedHabits);
   const [logs, setLogs]     = useStateH(new Map()); // habitId → Set<YYYY-MM-DD>
   const [streaks, setStreaks] = useStateH({});
-  const [loading, setLoading] = useStateH(true);
+  // loading=false если есть кэш — UI уже что-то показывает, refresh идёт молча.
+  const [loading, setLoading] = useStateH(!cachedHabits.length);
 
   const today = new Date(); today.setHours(0,0,0,0);
   const monday = window.dotLiveHelpers.mondayOf(today);
@@ -920,19 +926,11 @@ function BaseViewLive({ route, setRoute, hint, onPageDelete, onSpaceAction, onPa
 }
 
 function BaseTreeView({ setRoute, hint, onSpaceAction, onPageAction }) {
-  const [spaces, setSpaces] = useStateH([]);
-  const [pagesBySpace, setPagesBySpace] = useStateH({});
-  const [openSpaces, setOpenSpaces] = useStateH({});
-  const [openPages, setOpenPages] = useStateH({});
-  const [loading, setLoading] = useStateH(true);
-  const [q, setQ] = useStateH('');
-
-  const reload = async () => {
-    if (!window.live) return;
-    const { spaces: sps } = await window.live.loadSpaces();
-    setSpaces(sps);
-    const { pages: allPages } = await window.live.loadPages();
-    // Группируем страницы по пространству и строим дерево по parent_page_id
+  // Warm cache: при первом рендере собираем пространства и страницы из кэша,
+  // чтобы дерево «Базы» появилось мгновенно. Фоновый reload подтянет свежее.
+  const cachedSpaces = window.live?.getCachedSpaces?.() || [];
+  const cachedPages = window.live?.getCachedPages?.() || [];
+  const buildPagesBySpace = (sps, allPages) => {
     const byId = {};
     sps.forEach((sp) => { byId[sp.id] = { all: [], topLevel: [], childrenByParent: {} }; });
     allPages.forEach((p) => {
@@ -945,10 +943,32 @@ function BaseTreeView({ setRoute, hint, onSpaceAction, onPageAction }) {
         bag.childrenByParent[p.parent_page_id].push(p);
       }
     });
-    setPagesBySpace(byId);
-    const open = {};
-    sps.forEach((sp) => { open[sp.id] = true; });
-    setOpenSpaces(open);
+    return byId;
+  };
+  const [spaces, setSpaces] = useStateH(cachedSpaces);
+  const [pagesBySpace, setPagesBySpace] = useStateH(() => buildPagesBySpace(cachedSpaces, cachedPages));
+  const [openSpaces, setOpenSpaces] = useStateH(() => {
+    const o = {}; cachedSpaces.forEach((sp) => { o[sp.id] = true; }); return o;
+  });
+  const [openPages, setOpenPages] = useStateH({});
+  const [loading, setLoading] = useStateH(!cachedSpaces.length);
+  const [q, setQ] = useStateH('');
+
+  const reload = async () => {
+    if (!window.live) return;
+    // Параллельный fetch — было два await друг за другом, стало один Promise.all.
+    const [{ spaces: sps }, { pages: allPages }] = await Promise.all([
+      window.live.loadSpaces(),
+      window.live.loadPages(),
+    ]);
+    setSpaces(sps);
+    setPagesBySpace(buildPagesBySpace(sps, allPages));
+    setOpenSpaces((cur) => {
+      // Сохраняем уже открытые/закрытые пространства, новые — открываем по дефолту.
+      const next = { ...cur };
+      sps.forEach((sp) => { if (next[sp.id] === undefined) next[sp.id] = true; });
+      return next;
+    });
     setLoading(false);
   };
 
@@ -1120,7 +1140,7 @@ function SpaceView({ spaceId, setRoute, onBack, hint, onPageAction }) {
 
   const createPage = async () => {
     const { page, error } = await window.live.createPage({ spaceId, title: '' });
-    if (error) { alert('Ошибка: ' + error.message); return; }
+    if (error) { window.dotToast('Ошибка: ' + error.message, 'error'); return; }
     if (page) setRoute({ kind: 'page', id: page.id, spaceId });
   };
 

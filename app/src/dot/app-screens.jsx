@@ -475,12 +475,23 @@ function TasksView({ tasks, toggle, loading, live, onAdd, onEdit }) {
   );
 }
 
-function TasksEmpty({ onAdd }) {
+// Общая обёртка для всех empty-состояний — гарантирует одинаковую вертикальную позицию.
+// minHeight 100% + центрирование по обеим осям ⇒ контент всегда «в середине вкладки»,
+// независимо от того, насколько длинный текст внутри.
+function EmptyShell({ children }) {
   return (
     <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      textAlign: 'center', padding: '120px 32px 32px',
-    }}>
+      minHeight: '100%',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      textAlign: 'center', padding: '32px 32px 64px',
+    }}>{children}</div>
+  );
+}
+
+function TasksEmpty({ onAdd }) {
+  return (
+    <EmptyShell>
       <div style={{
         width: 64, height: 64, borderRadius: 16,
         background: 'var(--accent-soft)', color: 'var(--accent)',
@@ -506,7 +517,7 @@ function TasksEmpty({ onAdd }) {
       }}>
         <IconPlus size={18} strokeWidth={2.2} /> Новая задача
       </button>
-    </div>
+    </EmptyShell>
   );
 }
 function TaskSection({ title, items, toggle, onEdit }) {
@@ -738,10 +749,7 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
 
 function HabitsEmpty({ onAdd }) {
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      textAlign: 'center', padding: '120px 32px 32px',
-    }}>
+    <EmptyShell>
       <div style={{
         width: 64, height: 64, borderRadius: 16,
         background: 'var(--accent-soft)', color: 'var(--accent)',
@@ -767,7 +775,7 @@ function HabitsEmpty({ onAdd }) {
       }}>
         <IconPlus size={18} strokeWidth={2.2} /> Новая привычка
       </button>
-    </div>
+    </EmptyShell>
   );
 }
 

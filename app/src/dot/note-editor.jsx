@@ -890,61 +890,62 @@ function NotePropertyType() {
 
 // ─── Пустая база (первый запуск) ──────────────────────────────
 function BaseEmpty({ onCreate, embedded }) {
-  // embedded=true — рендерим только центральный блок (без своей шапки и фона),
-  // потому что вокруг уже есть HomeHeader/таббар. По умолчанию false для статичного канваса.
+  // Визуально идентично TasksEmpty/HabitsEmpty в app-screens.jsx — иконка 64×64,
+  // titleSize 22, тот же ритм отступов, та же accent-pill кнопка. Шаблоны убраны
+  // (no-op без templates feature; вернётся когда сделаем).
   const InnerCore = (
     <>
       <div style={{
-        width: 72, height: 72, borderRadius: 20,
+        width: 64, height: 64, borderRadius: 16,
         background: 'var(--accent-soft)', color: 'var(--accent)',
-        display: 'grid', placeItems: 'center',
+        display: 'grid', placeItems: 'center', marginBottom: 22,
       }}>
-        <IconBook size={32} strokeWidth={1.5} />
+        <IconBook size={28} strokeWidth={1.6} />
       </div>
-      <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: -0.3 }}>Ваша база пока пуста</div>
-      <div style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.5 }}>
-        Создайте пространство — это папка верхнего уровня. Внутри будут страницы: заметки, проекты, списки.
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', marginTop: 10 }}>
-        <button onClick={onCreate} style={{
-          height: 44, borderRadius: 12, border: 'none',
-          background: 'var(--accent)', color: '#fff',
-          fontSize: 15, fontWeight: 600, fontFamily: 'inherit', cursor: onCreate ? 'pointer' : 'default',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-        }}>
-          <IconPlusSmall size={16} strokeWidth={2.2} /> Создать пространство
-        </button>
-        <button style={{
-          height: 44, borderRadius: 12, border: '1px solid var(--line)',
-          background: 'transparent', color: 'var(--text)',
-          fontSize: 14, fontFamily: 'inherit', cursor: 'pointer',
-        }}>Начать с шаблонов</button>
-      </div>
+      <h2 style={{
+        fontSize: 22, fontWeight: 600, letterSpacing: -0.4,
+        margin: '0 0 10px', color: 'var(--text)',
+      }}>Ваша база пока пуста</h2>
+      <p style={{
+        fontSize: 14, color: 'var(--sub)', lineHeight: 1.5,
+        margin: '0 0 22px', maxWidth: 280,
+      }}>Создайте пространство — это папка верхнего уровня. Внутри будут страницы: заметки, проекты, списки.</p>
+      <button onClick={onCreate} style={{
+        display: 'inline-flex', alignItems: 'center', gap: 8,
+        padding: '13px 22px', borderRadius: 14,
+        background: 'var(--accent)', color: '#fff',
+        border: 'none', cursor: onCreate ? 'pointer' : 'default',
+        fontSize: 15, fontWeight: 600, fontFamily: 'inherit',
+        boxShadow: '0 8px 20px -8px var(--accent)',
+      }}>
+        <IconPlus size={18} strokeWidth={2.2} /> Новое пространство
+      </button>
     </>
   );
 
-  // Embedded — занимает min-height родителя (тот высотой 100%) и центрирует контент.
+  // Embedded — занимает min-height родителя и центрирует контент.
+  // Identical layout to EmptyShell in app-screens.jsx (общие отступы 32px 32px 64px).
   if (embedded) {
     return (
       <div style={{
-        minHeight: '100%', display: 'flex', flexDirection: 'column',
+        minHeight: '100%',
+        display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        padding: '0 36px', textAlign: 'center', gap: 14,
+        textAlign: 'center', padding: '32px 32px 64px',
       }}>{InnerCore}</div>
     );
   }
-  const Inner = (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 36px', textAlign: 'center', gap: 14 }}>
-      {InnerCore}
-    </div>
-  );
-
+  // Non-embedded (старый figma-canvas) — оставляем как было, но с теми же inner-стилями.
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
       <div style={{ padding: '20px 22px 4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.6 }}>dot<span style={{ color: 'var(--accent)' }}>.</span></div>
       </div>
-      {Inner}
+      <div style={{
+        flex: 1, display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        textAlign: 'center', padding: '32px 32px 64px',
+      }}>{InnerCore}</div>
     </div>
   );
 }

@@ -5,23 +5,38 @@
 const { useState: useStateS } = React;
 
 function SettingsIndex({ onEnter }) {
+  const [profile, setProfile] = useStateS(null);
+  React.useEffect(() => {
+    if (!window.live) return;
+    window.live.loadProfile().then(({ profile }) => profile && setProfile(profile));
+  }, []);
+  const themeName = (typeof window !== 'undefined' && window.dotTheme)
+    ? ({ light: 'Светлая', dark: 'Тёмная', warm: 'Тёплая' }[window.dotTheme.get()] || 'Светлая')
+    : 'Светлая';
   const rows = [
-    { id: 'account',  icon: IconUser,     label: 'Аккаунт',       sub: 'alice@mail.com' },
-    { id: 'sync',     icon: IconCloud,    label: 'Синхронизация', sub: 'Включена' },
-    { id: 'theme',    icon: IconPalette,  label: 'Оформление',    sub: 'Системная · Фиолетовый' },
-    { id: 'notif',    icon: IconBell,     label: 'Уведомления',   sub: 'Включены · за 15 мин' },
-    { id: 'privacy',  icon: IconLock,     label: 'Приватность',   sub: 'Face ID, PIN-код' },
-    { id: 'about',    icon: IconInfo,     label: 'О приложении',  sub: 'Версия 2.4' },
+    { id: 'account',  icon: IconUser,     label: 'Аккаунт',       sub: profile?.email || '—' },
+    { id: 'theme',    icon: IconPalette,  label: 'Оформление',    sub: themeName },
+    { id: 'sync',     icon: IconCloud,    label: 'Синхронизация', sub: 'Авто, через Supabase' },
+    { id: 'notif',    icon: IconBell,     label: 'Уведомления',   sub: 'В разработке' },
+    { id: 'privacy',  icon: IconLock,     label: 'Приватность',   sub: 'В разработке' },
+    { id: 'about',    icon: IconInfo,     label: 'О приложении',  sub: 'Версия и ссылки' },
   ];
+  const initial1 = (profile?.name || profile?.email || '?').trim().charAt(0).toUpperCase();
   return (
     <div style={{ paddingBottom: 24 }}>
       <div style={{ padding: '12px 24px 20px', display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div style={{ width: 54, height: 54, borderRadius: 27, background: 'var(--accent)', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 20, fontWeight: 600 }}>А</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 17, fontWeight: 600 }}>Алиса К.</div>
-          <div style={{ fontSize: 13, color: 'var(--sub)' }}>alice@mail.com</div>
+        <div style={{
+          width: 54, height: 54, borderRadius: 27,
+          background: profile?.avatar_url ? `center/cover no-repeat url(${profile.avatar_url})` : 'var(--accent)',
+          color: '#fff', display: 'grid', placeItems: 'center', fontSize: 20, fontWeight: 600,
+        }}>{!profile?.avatar_url && initial1}</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 17, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile?.name || (profile?.email || '').split('@')[0] || '—'}</div>
+          <div style={{ fontSize: 13, color: 'var(--sub)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile?.email || ''}</div>
         </div>
-        <button style={{ background: 'var(--accent-soft)', color: 'var(--accent)', border: 'none', fontWeight: 600, fontSize: 12, padding: '6px 12px', borderRadius: 99, cursor: 'pointer', fontFamily: 'inherit' }}>Plus</button>
+        {profile?.plan === 'plus' && (
+          <span style={{ background: 'var(--accent-soft)', color: 'var(--accent)', border: 'none', fontWeight: 600, fontSize: 12, padding: '6px 12px', borderRadius: 99 }}>Plus</span>
+        )}
       </div>
 
       <div style={{ borderTop: '1px solid var(--line)' }}>
@@ -40,12 +55,6 @@ function SettingsIndex({ onEnter }) {
             <IconChevronRight size={14} color="var(--sub)" strokeWidth={2} />
           </div>
         ))}
-      </div>
-
-      <div style={{ padding: '22px 24px 8px', textAlign: 'center' }}>
-        <button style={{ background: 'none', border: 'none', color: '#E44', fontSize: 14, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-          <IconLogOut size={16} strokeWidth={1.75} /> Выйти из аккаунта
-        </button>
       </div>
     </div>
   );
@@ -109,117 +118,112 @@ function Toggle({ on }) {
 
 // ─── Detail: Account ─────────────────────────
 function AccountDetail() {
+  const [profile, setProfile] = useStateS(null);
+  React.useEffect(() => {
+    if (!window.live) return;
+    window.live.loadProfile().then(({ profile }) => profile && setProfile(profile));
+  }, []);
+
+  const signOut = async () => {
+    if (!window.live) return;
+    await window.live.signOut();
+    window.location.reload();
+  };
+  const deleteAccount = async () => {
+    if (!window.confirm('Удалить аккаунт? Все данные (задачи, привычки, страницы) будут стёрты безвозвратно.')) return;
+    if (!window.live) return;
+    const { error } = await window.live.deleteAccount();
+    if (error) {
+      alert('Ошибка: ' + error.message + '\n\nЕсли видите «function delete_my_account does not exist» — выполни SQL-миграцию backend/03-delete-account.sql.');
+      return;
+    }
+    window.location.reload();
+  };
+
   return (
     <div style={{ borderTop: '1px solid var(--line)' }}>
-      <Row label="Редактировать профиль" value="Алиса К." onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-      <Row label="Сменить пароль" onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-      <Row label="Устройства" value="3" onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-      <SectionHead>Подписка</SectionHead>
-      <Row label="Тариф" value="Plus" valueColor="var(--accent)" />
-      <Row label="Продлевается" value="12 мая 2026" />
-      <Row label="Управлять подпиской" onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
+      <SectionHead>Профиль</SectionHead>
+      <Row label="Имя" value={profile?.name || '—'} />
+      <Row label="Email" value={profile?.email || '—'} />
+      <Row label="Тариф" value={profile?.plan === 'plus' ? 'Plus' : 'Free'} valueColor={profile?.plan === 'plus' ? 'var(--accent)' : undefined} />
+      <SectionHead>Сессия</SectionHead>
+      <Row label="Выйти из аккаунта" onClick={signOut} right={<span style={{ fontSize: 14, color: 'var(--accent)', fontWeight: 500 }}>Выйти</span>} />
       <SectionHead>Опасная зона</SectionHead>
-      <Row label={<span style={{ color: '#E44' }}>Удалить аккаунт</span>} onClick={() => {}} />
+      <Row label={<span style={{ color: '#E44' }}>Удалить аккаунт</span>} onClick={deleteAccount} />
     </div>
   );
 }
-// ─── Detail: Sync ────────────────────────────
+
+// Универсальный «в разработке» — для секций, требующих доп.настройки
+function ComingSoonDetail({ what }) {
+  return (
+    <div style={{ borderTop: '1px solid var(--line)', padding: '40px 24px', textAlign: 'center' }}>
+      <div style={{ fontSize: 36, marginBottom: 8 }}>🛠️</div>
+      <div style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>В разработке</div>
+      <div style={{ fontSize: 13, color: 'var(--sub)', lineHeight: 1.5, maxWidth: 280, margin: '0 auto' }}>
+        {what}
+      </div>
+    </div>
+  );
+}
+
 function SyncDetail() {
-  const [auto, setAuto] = useStateS(true);
-  const [wifi, setWifi] = useStateS(false);
   return (
     <div style={{ borderTop: '1px solid var(--line)' }}>
+      <SectionHead>Состояние</SectionHead>
       <Row label="Статус" value="Синхронизировано" valueColor="#2E8B57" />
-      <Row label="Последняя синхронизация" value="2 мин. назад" />
-      <SectionHead>Параметры</SectionHead>
-      <Row label="Автосинхронизация" onClick={() => setAuto(!auto)} right={<Toggle on={auto} />} />
-      <Row label="Только по Wi-Fi" onClick={() => setWifi(!wifi)} right={<Toggle on={wifi} />} />
-      <SectionHead>Диагностика</SectionHead>
-      <Row label="Статус и журнал" onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-      <Row label="Конфликты версий" value="1" valueColor="#FF8C1A" onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-      <Row label="Принудительная синхронизация" onClick={() => {}} right={<span style={{ fontSize: 14, color: 'var(--accent)', fontWeight: 500 }}>Запустить</span>} />
-      <Row label={<span style={{ color: '#E44' }}>Сбросить локальную копию</span>} onClick={() => {}} />
+      <Row label="Бэкенд" value="Supabase" />
+      <Row label="Авто-сохранение" value="Включено" valueColor="#2E8B57" />
+      <SectionHead>Информация</SectionHead>
+      <div style={{ padding: '14px 24px', fontSize: 13, color: 'var(--sub)', lineHeight: 1.5 }}>
+        Все изменения сохраняются в облако автоматически. Тонкая настройка (только по Wi-Fi, журнал конфликтов) — в разработке.
+      </div>
     </div>
   );
 }
+
 // ─── Detail: Theme ───────────────────────────
 function ThemeDetail() {
-  const [theme, setTheme] = useStateS('system');
-  const [accent, setAccent] = useStateS('violet');
+  const [theme, setTheme] = useStateS(window.dotTheme ? window.dotTheme.get() : 'light');
+  const apply = (t) => {
+    setTheme(t);
+    if (window.dotTheme) window.dotTheme.set(t);
+  };
   return (
     <div style={{ borderTop: '1px solid var(--line)' }}>
       <SectionHead>Тема</SectionHead>
-      {[['system','Системная'],['light','Светлая'],['dark','Тёмная'],['warm','Тёплая бежевая']].map(([k,l]) => (
-        <Row key={k} label={l} onClick={() => setTheme(k)} right={theme === k ? <IconCheck size={16} color="var(--accent)" strokeWidth={2.2} /> : null} />
+      {[['light','Светлая'],['dark','Тёмная'],['warm','Тёплая бежевая']].map(([k,l]) => (
+        <Row key={k} label={l} onClick={() => apply(k)} right={theme === k ? <IconCheck size={16} color="var(--accent)" strokeWidth={2.2} /> : null} />
       ))}
-      <SectionHead>Акцентный цвет</SectionHead>
-      <div style={{ padding: '12px 24px 16px', display: 'flex', gap: 12, borderBottom: '1px solid var(--line)' }}>
-        {[['violet','#6D3CF0'],['blue','#007AFF'],['orange','#FF6A00'],['green','#2E8B57']].map(([k,hex]) => (
-          <button key={k} onClick={() => setAccent(k)} style={{
-            width: 32, height: 32, borderRadius: 16, background: hex,
-            border: accent === k ? '2.5px solid var(--text)' : '1px solid rgba(0,0,0,0.1)',
-            cursor: 'pointer', padding: 0,
-          }} />
-        ))}
+      <div style={{ padding: '14px 24px', fontSize: 13, color: 'var(--sub)', lineHeight: 1.5 }}>
+        Тема сохраняется на устройстве. На разных устройствах можно настроить независимо.
       </div>
-      <SectionHead>Текст</SectionHead>
-      <Row label="Шрифт" value="Inter" right={<IconChevronRight size={14} color="var(--sub)" />} onClick={() => {}} />
     </div>
   );
 }
-// ─── Detail: Notifications ───────────────────
+
 function NotifDetail() {
-  const [on, setOn] = useStateS(true);
-  const [tasks, setTasks] = useStateS(true);
-  const [habits, setHabits] = useStateS(true);
-  return (
-    <div style={{ borderTop: '1px solid var(--line)' }}>
-      <Row label="Уведомления" onClick={() => setOn(!on)} right={<Toggle on={on} />} />
-      <SectionHead>Для задач</SectionHead>
-      <Row label="Напоминания" onClick={() => setTasks(!tasks)} right={<Toggle on={tasks} />} />
-      <Row label="За сколько предупреждать" value="За 15 мин" right={<IconChevronRight size={14} color="var(--sub)" />} onClick={() => {}} />
-      <SectionHead>Для привычек</SectionHead>
-      <Row label="Напоминания" onClick={() => setHabits(!habits)} right={<Toggle on={habits} />} />
-      <Row label="Время" value="09:00" right={<IconChevronRight size={14} color="var(--sub)" />} onClick={() => {}} />
-      <SectionHead>Общее</SectionHead>
-      <Row label="Тихие часы" value="22:00 — 08:00" right={<IconChevronRight size={14} color="var(--sub)" />} onClick={() => {}} />
-      <Row label="Звуки" value="Колокольчик" right={<IconChevronRight size={14} color="var(--sub)" />} onClick={() => {}} />
-    </div>
-  );
+  return <ComingSoonDetail what="Push-уведомления требуют разрешения от браузера/iOS и serviceWorker. Сейчас все напоминания у задач/привычек видны только когда открыто приложение." />;
 }
-// ─── Detail: Privacy ─────────────────────────
 function PrivacyDetail() {
-  const [bio, setBio] = useStateS(true);
-  const [pin, setPin] = useStateS(true);
-  const [analytics, setAnalytics] = useStateS(false);
-  return (
-    <div style={{ borderTop: '1px solid var(--line)' }}>
-      <SectionHead>Замок</SectionHead>
-      <Row label="Face ID / Touch ID" onClick={() => setBio(!bio)} right={<Toggle on={bio} />} />
-      <Row label="PIN-код" onClick={() => setPin(!pin)} right={<Toggle on={pin} />} />
-      <Row label="Автозамок" value="Через 1 мин." onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-      <SectionHead>Данные</SectionHead>
-      <Row label="Сквозное шифрование" value="Включено" valueColor="#2E8B57" />
-      <Row label="Экспорт данных" onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-      <Row label="Аналитика использования" onClick={() => setAnalytics(!analytics)} right={<Toggle on={analytics} />} />
-      <Row label="История активности" onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-    </div>
-  );
+  return <ComingSoonDetail what="Биометрический замок (Face ID, Touch ID), PIN-код, экспорт данных. Шифрование на стороне Supabase уже включено." />;
 }
+
 // ─── Detail: About ───────────────────────────
 function AboutDetail() {
   return (
     <div>
       <div style={{ padding: '24px 24px 16px', textAlign: 'center' }}>
         <Logo size={32} />
-        <div style={{ fontSize: 14, color: 'var(--sub)', marginTop: 8 }}>Версия 2.4 (103)</div>
+        <div style={{ fontSize: 14, color: 'var(--sub)', marginTop: 8 }}>Прототип · v0.5</div>
       </div>
       <div style={{ borderTop: '1px solid var(--line)' }}>
-        <Row label="Что нового" onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-        <Row label="Помощь и FAQ" onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-        <Row label="Правовые документы" onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-        <Row label="Лицензии open source" onClick={() => {}} right={<IconChevronRight size={14} color="var(--sub)" />} />
-        <Row label="Оценить в App Store" onClick={() => {}} right={<window.IconExternalLink size={14} color="var(--sub)" strokeWidth={1.75} />} />
+        <Row label="Исходники на GitHub" onClick={() => window.open('https://github.com/danillezny-byte/dot-app', '_blank')} right={<window.IconExternalLink size={14} color="var(--sub)" strokeWidth={1.75} />} />
+        <Row label="Бэкенд" value="Supabase" />
+        <Row label="Авторы" value="Данил + Claude" />
+      </div>
+      <div style={{ padding: '20px 24px', fontSize: 13, color: 'var(--sub)', lineHeight: 1.5 }}>
+        Это рабочий прототип. Многое сделано, многое впереди — будем улучшать вместе.
       </div>
     </div>
   );

@@ -122,11 +122,40 @@ function ProfileEdit({ onBack, live, initial }) {
       </EditSection>
 
       <EditSection title="Предпочтения">
-        <EditRow label="Часовой пояс" value="GMT+3 · Москва" />
-        <EditRow label="Язык" value="Русский" />
-        <EditRow label="Стартовый экран" value="Задачи" />
+        <StartTabRow />
       </EditSection>
 
+    </div>
+  );
+}
+
+// Стартовый экран — какая вкладка по умолчанию открывается. Хранится в localStorage.
+function StartTabRow() {
+  const TABS = [
+    { id: 'tasks',  label: 'Задачи' },
+    { id: 'habits', label: 'Привычки' },
+    { id: 'base',   label: 'База' },
+    { id: 'me',     label: 'Профиль' },
+  ];
+  const [tab, setTab] = useStatePS(localStorage.getItem('dot-start-tab') || 'tasks');
+  const apply = (t) => {
+    setTab(t);
+    localStorage.setItem('dot-start-tab', t);
+  };
+  return (
+    <div style={{ padding: '12px 24px 14px' }}>
+      <div style={{ fontSize: 14, color: 'var(--sub)', marginBottom: 10 }}>Стартовый экран</div>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {TABS.map((t) => (
+          <button key={t.id} onClick={() => apply(t.id)} style={{
+            padding: '8px 14px', borderRadius: 10,
+            background: tab === t.id ? 'var(--accent)' : 'var(--chip)',
+            color: tab === t.id ? '#fff' : 'var(--text)',
+            border: 'none', fontSize: 13, fontWeight: 500,
+            fontFamily: 'inherit', cursor: 'pointer',
+          }}>{t.label}</button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -199,7 +228,29 @@ function EditRow({ label, value }) {
 }
 
 // ─── Subscription management ─────────────────────────
+// Минимальная живая логика: показываем текущий тариф, кнопкой
+// можно переключиться (Free ⇄ Plus). Реальная оплата (Stripe и т.п.)
+// — отдельная история; пока это «прототипный» переключатель.
 function SubscriptionManage({ onBack }) {
+  const [profile, setProfile] = useStatePS(null);
+  const [busy, setBusy] = useStatePS(false);
+  React.useEffect(() => {
+    if (!window.live) return;
+    window.live.loadProfile().then(({ profile }) => profile && setProfile(profile));
+  }, []);
+
+  const isPlus = profile?.plan === 'plus';
+
+  const togglePlan = async () => {
+    if (busy || !window.live) return;
+    setBusy(true);
+    const next = isPlus ? 'free' : 'plus';
+    const { profile: updated, error } = await window.live.updatePlan(next);
+    if (error) alert('Ошибка: ' + error.message);
+    if (updated) setProfile(updated);
+    setBusy(false);
+  };
+
   return (
     <div style={{ paddingBottom: 24 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 24px' }}>
@@ -212,30 +263,64 @@ function SubscriptionManage({ onBack }) {
       {/* Карточка текущего тарифа */}
       <div style={{
         margin: '4px 24px 20px', padding: 20,
-        borderRadius: 20, background: 'var(--accent)', color: '#fff',
+        borderRadius: 20,
+        background: isPlus ? 'var(--accent)' : 'var(--chip)',
+        color: isPlus ? '#fff' : 'var(--text)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 600, letterSpacing: 0.08, textTransform: 'uppercase', opacity: 0.9 }}>
           <IconStar size={14} strokeWidth={2.2} /> Текущий тариф
         </div>
-        <div style={{ fontSize: 28, fontWeight: 600, margin: '10px 0 6px', letterSpacing: -0.5 }}>dot. Plus</div>
-        <div style={{ fontSize: 13, opacity: 0.85 }}>Продлевается 12 мая 2026 · 1 990 ₽ / год</div>
+        <div style={{ fontSize: 28, fontWeight: 600, margin: '10px 0 6px', letterSpacing: -0.5 }}>{isPlus ? 'dot. Plus' : 'dot. Free'}</div>
+        <div style={{ fontSize: 13, opacity: 0.85 }}>{isPlus ? 'Все функции, без лимитов' : 'Базовые функции'}</div>
       </div>
 
-      <EditSection title="Оплата">
-        <EditRow label="Способ оплаты" value="Visa •• 4521" />
-        <EditRow label="История платежей" value="" />
+      {/* Что входит */}
+      <EditSection title={isPlus ? 'Что доступно' : 'Что даст Plus'}>
+        <PlanLine label="Задачи и привычки" yes />
+        <PlanLine label="Заметки и страницы" yes />
+        <PlanLine label="Синхронизация на всех устройствах" yes />
+        <PlanLine label="Загрузка изображений" yes={isPlus || true /* пока разрешаем всем */} />
+        <PlanLine label="История версий страниц" yes={isPlus} hint={isPlus ? '' : 'Только в Plus'} />
+        <PlanLine label="Совместная работа" yes={isPlus} hint={isPlus ? '' : 'Только в Plus'} />
       </EditSection>
 
-      <EditSection title="Управление">
-        <EditRow label="Сменить тариф" value="Год → Месяц" />
-        <div style={{ padding: '14px 24px', borderBottom: '1px solid var(--line)', cursor: 'pointer' }}>
-          <div style={{ fontSize: 15, color: '#E44' }}>Отменить подписку</div>
-          <div style={{ fontSize: 12, color: 'var(--sub)', marginTop: 2 }}>Останется активной до 12 мая 2026</div>
-        </div>
-      </EditSection>
+      <div style={{ padding: '24px 24px 8px' }}>
+        <button onClick={togglePlan} disabled={busy} style={{
+          width: '100%', height: 50, borderRadius: 14, border: 'none',
+          background: isPlus ? 'transparent' : 'var(--accent)',
+          color: isPlus ? '#E44' : '#fff',
+          border: isPlus ? '1px solid var(--line)' : 'none',
+          fontSize: 15, fontWeight: 600, fontFamily: 'inherit',
+          cursor: 'pointer', opacity: busy ? 0.6 : 1,
+        }}>
+          {busy ? '…' : (isPlus ? 'Отменить Plus' : 'Перейти на Plus')}
+        </button>
+      </div>
 
-      <div style={{ padding: '20px 24px', fontSize: 12, color: 'var(--sub)', lineHeight: 1.5 }}>
-        Подписка управляется через App Store. Чтобы отменить, перейдите в Настройки → Apple ID → Подписки.
+      <div style={{ padding: '14px 24px', fontSize: 12, color: 'var(--sub)', lineHeight: 1.5 }}>
+        Это прототип. Платёжная система (Stripe / ЮКасса) — следующий этап. Сейчас переключатель работает «в один клик».
+      </div>
+    </div>
+  );
+}
+
+function PlanLine({ label, yes, hint }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 12,
+      padding: '12px 24px', borderBottom: '1px solid var(--line)',
+    }}>
+      <span style={{
+        width: 22, height: 22, borderRadius: 11,
+        background: yes ? 'var(--accent-soft)' : 'var(--chip)',
+        color: yes ? 'var(--accent)' : 'var(--sub)',
+        display: 'grid', placeItems: 'center', flexShrink: 0,
+      }}>
+        {yes ? <IconCheck size={14} strokeWidth={2.5} /> : '•'}
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 15 }}>{label}</div>
+        {hint && <div style={{ fontSize: 12, color: 'var(--sub)' }}>{hint}</div>}
       </div>
     </div>
   );

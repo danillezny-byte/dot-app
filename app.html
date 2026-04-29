@@ -81,8 +81,9 @@
   // Контент сразу рендерится во весь viewport.
   function LiveApp() {
     const [screen, setScreen] = useState('login');
-    // На какую вкладку Home возвращать после под-экрана (профиль/настройки)
-    const [homeTab, setHomeTab] = useState('tasks');
+    // На какую вкладку Home возвращать после под-экрана (профиль/настройки).
+    // Дефолт — из настроек «Стартовый экран» в localStorage.
+    const [homeTab, setHomeTab] = useState(localStorage.getItem('dot-start-tab') || 'tasks');
 
     // Перехватываем 'migration' (моковые цифры — пропускаем) и помечаем
     // профильные/настройки экраны как «вернуться на вкладку Профиль».

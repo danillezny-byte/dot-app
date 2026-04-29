@@ -149,6 +149,23 @@ window.live = {
     return { profile: data, error };
   },
 
+  async updatePlan(plan) {
+    if (!sb) return { error: { message: 'Supabase не подключён' } };
+    const user = await this.getUser();
+    if (!user) return { error: { message: 'Не авторизован' } };
+    if (plan !== 'free' && plan !== 'plus') return { error: { message: 'Неверный тариф' } };
+    const { data, error } = await sb.from('profiles')
+      .update({ plan }).eq('id', user.id).select().single();
+    return { profile: data, error };
+  },
+
+  async deleteAccount() {
+    if (!sb) return { error: { message: 'Supabase не подключён' } };
+    const { error } = await sb.rpc('delete_my_account');
+    if (!error) await sb.auth.signOut();
+    return { error };
+  },
+
   async updateAuthEmail(newEmail) {
     if (!sb) return { error: { message: 'Supabase не подключён' } };
     const { data, error } = await sb.auth.updateUser({ email: newEmail });

@@ -4,12 +4,34 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, interactive-widget=resizes-content">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<!-- black-translucent: статус-бар iOS становится прозрачным, контент уходит под него.
+     Сафари сам подкрашивает текст под фон через safe-area-inset-top. Ощущается нативно. -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="dot.">
 <meta name="theme-color" content="#F5F5F7">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png">
-<title>dot.</title>
+<title>dot. — задачи, привычки и база знаний</title>
+<meta name="description" content="Минималистичный таск-менеджер с привычками и базой знаний. Тихо, по-человечески, без лишнего шума.">
+
+<!-- OpenGraph: что показывается в превью когда ссылку кидают в Telegram, iMessage, Discord, Slack -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="dot. — задачи, привычки и база знаний">
+<meta property="og:description" content="Минималистичный таск-менеджер с привычками и базой знаний. Тихо, по-человечески, без лишнего шума.">
+<meta property="og:url" content="https://dot-app-gold.vercel.app/">
+<meta property="og:image" content="https://dot-app-gold.vercel.app/pwa-512x512.png">
+<meta property="og:image:width" content="512">
+<meta property="og:image:height" content="512">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="dot.">
+
+<!-- Twitter Card (тот же набор, но Twitter/X читает свои теги) -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="dot. — задачи, привычки и база знаний">
+<meta name="twitter:description" content="Минималистичный таск-менеджер с привычками и базой знаний.">
+<meta name="twitter:image" content="https://dot-app-gold.vercel.app/pwa-512x512.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">

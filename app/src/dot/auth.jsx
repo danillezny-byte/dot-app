@@ -85,15 +85,12 @@ function Login({ onGo, live }) {
           // При успехе Supabase сам редиректит на accounts.google.com,
           // потом обратно на origin — в этот момент LiveApp заметит сессию через getUser().
         }}><GoogleIcon /> Продолжить с Google</Button>
-        <Button kind="ghost" full onClick={() => window.dotToast('Apple Sign In скоро — пока используй Google или email.', 'info')}><AppleIcon /> Продолжить с Apple</Button>
+        {/* Apple Sign In вернётся когда купим Apple Developer ($99/год) */}
       </div>
 
       <div style={{ marginTop: 'auto', paddingTop: 18, display: 'flex', justifyContent: 'center', gap: 6, fontSize: 14 }}>
         <span style={{ color: 'var(--sub)' }}>Нет аккаунта?</span>
         <button onClick={() => onGo && onGo('register')} style={{ background: 'none', border: 'none', color: 'var(--accent)', fontWeight: 600, cursor: 'pointer', padding: 0, fontFamily: 'inherit', fontSize: 14 }}>Создать</button>
-      </div>
-      <div style={{ textAlign: 'center', marginTop: 10 }}>
-        <Button kind="plain" onClick={() => onGo && onGo('home')}>Войти как гость →</Button>
       </div>
     </div>
   );

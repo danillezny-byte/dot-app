@@ -21,16 +21,23 @@ function AppleIcon() {
 }
 
 // ── LOGIN ──────────────────────────────────────────────────
-function Login({ onGo }) {
+function Login({ onGo, live }) {
   const [email, setEmail] = useStateA('');
   const [pwd, setPwd] = useStateA('');
   const [show, setShow] = useStateA(false);
   const [err, setErr] = useStateA('');
+  const [busy, setBusy] = useStateA(false);
 
-  const submit = () => {
+  const submit = async () => {
     if (!email.includes('@')) { setErr('Введите корректный email'); return; }
     if (pwd.length < 6) { setErr('Пароль короче 6 символов'); return; }
     setErr('');
+    if (live && window.live) {
+      setBusy(true);
+      const { error } = await window.live.signIn(email.trim(), pwd);
+      setBusy(false);
+      if (error) { setErr(error.message || 'Не удалось войти'); return; }
+    }
     onGo && onGo('home');
   };
 
@@ -61,7 +68,7 @@ function Login({ onGo }) {
       </div>
 
       <div style={{ marginTop: 20 }}>
-        <Button kind="primary" full onClick={submit}>Войти</Button>
+        <Button kind="primary" full onClick={submit} disabled={busy}>{busy ? 'Входим…' : 'Войти'}</Button>
       </div>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '22px 0' }}>
@@ -87,17 +94,34 @@ function Login({ onGo }) {
 }
 
 // ── REGISTER ──────────────────────────────────────────────────
-function Register({ onGo }) {
+function Register({ onGo, live }) {
   const [name, setName] = useStateA('');
   const [email, setEmail] = useStateA('');
   const [pwd, setPwd] = useStateA('');
   const [agree, setAgree] = useStateA(true);
+  const [err, setErr] = useStateA('');
+  const [busy, setBusy] = useStateA(false);
 
   const strength = pwd.length < 6 ? 0 : pwd.length < 10 ? 1 : /[0-9]/.test(pwd) ? 2 : 1;
   const strengthLabels = ['Слабый', 'Средний', 'Надёжный'];
   const strengthColors = ['#E44', '#F2A93B', '#2E8B57'];
 
-  const canSubmit = name && email.includes('@') && pwd.length >= 6 && agree;
+  const canSubmit = name && email.includes('@') && pwd.length >= 6 && agree && !busy;
+
+  const submit = async () => {
+    setErr('');
+    if (live && window.live) {
+      setBusy(true);
+      const { session, error } = await window.live.signUp(email.trim(), pwd, name);
+      setBusy(false);
+      if (error) { setErr(error.message || 'Не удалось зарегистрироваться'); return; }
+      if (!session) {
+        setErr('Аккаунт создан, но требуется подтверждение email. Проверьте почту.');
+        return;
+      }
+    }
+    onGo && onGo('onboarding');
+  };
 
   return (
     <div style={{ padding: '48px 24px 24px', display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -132,8 +156,10 @@ function Register({ onGo }) {
         <span>Согласен с <span style={{ color: 'var(--accent)' }}>условиями</span> и <span style={{ color: 'var(--accent)' }}>политикой конфиденциальности</span>.</span>
       </label>
 
+      {err && <div style={{ marginTop: 12, fontSize: 13, color: '#E44', lineHeight: 1.4 }}>{err}</div>}
+
       <div style={{ marginTop: 18 }}>
-        <Button kind="primary" full disabled={!canSubmit} onClick={() => onGo && onGo('onboarding')}>Создать аккаунт</Button>
+        <Button kind="primary" full disabled={!canSubmit} onClick={submit}>{busy ? 'Создаём…' : 'Создать аккаунт'}</Button>
       </div>
 
       <div style={{ marginTop: 'auto', paddingTop: 18, textAlign: 'center', fontSize: 13, color: 'var(--sub)' }}>
@@ -144,9 +170,22 @@ function Register({ onGo }) {
 }
 
 // ── RESET ──────────────────────────────────────────────────
-function Reset({ onGo }) {
+function Reset({ onGo, live }) {
   const [email, setEmail] = useStateA('');
   const [sent, setSent] = useStateA(false);
+  const [err, setErr] = useStateA('');
+  const [busy, setBusy] = useStateA(false);
+
+  const submit = async () => {
+    setErr('');
+    if (live && window.live) {
+      setBusy(true);
+      const { error } = await window.live.resetPassword(email.trim());
+      setBusy(false);
+      if (error) { setErr(error.message || 'Не удалось отправить ссылку'); return; }
+    }
+    setSent(true);
+  };
 
   return (
     <div style={{ padding: '48px 24px 24px', display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -161,9 +200,9 @@ function Reset({ onGo }) {
         <>
           <h1 style={{ fontSize: 28, fontWeight: 600, letterSpacing: -0.6, margin: '0 0 6px', lineHeight: 1.15 }}>Восстановить пароль</h1>
           <p style={{ color: 'var(--sub)', fontSize: 15, margin: 0, marginBottom: 24 }}>Мы отправим ссылку на указанный email.</p>
-          <Field label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@mail.com" />
+          <Field label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@mail.com" error={err || null} />
           <div style={{ marginTop: 18 }}>
-            <Button kind="primary" full disabled={!email.includes('@')} onClick={() => setSent(true)}>Отправить ссылку</Button>
+            <Button kind="primary" full disabled={!email.includes('@') || busy} onClick={submit}>{busy ? 'Отправляем…' : 'Отправить ссылку'}</Button>
           </div>
         </>
       ) : (

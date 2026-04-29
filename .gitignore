@@ -41,3 +41,4 @@ scraps/
 # ─── Supabase локально (если когда-нибудь поднимем) ─────────
 supabase/.branches
 supabase/.temp
+.claude/

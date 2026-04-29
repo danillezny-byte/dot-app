@@ -2,10 +2,71 @@
 
 const { useState: useStatePS } = React;
 
-function ProfileEdit({ onBack }) {
-  const [name, setName] = useStatePS('Алиса Королёва');
-  const [email, setEmail] = useStatePS('alice@mail.com');
-  const [tz, setTz] = useStatePS('Europe/Moscow');
+function ProfileEdit({ onBack, live, initial }) {
+  const [name, setName] = useStatePS(initial?.name ?? (live ? '' : 'Алиса Королёва'));
+  const [email, setEmail] = useStatePS(initial?.email ?? (live ? '' : 'alice@mail.com'));
+  const [originalEmail, setOriginalEmail] = useStatePS(initial?.email ?? '');
+  const [avatarUrl, setAvatarUrl] = useStatePS(null);
+  const [theme, setThemeS] = useStatePS(typeof window !== 'undefined' && window.dotTheme ? window.dotTheme.get() : 'light');
+  const [busy, setBusy] = useStatePS(false);
+  const [emailMsg, setEmailMsg] = useStatePS(null);
+  const fileRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (!live || !window.live) return;
+    let cancelled = false;
+    (async () => {
+      const { profile } = await window.live.loadProfile();
+      if (cancelled || !profile) return;
+      setName(profile.name || (profile.email || '').split('@')[0]);
+      setEmail(profile.email);
+      setOriginalEmail(profile.email);
+      setAvatarUrl(profile.avatar_url || null);
+    })();
+    return () => { cancelled = true; };
+  }, [live]);
+
+  const initial1 = (name || email || '?').trim().charAt(0).toUpperCase();
+
+  const setTheme = (t) => {
+    setThemeS(t);
+    if (window.dotTheme) window.dotTheme.set(t);
+  };
+
+  const onPickAvatar = () => fileRef.current?.click();
+
+  const onAvatarChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !live) return;
+    setBusy(true);
+    const { url, error } = await window.live.uploadAvatar(file);
+    if (!error && url) {
+      await window.live.updateProfile({ avatar_url: url });
+      setAvatarUrl(url);
+    } else if (error) {
+      alert('Не удалось загрузить: ' + (error.message || ''));
+    }
+    setBusy(false);
+  };
+
+  const save = async () => {
+    if (!live || !window.live || busy) { onBack && onBack(); return; }
+    setBusy(true);
+    await window.live.updateProfile({ name: name.trim() });
+    if (email && email !== originalEmail) {
+      const { error } = await window.live.updateAuthEmail(email.trim());
+      if (error) {
+        alert('Email: ' + error.message);
+        setBusy(false);
+        return;
+      }
+      setEmailMsg('Письмо подтверждения отправлено на новый email. Старый продолжит работать до подтверждения.');
+      setBusy(false);
+      return; // не закрываем — пусть прочтёт сообщение
+    }
+    setBusy(false);
+    onBack && onBack();
+  };
 
   return (
     <div style={{ paddingBottom: 24 }}>
@@ -14,24 +75,26 @@ function ProfileEdit({ onBack }) {
           <IconChevronLeft size={22} strokeWidth={1.75} />
         </button>
         <div style={{ fontSize: 18, fontWeight: 600, flex: 1 }}>Профиль</div>
-        <button style={{
+        <button onClick={save} disabled={busy} style={{
           background: 'var(--accent)', color: '#fff', border: 'none',
           borderRadius: 99, padding: '6px 14px', fontSize: 13, fontWeight: 600,
-          fontFamily: 'inherit',
-        }}>Готово</button>
+          fontFamily: 'inherit', cursor: 'pointer', opacity: busy ? 0.5 : 1,
+        }}>{busy ? '…' : 'Готово'}</button>
       </div>
 
       {/* Аватар */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '8px 0 24px' }}>
+        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={onAvatarChange} />
         <div style={{
           width: 96, height: 96, borderRadius: 48,
-          background: 'var(--accent)', color: '#fff',
+          background: avatarUrl ? `center/cover no-repeat url(${avatarUrl})` : 'var(--accent)',
+          color: '#fff',
           display: 'grid', placeItems: 'center',
           fontSize: 36, fontWeight: 600,
           position: 'relative',
         }}>
-          А
-          <button style={{
+          {!avatarUrl && initial1}
+          <button onClick={onPickAvatar} disabled={busy} style={{
             position: 'absolute', right: -4, bottom: -4,
             width: 32, height: 32, borderRadius: 16,
             background: 'var(--bg)', color: 'var(--accent)',
@@ -41,14 +104,21 @@ function ProfileEdit({ onBack }) {
             <IconCamera size={14} strokeWidth={1.9} />
           </button>
         </div>
-        <button style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: 14, marginTop: 12, fontFamily: 'inherit', cursor: 'pointer' }}>
-          Изменить фото
+        <button onClick={onPickAvatar} disabled={busy} style={{ background: 'none', border: 'none', color: 'var(--accent)', fontSize: 14, marginTop: 12, fontFamily: 'inherit', cursor: 'pointer' }}>
+          {busy ? 'Загружаем…' : 'Изменить фото'}
         </button>
       </div>
 
       <EditSection title="Личные данные">
         <EditField label="Имя"   value={name}  onChange={setName} />
         <EditField label="Email" value={email} onChange={setEmail} />
+      </EditSection>
+      {emailMsg && (
+        <div style={{ padding: '10px 24px', fontSize: 13, color: 'var(--accent)', lineHeight: 1.4 }}>{emailMsg}</div>
+      )}
+
+      <EditSection title="Тема">
+        <ThemeRow value={theme} onChange={setTheme} />
       </EditSection>
 
       <EditSection title="Предпочтения">
@@ -57,6 +127,37 @@ function ProfileEdit({ onBack }) {
         <EditRow label="Стартовый экран" value="Задачи" />
       </EditSection>
 
+    </div>
+  );
+}
+
+function ThemeRow({ value, onChange }) {
+  const themes = [
+    { id: 'light', label: 'Светлая', bg: '#F5F5F7', text: '#111' },
+    { id: 'dark',  label: 'Тёмная',  bg: '#000000', text: '#FFF' },
+    { id: 'warm',  label: 'Тёплая',  bg: '#F4F0E8', text: '#2A2418' },
+  ];
+  return (
+    <div style={{ padding: '14px 24px', display: 'flex', gap: 10 }}>
+      {themes.map((t) => {
+        const sel = t.id === value;
+        return (
+          <button key={t.id} onClick={() => onChange(t.id)} style={{
+            flex: 1, padding: '12px 8px', borderRadius: 14,
+            border: sel ? '2px solid var(--accent)' : '2px solid transparent',
+            background: t.bg, color: t.text,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+            fontFamily: 'inherit', cursor: 'pointer',
+            boxShadow: '0 0 0 1px rgba(60,60,67,0.12)',
+          }}>
+            <div style={{
+              width: 44, height: 28, borderRadius: 6, background: t.id === 'dark' ? '#1C1C1E' : (t.id === 'warm' ? '#FBF8F1' : '#FFFFFF'),
+              border: '1px solid rgba(60,60,67,0.15)',
+            }} />
+            <span style={{ fontSize: 12, fontWeight: 500 }}>{t.label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 }

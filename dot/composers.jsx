@@ -5,13 +5,14 @@
 const { useState: useStateC } = React;
 
 // ─── ADD TASK COMPOSER ────────────────────────────────────
-// Лежит поверх «Задач» как снизу поднятый sheet.
+// Статичный bottom-sheet превью для дизайн-канваса. Для реального
+// создания задачи в live-режиме используется ComposerFullscreen.
 function AddTaskComposer({ onClose }) {
-  const [text, setText] = useStateC('Подготовить отчёт');
-  const [when, setWhen] = useStateC('today');  // today | tomorrow | later
-  const [priority, setPriority] = useStateC(null);
-  const [project, setProject] = useStateC('Работа');
-  const [reminder, setReminder] = useStateC(null);
+  const [text] = useStateC('Подготовить отчёт');
+  const [when] = useStateC('today');
+  const [priority] = useStateC(null);
+  const [project] = useStateC('Работа');
+  const [reminder] = useStateC(null);
 
   return (
     <div style={{
@@ -24,7 +25,6 @@ function AddTaskComposer({ onClose }) {
         borderTopLeftRadius: 20, borderTopRightRadius: 20,
         display: 'flex', flexDirection: 'column',
       }}>
-        {/* Поле ввода */}
         <div style={{ padding: '14px 20px 6px' }}>
           <div style={{
             display: 'flex', alignItems: 'flex-start', gap: 10,
@@ -49,8 +49,6 @@ function AddTaskComposer({ onClose }) {
               </div>
               <div style={{ fontSize: 13, color: 'var(--sub)', marginTop: 4 }}>
                 {when === 'today' && 'Сегодня'}
-                {when === 'tomorrow' && 'Завтра'}
-                {when === 'later' && 'На следующей неделе'}
                 {priority && ' · ' + (priority === 'high' ? 'Важное' : 'Обычное')}
                 {project && ' · ' + project}
                 {reminder && ' · напомнить ' + reminder}
@@ -65,7 +63,6 @@ function AddTaskComposer({ onClose }) {
           <style>{`@keyframes dot-caret { 50% { opacity: 0; } }`}</style>
         </div>
 
-        {/* Ряд модификаторов — скроллящиеся чипы */}
         <div style={{
           padding: '8px 16px 10px',
           display: 'flex', gap: 6, overflowX: 'auto',
@@ -76,17 +73,14 @@ function AddTaskComposer({ onClose }) {
           <ModChip icon={<IconCalendar size={14} />} active={!!when}
             label={when === 'today' ? 'Сегодня' : when === 'tomorrow' ? 'Завтра' : 'Дата'} />
           <ModChip icon={<IconClock size={14} />} active={!!reminder}
-            label={reminder || 'Напомнить'} onClick={() => setReminder(reminder ? null : '9:00')} />
+            label={reminder || 'Напомнить'} />
           <ModChip icon={<IconFlag size={14} />} active={!!priority}
-            label={priority === 'high' ? 'Важное' : 'Приоритет'}
-            onClick={() => setPriority(priority === 'high' ? null : 'high')} />
+            label={priority === 'high' ? 'Важное' : 'Приоритет'} />
           <ModChip icon={<IconFolder size={14} />} active={!!project}
-            label={project || 'Проект'}
-            onClick={() => setProject(project ? null : 'Работа')} />
+            label={project || 'Проект'} />
           <ModChip icon={<IconHash size={14} />} label="Тег" />
         </div>
 
-        {/* Клавиатура */}
         <IosKeyboard mode="lower" />
       </div>
     </div>

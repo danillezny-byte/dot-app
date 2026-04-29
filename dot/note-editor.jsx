@@ -888,77 +888,113 @@ function NotePropertyType() {
 }
 
 // ─── Пустая база (первый запуск) ──────────────────────────────
-function BaseEmpty() {
+function BaseEmpty({ onCreate, embedded }) {
+  // embedded=true — рендерим только центральный блок (без своей шапки и фона),
+  // потому что вокруг уже есть HomeHeader/таббар. По умолчанию false для статичного канваса.
+  const InnerCore = (
+    <>
+      <div style={{
+        width: 72, height: 72, borderRadius: 20,
+        background: 'var(--accent-soft)', color: 'var(--accent)',
+        display: 'grid', placeItems: 'center',
+      }}>
+        <IconBook size={32} strokeWidth={1.5} />
+      </div>
+      <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: -0.3 }}>Ваша база пока пуста</div>
+      <div style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.5 }}>
+        Создайте пространство — это папка верхнего уровня. Внутри будут страницы: заметки, проекты, списки.
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', marginTop: 10 }}>
+        <button onClick={onCreate} style={{
+          height: 44, borderRadius: 12, border: 'none',
+          background: 'var(--accent)', color: '#fff',
+          fontSize: 15, fontWeight: 600, fontFamily: 'inherit', cursor: onCreate ? 'pointer' : 'default',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        }}>
+          <IconPlusSmall size={16} strokeWidth={2.2} /> Создать пространство
+        </button>
+        <button style={{
+          height: 44, borderRadius: 12, border: '1px solid var(--line)',
+          background: 'transparent', color: 'var(--text)',
+          fontSize: 14, fontFamily: 'inherit', cursor: 'pointer',
+        }}>Начать с шаблонов</button>
+      </div>
+    </>
+  );
+
+  // Embedded — занимает min-height родителя (тот высотой 100%) и центрирует контент.
+  if (embedded) {
+    return (
+      <div style={{
+        minHeight: '100%', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        padding: '0 36px', textAlign: 'center', gap: 14,
+      }}>{InnerCore}</div>
+    );
+  }
+  const Inner = (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 36px', textAlign: 'center', gap: 14 }}>
+      {InnerCore}
+    </div>
+  );
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
       <div style={{ padding: '20px 22px 4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.6 }}>dot<span style={{ color: 'var(--accent)' }}>.</span></div>
       </div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 36px', textAlign: 'center', gap: 14 }}>
-        <div style={{
-          width: 72, height: 72, borderRadius: 20,
-          background: 'var(--accent-soft)', color: 'var(--accent)',
-          display: 'grid', placeItems: 'center',
-        }}>
-          <IconBook size={32} strokeWidth={1.5} />
-        </div>
-        <div style={{ fontSize: 20, fontWeight: 600, letterSpacing: -0.3 }}>Ваша база пока пуста</div>
-        <div style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.5 }}>
-          Создайте пространство — это папка верхнего уровня. Внутри будут страницы: заметки, проекты, списки.
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: '100%', marginTop: 10 }}>
-          <button style={{
-            height: 44, borderRadius: 12, border: 'none',
-            background: 'var(--accent)', color: '#fff',
-            fontSize: 15, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-          }}>
-            <IconPlusSmall size={16} strokeWidth={2.2} /> Создать пространство
-          </button>
-          <button style={{
-            height: 44, borderRadius: 12, border: '1px solid var(--line)',
-            background: 'transparent', color: 'var(--text)',
-            fontSize: 14, fontFamily: 'inherit', cursor: 'pointer',
-          }}>Начать с шаблонов</button>
-        </div>
-      </div>
+      {Inner}
     </div>
   );
 }
 
 // ─── Пустое пространство ──────────────────────────────
-function SpaceEmpty() {
+// Без props — статичный артборд (Работа · briefcase).
+// С space + onBack/onCreatePage/onMenu — живой режим.
+function SpaceEmpty({ space, onBack, onCreatePage, onMenu }) {
+  const SPACE_ICONS = {
+    briefcase: IconBriefcase, heart: IconHeart, compass: IconCompass,
+    star: IconStar, book: IconBook, folder: IconFolder,
+  };
+  let meta = {};
+  try { meta = space?.icon ? JSON.parse(space.icon) : {}; } catch (_) {}
+  const iconKey = meta.key || (space ? 'folder' : 'briefcase');
+  const accentColor = meta.color || 'var(--accent)';
+  const Icon = SPACE_ICONS[iconKey] || IconFolder;
+  const name = space?.name || 'Работа';
+  const desc = meta.description || (space ? '' : 'Проекты, встречи и цели по работе');
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12,
         padding: '12px 20px', borderBottom: '1px solid var(--line)',
       }}>
-        <button style={{ background: 'none', border: 'none', padding: 0, color: 'var(--text)', cursor: 'pointer', display: 'flex' }}>
+        <button onClick={onBack} style={{ background: 'none', border: 'none', padding: 0, color: 'var(--text)', cursor: onBack ? 'pointer' : 'default', display: 'flex' }}>
           <IconChevronLeft size={22} strokeWidth={1.75} />
         </button>
         <div style={{ flex: 1, fontSize: 13, color: 'var(--sub)', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <IconBriefcase size={13} strokeWidth={1.8} /><span>База / Работа</span>
+          <Icon size={13} strokeWidth={1.8} /><span>База / {name}</span>
         </div>
-        <button style={{ background: 'none', border: 'none', padding: 0, color: 'var(--sub)', cursor: 'pointer', display: 'flex' }}>
+        <button onClick={onMenu} style={{ background: 'none', border: 'none', padding: 0, color: 'var(--sub)', cursor: onMenu ? 'pointer' : 'default', display: 'flex' }}>
           <IconMore size={20} strokeWidth={1.75} />
         </button>
       </div>
       <div style={{ padding: '22px 24px 0' }}>
         <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.6, margin: 0, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ color: 'var(--accent)', display: 'flex' }}><IconBriefcase size={24} strokeWidth={1.75} /></span>
-          Работа
+          <span style={{ color: accentColor, display: 'flex' }}><Icon size={24} strokeWidth={1.75} /></span>
+          {name}
         </h1>
-        <p style={{ fontSize: 14, color: 'var(--sub)', margin: '8px 0 0', lineHeight: 1.45 }}>Проекты, встречи и цели по работе</p>
+        {desc && <p style={{ fontSize: 14, color: 'var(--sub)', margin: '8px 0 0', lineHeight: 1.45 }}>{desc}</p>}
       </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0 36px', textAlign: 'center', gap: 14 }}>
         <div style={{ fontSize: 14, color: 'var(--sub)', lineHeight: 1.5 }}>
           Создайте первую страницу в этом пространстве. Заметка, проект, список — всё это обычные страницы.
         </div>
-        <button style={{
+        <button onClick={onCreatePage} style={{
           height: 42, padding: '0 22px', borderRadius: 12, border: 'none',
           background: 'var(--accent)', color: '#fff',
-          fontSize: 14, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer',
+          fontSize: 14, fontWeight: 600, fontFamily: 'inherit', cursor: onCreatePage ? 'pointer' : 'default',
           display: 'flex', alignItems: 'center', gap: 8,
         }}>
           <IconPlusSmall size={16} strokeWidth={2.2} /> Создать страницу
@@ -969,83 +1005,175 @@ function SpaceEmpty() {
 }
 
 // ─── Bottom-sheet создания пространства ──────────────────────────────
-function CreateSpaceSheet() {
+// Без props — статичный артборд для канваса.
+// С `live` + `onSubmit({name, description, icon, color})` + `onClose` — рабочая форма.
+function CreateSpaceSheet({ live, initialSpace, onClose, onSubmit, onDelete }) {
   const colors = ['#6E2BF5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#A855F7'];
-  const icons = [IconBriefcase, IconHeart, IconCompass, IconStar, IconBook, IconFolder];
+  const iconKeys = ['briefcase', 'heart', 'compass', 'star', 'book', 'folder'];
+  const iconCmps = [IconBriefcase, IconHeart, IconCompass, IconStar, IconBook, IconFolder];
+  const isEdit = !!initialSpace;
+
+  // Распаковка initialSpace для edit-режима
+  let initialMeta = {};
+  if (isEdit) { try { initialMeta = JSON.parse(initialSpace.icon || '{}'); } catch (_) {} }
+
+  const [name, setName] = React.useState(initialSpace?.name ?? (live ? '' : 'Работа'));
+  const [description, setDescription] = React.useState(initialMeta.description ?? (live ? '' : 'Проекты, встречи и цели по работе'));
+  const [iconKey, setIconKey] = React.useState(initialMeta.key || 'briefcase');
+  const [color, setColor] = React.useState(initialMeta.color || colors[0]);
+  const [busy, setBusy] = React.useState(false);
+
+  const submit = async () => {
+    if (!live || !onSubmit) return;
+    if (!name.trim() || busy) return;
+    setBusy(true);
+    // onSubmit сам решает, как закрывать форму (например, переход на новый экран
+    // пространства). onClose тут НЕ вызываем — иначе перезатрём навигацию.
+    await onSubmit({ name: name.trim(), description: description.trim(), icon: iconKey, color });
+    setBusy(false);
+  };
+
+  const remove = async () => {
+    if (!live || !onDelete) return;
+    if (!window.confirm('Удалить пространство со всеми страницами? Действие можно отменить.')) return;
+    setBusy(true);
+    // onDelete сам решает, что делать с навигацией
+    await onDelete();
+    setBusy(false);
+  };
+
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative', background: 'var(--bg)' }}>
-      {/* фон — дерево базы под sheet'ом (приглушённое) */}
-      <div style={{ flex: 1, opacity: 0.35, pointerEvents: 'none', overflow: 'hidden' }}>
-        <BaseEmpty />
-      </div>
-      <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)' }} />
+      {/* фон — приглушённое содержимое под sheet'ом (только для статичного артборда) */}
+      {!live && (
+        <div style={{ flex: 1, opacity: 0.35, pointerEvents: 'none', overflow: 'hidden' }}>
+          <BaseEmpty />
+        </div>
+      )}
+      <div onClick={live ? onClose : undefined} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.25)' }} />
       <div style={{
         position: 'absolute', left: 0, right: 0, bottom: 0,
         background: 'var(--bg)',
         borderTopLeftRadius: 20, borderTopRightRadius: 20,
         boxShadow: '0 -8px 30px rgba(0,0,0,0.12)',
         padding: '10px 0 20px',
+        maxHeight: '90%', overflowY: 'auto',
       }}>
         <div style={{ display: 'grid', placeItems: 'center', padding: '2px 0 8px' }}>
           <div style={{ width: 36, height: 4, borderRadius: 2, background: 'var(--line)' }} />
         </div>
         <div style={{ padding: '0 20px' }}>
-          <div style={{ fontSize: 17, fontWeight: 600, marginBottom: 16 }}>Новое пространство</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', padding: 0, color: 'var(--sub)', fontSize: 15, fontFamily: 'inherit', cursor: live ? 'pointer' : 'default', visibility: live ? 'visible' : 'hidden' }}>Отмена</button>
+            <div style={{ fontSize: 17, fontWeight: 600 }}>{isEdit ? 'Изменить пространство' : 'Новое пространство'}</div>
+            <span style={{ width: 60 }} />
+          </div>
 
           {/* Название */}
           <div style={{ fontSize: 12, color: 'var(--sub)', letterSpacing: 0.3, textTransform: 'uppercase', marginBottom: 8 }}>Название</div>
-          <div style={{
-            height: 44, borderRadius: 12, background: 'var(--chip)',
-            display: 'flex', alignItems: 'center', padding: '0 14px', fontSize: 15, color: 'var(--text)',
-          }}>
-            Работа<Caret />
-          </div>
+          {live ? (
+            <input
+              autoFocus={!isEdit}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Например, Работа"
+              style={{
+                width: '100%', height: 44, borderRadius: 12, background: 'var(--chip)',
+                border: 'none', outline: 'none',
+                padding: '0 14px', fontSize: 15, color: 'var(--text)', fontFamily: 'inherit',
+                boxSizing: 'border-box',
+              }}
+            />
+          ) : (
+            <div style={{
+              height: 44, borderRadius: 12, background: 'var(--chip)',
+              display: 'flex', alignItems: 'center', padding: '0 14px', fontSize: 15, color: 'var(--text)',
+            }}>
+              {name}<Caret />
+            </div>
+          )}
 
           {/* Описание */}
           <div style={{ fontSize: 12, color: 'var(--sub)', letterSpacing: 0.3, textTransform: 'uppercase', margin: '18px 0 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
             <span>Описание</span>
             <span style={{ textTransform: 'none', letterSpacing: 0, fontSize: 11, color: 'var(--sub)', opacity: 0.7 }}>· необязательно</span>
           </div>
-          <div style={{
-            minHeight: 44, borderRadius: 12, background: 'var(--chip)',
-            display: 'flex', alignItems: 'flex-start', padding: '12px 14px', fontSize: 14, color: 'var(--text)',
-            lineHeight: 1.4,
-          }}>
-            Проекты, встречи и цели по работе<Caret />
-          </div>
+          {live ? (
+            <textarea
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Что здесь будет"
+              style={{
+                width: '100%', minHeight: 44, borderRadius: 12, background: 'var(--chip)',
+                border: 'none', outline: 'none', resize: 'none',
+                padding: '12px 14px', fontSize: 14, color: 'var(--text)', fontFamily: 'inherit',
+                lineHeight: 1.4, boxSizing: 'border-box',
+              }}
+            />
+          ) : (
+            <div style={{
+              minHeight: 44, borderRadius: 12, background: 'var(--chip)',
+              display: 'flex', alignItems: 'flex-start', padding: '12px 14px', fontSize: 14, color: 'var(--text)',
+              lineHeight: 1.4,
+            }}>
+              {description}<Caret />
+            </div>
+          )}
 
           {/* Иконка */}
           <div style={{ fontSize: 12, color: 'var(--sub)', letterSpacing: 0.3, textTransform: 'uppercase', margin: '18px 0 8px' }}>Иконка</div>
           <div style={{ display: 'flex', gap: 10 }}>
-            {icons.map((Ic, i) => (
-              <div key={i} style={{
-                width: 40, height: 40, borderRadius: 10,
-                background: i === 0 ? 'var(--accent-soft)' : 'var(--chip)',
-                color: i === 0 ? 'var(--accent)' : 'var(--sub)',
-                display: 'grid', placeItems: 'center',
-                border: i === 0 ? '1.5px solid var(--accent)' : '1.5px solid transparent',
-              }}>
-                <Ic size={18} strokeWidth={1.75} />
-              </div>
-            ))}
+            {iconCmps.map((Ic, i) => {
+              const sel = iconKeys[i] === iconKey;
+              return (
+                <div key={i}
+                  onClick={live ? () => setIconKey(iconKeys[i]) : undefined}
+                  style={{
+                    width: 40, height: 40, borderRadius: 10,
+                    background: sel ? 'var(--accent-soft)' : 'var(--chip)',
+                    color: sel ? 'var(--accent)' : 'var(--sub)',
+                    display: 'grid', placeItems: 'center',
+                    border: sel ? '1.5px solid var(--accent)' : '1.5px solid transparent',
+                    cursor: live ? 'pointer' : 'default',
+                  }}>
+                  <Ic size={18} strokeWidth={1.75} />
+                </div>
+              );
+            })}
           </div>
 
           {/* Цвет */}
           <div style={{ fontSize: 12, color: 'var(--sub)', letterSpacing: 0.3, textTransform: 'uppercase', margin: '18px 0 8px' }}>Цвет</div>
           <div style={{ display: 'flex', gap: 14, padding: '2px 2px' }}>
-            {colors.map((c, i) => (
-              <div key={c} style={{
-                width: 28, height: 28, borderRadius: 8, background: c,
-                boxShadow: i === 0 ? '0 0 0 2px var(--bg), 0 0 0 4px var(--text)' : 'none',
-              }} />
+            {colors.map((c) => (
+              <div key={c}
+                onClick={live ? () => setColor(c) : undefined}
+                style={{
+                  width: 28, height: 28, borderRadius: 8, background: c,
+                  boxShadow: c === color ? '0 0 0 2px var(--bg), 0 0 0 4px var(--text)' : 'none',
+                  cursor: live ? 'pointer' : 'default',
+                }} />
             ))}
           </div>
 
-          <button style={{
+          <button onClick={submit} disabled={live && (!name.trim() || busy)} style={{
             marginTop: 24, width: '100%', height: 46, borderRadius: 12, border: 'none',
             background: 'var(--accent)', color: '#fff',
-            fontSize: 15, fontWeight: 600, fontFamily: 'inherit', cursor: 'pointer',
-          }}>Создать</button>
+            fontSize: 15, fontWeight: 600, fontFamily: 'inherit',
+            cursor: live ? 'pointer' : 'default',
+            opacity: (live && (!name.trim() || busy)) ? 0.4 : 1,
+          }}>{busy ? '…' : (isEdit ? 'Сохранить' : 'Создать')}</button>
+
+          {live && isEdit && (
+            <div style={{ marginTop: 14, textAlign: 'center' }}>
+              <button onClick={remove} disabled={busy} style={{
+                background: 'none', border: 'none', color: '#E44',
+                fontSize: 14, cursor: 'pointer', fontFamily: 'inherit',
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+              }}><IconLogOut size={16} strokeWidth={1.75} /> Удалить пространство</button>
+            </div>
+          )}
         </div>
       </div>
     </div>

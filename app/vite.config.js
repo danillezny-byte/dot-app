@@ -86,6 +86,6 @@ export default defineConfig({
     strictPort: false,
     // Vite по умолчанию блокирует Host-заголовки от ngrok (CVE-2025-mosaic).
     // Разрешаем все *.ngrok-free.app / *.ngrok.app поддомены для dev-туннеля.
-    allowedHosts: ['.ngrok-free.app', '.ngrok.app', '.ngrok.io'],
+    allowedHosts: ['.ngrok-free.app', '.ngrok-free.dev', '.ngrok.app', '.ngrok.io', '.ngrok.dev'],
   },
 });

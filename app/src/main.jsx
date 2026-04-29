@@ -16,6 +16,7 @@
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 window.React = React;
 window.ReactDOM = { createRoot };
@@ -90,6 +91,7 @@ function LiveApp() {
       {screen === 'profile-sub'  && <SubscriptionManage onBack={back} />}
       {screen === 'profile-help' && <HelpSupport onBack={back} />}
       {screen === 'settings'     && <SettingsLive onBack={back} />}
+      <SpeedInsights />
     </div>
   );
 }

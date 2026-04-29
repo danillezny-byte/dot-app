@@ -91,7 +91,6 @@ function LiveApp() {
       {screen === 'profile-sub'  && <SubscriptionManage onBack={back} />}
       {screen === 'profile-help' && <HelpSupport onBack={back} />}
       {screen === 'settings'     && <SettingsLive onBack={back} />}
-      <SpeedInsights />
     </div>
   );
 }
@@ -176,19 +175,59 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+// BootShell — корневой компонент, который монтируется СРАЗУ (до loadAll).
+// Это важно для двух вещей:
+//  1) SpeedInsights видит ранние Web Vitals (FCP/LCP/TTFB) — иначе если
+//     ждать загрузки 19 dot/*-модулей, метрики уже прошли и пусто в дашборде.
+//  2) Пользователь видит хоть что-то (логотип/skeleton) пока грузятся модули,
+//     а не пустоту 0.5-2 секунды.
+function BootShell() {
+  const { useState, useEffect } = React;
+  const [ready, setReady] = useState(!!window.live);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadAll().then(() => {
+      if (!cancelled) setReady(true);
+    }).catch((err) => {
+      console.error('[dot] Не удалось загрузить модули:', err);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <ErrorBoundary>
+      {/* SpeedInsights монтируется немедленно, ловит FCP/LCP/TTFB.
+          Это пустой компонент (вставляет скрипт в head), не ломает layout. */}
+      <SpeedInsights />
+      {ready ? <LiveApp /> : <BootSplash />}
+    </ErrorBoundary>
+  );
+}
+
+// Brand splash во время первоначальной загрузки модулей (~500-2000мс).
+// Просто три точки в центре + лёгкий pulse. Когда модули загружены — заменяется на LiveApp.
+function BootSplash() {
+  return (
+    <div style={{
+      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div style={{
+        display: 'flex', gap: 12,
+        animation: 'dot-pulse 1.4s ease-in-out infinite',
+      }}>
+        <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--text)' }} />
+        <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--text)' }} />
+        <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--text)' }} />
+      </div>
+    </div>
+  );
+}
+
 // Singleton root — иначе Vite HMR при каждом обновлении модуля зовёт createRoot
 // заново, и React 19 ругается «container already passed to createRoot».
 const rootEl = document.getElementById('root');
 const root = window.__dotRoot || (window.__dotRoot = createRoot(rootEl));
 
-loadAll().then(() => {
-  root.render(
-    <ErrorBoundary>
-      <LiveApp />
-    </ErrorBoundary>
-  );
-}).catch((err) => {
-  console.error('[dot] Не удалось загрузить модули:', err);
-  rootEl.innerHTML =
-    `<div style="padding:24px;font-family:system-ui;color:#E44">Ошибка загрузки модулей. Смотри консоль.</div>`;
-});
+// Рендерим СРАЗУ — до loadAll. Это запускает SpeedInsights в правильное время.
+root.render(<BootShell />);

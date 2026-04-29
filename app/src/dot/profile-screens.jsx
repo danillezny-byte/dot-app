@@ -45,7 +45,7 @@ function ProfileEdit({ onBack, live, initial }) {
       await window.live.updateProfile({ avatar_url: url });
       setAvatarUrl(url);
     } else if (error) {
-      window.dotToast('Не удалось загрузить: ' + (error.message || ''), 'error');
+      window.dotToast(window.dotErr(error) || 'Не удалось загрузить', 'error');
     }
     setBusy(false);
   };
@@ -57,7 +57,7 @@ function ProfileEdit({ onBack, live, initial }) {
     if (email && email !== originalEmail) {
       const { error } = await window.live.updateAuthEmail(email.trim());
       if (error) {
-        window.dotToast('Email: ' + error.message, 'error');
+        window.dotToast(window.dotErr(error), 'error');
         setBusy(false);
         return;
       }
@@ -247,7 +247,7 @@ function SubscriptionManage({ onBack }) {
     setBusy(true);
     const next = isPlus ? 'free' : 'plus';
     const { profile: updated, error } = await window.live.updatePlan(next);
-    if (error) window.dotToast('Ошибка: ' + error.message, 'error');
+    if (error) window.dotToast(window.dotErr(error), 'error');
     if (updated) setProfile(updated);
     setBusy(false);
   };

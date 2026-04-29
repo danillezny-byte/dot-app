@@ -82,7 +82,7 @@ function Home({ onGo, initialTab, live }) {
         // но проще: вызываем createPage здесь.
         (async () => {
           const { page, error } = await window.live.createPage({ spaceId: baseRoute.id, title: '' });
-          if (error) { window.dotToast('Ошибка: ' + error.message, 'error'); return; }
+          if (error) { window.dotToast(window.dotErr(error), 'error'); return; }
           if (page) setBaseRoute({ kind: 'page', id: page.id, spaceId: baseRoute.id });
           setBaseTick((n) => n + 1);
         })();
@@ -195,7 +195,7 @@ function Home({ onGo, initialTab, live }) {
     }
     else if (action === 'addsubpage') {
       const { page, error } = await window.live.createPage({ spaceId: pg.space_id, parentPageId: pg.id, title: '' });
-      if (error) { window.dotToast('Ошибка: ' + error.message, 'error'); return; }
+      if (error) { window.dotToast(window.dotErr(error), 'error'); return; }
       if (page) setBaseRoute({ kind: 'page', id: page.id, spaceId: pg.space_id });
       setBaseTick((n) => n + 1);
     }
@@ -220,7 +220,7 @@ function Home({ onGo, initialTab, live }) {
       space_id: targetSpaceId,
       parent_page_id: parentPageId,
     }).eq('id', pageId);
-    if (error) window.dotToast('Ошибка: ' + error.message, 'error');
+    if (error) window.dotToast(window.dotErr(error), 'error');
     setBaseTick((n) => n + 1);
   };
 
@@ -237,11 +237,11 @@ function Home({ onGo, initialTab, live }) {
     const dbPriority = prioMap[priority] || null;
     if (editingTask) {
       const { task, error } = await window.live.updateTask(editingTask.id, { title, dueIso, priority: dbPriority });
-      if (error) { window.dotToast('Ошибка: ' + error.message, 'error'); return; }
+      if (error) { window.dotToast(window.dotErr(error), 'error'); return; }
       if (task) setTasks((ts) => ts.map((t) => t.id === task.id ? task : t));
     } else {
       const { task, error } = await window.live.createTask(title, dueIso, dbPriority);
-      if (error) { window.dotToast('Ошибка: ' + error.message, 'error'); return; }
+      if (error) { window.dotToast(window.dotErr(error), 'error'); return; }
       if (task) setTasks((ts) => [task, ...ts]);
     }
   };
@@ -461,7 +461,7 @@ const PRIO_COLORS = {
 function TasksView({ tasks, toggle, loading, live, onAdd, onEdit }) {
   const order = ['Просрочено', 'Сегодня', 'Завтра', 'На неделе', 'Позже', 'Без даты'];
   if (loading) {
-    return <div style={{ padding: 32, minHeight: 200 }} />;
+    return <TasksSkeleton />;
   }
   if (live && tasks.length === 0) {
     return <TasksEmpty onAdd={onAdd} />;
@@ -470,6 +470,76 @@ function TasksView({ tasks, toggle, loading, live, onAdd, onEdit }) {
     <div style={{ paddingBottom: 24 }}>
       {order.map(sect => (
         <TaskSection key={sect} title={sect} items={tasks.filter(t => t.when === sect)} toggle={toggle} onEdit={onEdit} />
+      ))}
+    </div>
+  );
+}
+
+// ─── Skeleton placeholders для loading-состояний ─────────────
+// Используются когда юзер заходит в первый раз (кэша ещё нет) и пока
+// идёт сетевой fetch. Лучше серая «навёрстка» с лёгким shimmer-effect,
+// чем пустой экран. Анимация — в @keyframes dot-shimmer в index.html.
+function SkeletonRow({ height = 56, indent = 24, gap = 4, lines = [70, 40] }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: 14,
+      padding: `${(height - 28) / 2}px ${indent}px`,
+      borderBottom: '1px solid var(--line)',
+    }}>
+      <div className="dot-skeleton" style={{ width: 22, height: 22, borderRadius: 11, flexShrink: 0 }} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap, flex: 1 }}>
+        {lines.map((widthPercent, i) => (
+          <div key={i} className="dot-skeleton" style={{ height: 12, width: `${widthPercent}%` }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function TasksSkeleton() {
+  return (
+    <div>
+      <div style={{ padding: '14px 24px 6px', fontSize: 13, fontWeight: 600, color: 'var(--sub)' }}>
+        <div className="dot-skeleton" style={{ height: 12, width: 70 }} />
+      </div>
+      <SkeletonRow lines={[80, 35]} />
+      <SkeletonRow lines={[55, 30]} />
+      <SkeletonRow lines={[70, 25]} />
+      <div style={{ padding: '20px 24px 6px', fontSize: 13, fontWeight: 600, color: 'var(--sub)' }}>
+        <div className="dot-skeleton" style={{ height: 12, width: 60 }} />
+      </div>
+      <SkeletonRow lines={[60, 30]} />
+      <SkeletonRow lines={[75, 35]} />
+    </div>
+  );
+}
+
+function HabitsSkeleton() {
+  return (
+    <div>
+      {[80, 60, 70, 50].map((w, i) => (
+        <div key={i} style={{ padding: '16px 24px', borderBottom: '1px solid var(--line)' }}>
+          <div className="dot-skeleton" style={{ height: 14, width: `${w}%`, marginBottom: 12 }} />
+          <div style={{ display: 'flex', gap: 6 }}>
+            {Array.from({ length: 7 }).map((_, j) => (
+              <div key={j} className="dot-skeleton" style={{ width: 28, height: 28, borderRadius: 8 }} />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BaseSkeleton() {
+  return (
+    <div style={{ padding: '14px 24px' }}>
+      <div className="dot-skeleton" style={{ height: 36, width: '100%', marginBottom: 16 }} />
+      {[80, 60, 70, 50, 65].map((w, i) => (
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
+          <div className="dot-skeleton" style={{ width: 18, height: 18, borderRadius: 4, flexShrink: 0 }} />
+          <div className="dot-skeleton" style={{ height: 14, width: `${w}%` }} />
+        </div>
       ))}
     </div>
   );
@@ -677,7 +747,7 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
   };
 
   if (loading) {
-    return <div style={{ padding: 32, minHeight: 200 }} />;
+    return <HabitsSkeleton />;
   }
   if (habits.length === 0) {
     return <HabitsEmpty onAdd={onAdd} />;
@@ -983,7 +1053,7 @@ function BaseTreeView({ setRoute, hint, onSpaceAction, onPageAction }) {
   useEffectH(() => { reload(); }, [hint]);
 
   if (loading) {
-    return <div style={{ padding: 32, minHeight: 200 }} />;
+    return <BaseSkeleton />;
   }
   if (spaces.length === 0) {
     return (
@@ -1148,7 +1218,7 @@ function SpaceView({ spaceId, setRoute, onBack, hint, onPageAction }) {
 
   const createPage = async () => {
     const { page, error } = await window.live.createPage({ spaceId, title: '' });
-    if (error) { window.dotToast('Ошибка: ' + error.message, 'error'); return; }
+    if (error) { window.dotToast(window.dotErr(error), 'error'); return; }
     if (page) setRoute({ kind: 'page', id: page.id, spaceId });
   };
 
@@ -1673,7 +1743,7 @@ function ImageBlockView({ block, onChange }) {
     const { url, error } = await window.live.uploadImage(file);
     setBusy(false);
     if (error) {
-      setErr(error.message || 'Не удалось загрузить');
+      setErr(window.dotErr(error) || 'Не удалось загрузить');
       return;
     }
     onChange(url);

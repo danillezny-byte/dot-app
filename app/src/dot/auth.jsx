@@ -37,7 +37,7 @@ function Login({ onGo, live }) {
       setBusy(true);
       const { error } = await window.live.signIn(email.trim(), pwd);
       setBusy(false);
-      if (error) { setErr(error.message || 'Не удалось войти'); return; }
+      if (error) { setErr(window.dotErr(error) || 'Не удалось войти'); return; }
     }
     onGo && onGo('home');
   };
@@ -81,7 +81,7 @@ function Login({ onGo, live }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <Button kind="ghost" full onClick={async () => {
           const res = await window.live.signInWithGoogle();
-          if (res?.error) window.dotToast('Не удалось войти через Google: ' + res.error.message, 'error');
+          if (res?.error) window.dotToast(window.dotErr(res.error) || 'Не удалось войти через Google', 'error');
           // При успехе Supabase сам редиректит на accounts.google.com,
           // потом обратно на origin — в этот момент LiveApp заметит сессию через getUser().
         }}><GoogleIcon /> Продолжить с Google</Button>
@@ -117,7 +117,7 @@ function Register({ onGo, live }) {
       setBusy(true);
       const { session, error } = await window.live.signUp(email.trim(), pwd, name);
       setBusy(false);
-      if (error) { setErr(error.message || 'Не удалось зарегистрироваться'); return; }
+      if (error) { setErr(window.dotErr(error) || 'Не удалось зарегистрироваться'); return; }
       if (!session) {
         setErr('Аккаунт создан, но требуется подтверждение email. Проверьте почту.');
         return;
@@ -185,7 +185,7 @@ function Reset({ onGo, live }) {
       setBusy(true);
       const { error } = await window.live.resetPassword(email.trim());
       setBusy(false);
-      if (error) { setErr(error.message || 'Не удалось отправить ссылку'); return; }
+      if (error) { setErr(window.dotErr(error) || 'Не удалось отправить ссылку'); return; }
     }
     setSent(true);
   };

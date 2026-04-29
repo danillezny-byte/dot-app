@@ -135,7 +135,7 @@ function AccountDetail() {
     if (!window.live) return;
     const { error } = await window.live.deleteAccount();
     if (error) {
-      window.dotToast('Ошибка: ' + error.message, 'error');
+      window.dotToast(window.dotErr(error), 'error');
       return;
     }
     window.location.reload();

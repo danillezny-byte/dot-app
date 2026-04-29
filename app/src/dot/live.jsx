@@ -55,6 +55,52 @@ function cacheClearAll() {
 }
 window.dotCache = { get: cacheGet, set: cacheSet, clearAll: cacheClearAll };
 
+// ─── Перевод технических ошибок Supabase в человеческие ──────
+// Юзер не должен видеть «invalid login credentials». Видит «Неверный email
+// или пароль». Если для конкретной ошибки нет перевода — возвращаем оригинал
+// (лучше странный английский текст, чем съеденная ошибка).
+//
+// Использование: window.dotErr(error) → строка для UI/toast.
+const ERROR_TRANSLATIONS = [
+  // Auth
+  [/invalid login credentials/i,                     'Неверный email или пароль.'],
+  [/email not confirmed/i,                           'Email ещё не подтверждён. Проверь почту.'],
+  [/user already registered/i,                       'Этот email уже занят. Попробуй войти.'],
+  [/password should be at least/i,                   'Пароль слишком короткий — минимум 6 символов.'],
+  [/unable to validate email address/i,              'Email выглядит некорректно.'],
+  [/signup is disabled/i,                            'Регистрация временно отключена.'],
+  [/over.?(email|sms).?send.?rate.?limit/i,          'Слишком много писем за короткое время. Подожди минуту.'],
+  [/over.?request.?rate.?limit|too many requests/i,  'Слишком много попыток. Попробуй через минуту.'],
+  [/email rate limit exceeded/i,                     'Лимит писем исчерпан. Попробуй через 10 минут.'],
+  [/jwt.*expired|session.*expired/i,                 'Сессия истекла. Войди снова.'],
+  [/refresh token/i,                                 'Сессия истекла. Войди снова.'],
+  // OAuth
+  [/redirect_uri.*mismatch|redirect.*not allowed/i,  'Этот домен не разрешён в настройках OAuth.'],
+  [/oauth.*disabled|provider.*not enabled/i,         'Вход через этого провайдера временно недоступен.'],
+  // Network / Supabase down
+  [/failed to fetch|network|networkerror/i,          'Нет связи с сервером. Проверь интернет.'],
+  [/timeout/i,                                       'Сервер не ответил вовремя. Попробуй ещё раз.'],
+  // RLS / permissions
+  [/new row violates row-level security/i,           'Нет прав на это действие.'],
+  [/permission denied/i,                             'Нет прав на это действие.'],
+  // Storage
+  [/payload too large|file too large/i,              'Файл слишком большой.'],
+  [/duplicate key|already exists/i,                  'Такая запись уже существует.'],
+  // Account
+  [/function delete_my_account does not exist/i,     'SQL-миграция delete-account не выполнена в БД.'],
+];
+
+window.dotErr = function (err) {
+  if (!err) return '';
+  const msg = (err && (err.message || err.error_description || err.toString())) || '';
+  for (const [pattern, ru] of ERROR_TRANSLATIONS) {
+    if (pattern.test(msg)) return ru;
+  }
+  // Фолбэк: оригинальное сообщение, но без префикса «Ошибка:» —
+  // его подставит вызывающий код если нужно.
+  return msg;
+};
+
 // ── Маппинг БД-задачи → UI-форма (как в window.TASKS) ──────────
 function bucketFromDueAt(due) {
   if (!due) return 'Без даты';
@@ -264,17 +310,21 @@ window.live = {
 
   async loadStats() {
     if (!sb) return { stats: null };
-    const { count: taskCount } = await sb.from('tasks')
-      .select('id', { count: 'exact', head: true })
-      .is('deleted_at', null);
+    // Параллелим ВСЁ что не зависит друг от друга:
+    //  1) count задач
+    //  2) загрузка привычек
+    // Затем для каждой привычки — параллельно её streak.
+    // Было: 1 + 1 + N последовательных раундтрипов = ~N+2 RTT.
+    // Стало: 1 RTT (count + habits в параллели) + 1 RTT (все streaks в параллели) = 2 RTT.
+    const [{ count: taskCount }, { habits }] = await Promise.all([
+      sb.from('tasks').select('id', { count: 'exact', head: true }).is('deleted_at', null),
+      this.loadHabits(),
+    ]);
 
-    // «Дней подряд» = самая длинная текущая серия из всех привычек.
-    const { habits } = await this.loadHabits();
-    let streak = 0;
-    for (const h of (habits || [])) {
-      const { streak: s } = await this.loadStreak(h.id);
-      if (s > streak) streak = s;
-    }
+    const streaks = await Promise.all(
+      (habits || []).map((h) => this.loadStreak(h.id).then((r) => r.streak))
+    );
+    const streak = streaks.reduce((m, s) => Math.max(m, s), 0);
 
     return { stats: { tasks: taskCount ?? 0, streak, pages: 0 } };
   },

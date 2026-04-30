@@ -1,4 +1,9 @@
 import React from 'react';
+import {
+  IconCamera, IconCheck, IconChevronLeft, IconChevronRight,
+  IconMail, IconMessageCircle, IconSearch, IconStar,
+} from './icons.jsx';
+import { live as liveApi, dotErr, dotToast, dotTheme } from './live.jsx';
 // Профильные экраны: редактирование профиля и управление подпиской.
 
 const { useState: useStatePS } = React;
@@ -8,16 +13,16 @@ function ProfileEdit({ onBack, live, initial }) {
   const [email, setEmail] = useStatePS(initial?.email ?? (live ? '' : 'alice@mail.com'));
   const [originalEmail, setOriginalEmail] = useStatePS(initial?.email ?? '');
   const [avatarUrl, setAvatarUrl] = useStatePS(null);
-  const [theme, setThemeS] = useStatePS(typeof window !== 'undefined' && window.dotTheme ? window.dotTheme.get() : 'light');
+  const [theme, setThemeS] = useStatePS(typeof window !== 'undefined' && dotTheme ? dotTheme.get() : 'light');
   const [busy, setBusy] = useStatePS(false);
   const [emailMsg, setEmailMsg] = useStatePS(null);
   const fileRef = React.useRef(null);
 
   React.useEffect(() => {
-    if (!live || !window.live) return;
+    if (!live) return;
     let cancelled = false;
     (async () => {
-      const { profile } = await window.live.loadProfile();
+      const { profile } = await liveApi.loadProfile();
       if (cancelled || !profile) return;
       setName(profile.name || (profile.email || '').split('@')[0]);
       setEmail(profile.email);
@@ -31,7 +36,7 @@ function ProfileEdit({ onBack, live, initial }) {
 
   const setTheme = (t) => {
     setThemeS(t);
-    if (window.dotTheme) window.dotTheme.set(t);
+    if (dotTheme) dotTheme.set(t);
   };
 
   const onPickAvatar = () => fileRef.current?.click();
@@ -40,24 +45,24 @@ function ProfileEdit({ onBack, live, initial }) {
     const file = e.target.files?.[0];
     if (!file || !live) return;
     setBusy(true);
-    const { url, error } = await window.live.uploadAvatar(file);
+    const { url, error } = await liveApi.uploadAvatar(file);
     if (!error && url) {
-      await window.live.updateProfile({ avatar_url: url });
+      await liveApi.updateProfile({ avatar_url: url });
       setAvatarUrl(url);
     } else if (error) {
-      window.dotToast(window.dotErr(error) || 'Не удалось загрузить', 'error');
+      dotToast(dotErr(error) || 'Не удалось загрузить', 'error');
     }
     setBusy(false);
   };
 
   const save = async () => {
-    if (!live || !window.live || busy) { onBack && onBack(); return; }
+    if (!live || busy) { onBack && onBack(); return; }
     setBusy(true);
-    await window.live.updateProfile({ name: name.trim() });
+    await liveApi.updateProfile({ name: name.trim() });
     if (email && email !== originalEmail) {
-      const { error } = await window.live.updateAuthEmail(email.trim());
+      const { error } = await liveApi.updateAuthEmail(email.trim());
       if (error) {
-        window.dotToast(window.dotErr(error), 'error');
+        dotToast(dotErr(error), 'error');
         setBusy(false);
         return;
       }
@@ -236,18 +241,18 @@ function SubscriptionManage({ onBack }) {
   const [profile, setProfile] = useStatePS(null);
   const [busy, setBusy] = useStatePS(false);
   React.useEffect(() => {
-    if (!window.live) return;
-    window.live.loadProfile().then(({ profile }) => profile && setProfile(profile));
+    if (!liveApi) return;
+    liveApi.loadProfile().then(({ profile }) => profile && setProfile(profile));
   }, []);
 
   const isPlus = profile?.plan === 'plus';
 
   const togglePlan = async () => {
-    if (busy || !window.live) return;
+    if (busy) return;
     setBusy(true);
     const next = isPlus ? 'free' : 'plus';
-    const { profile: updated, error } = await window.live.updatePlan(next);
-    if (error) window.dotToast(window.dotErr(error), 'error');
+    const { profile: updated, error } = await liveApi.updatePlan(next);
+    if (error) dotToast(dotErr(error), 'error');
     if (updated) setProfile(updated);
     setBusy(false);
   };

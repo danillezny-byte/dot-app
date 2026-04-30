@@ -1,4 +1,9 @@
 import React from 'react';
+import {
+  IconBell, IconCheck, IconChevronLeft, IconChevronRight, IconCloud,
+  IconExternalLink, IconInfo, IconLock, IconPalette, IconUser,
+} from './icons.jsx';
+import { live, dotErr, dotToast, dotTheme } from './live.jsx';
 // Settings — полный каталог экранов.
 // Index (главный список) + 6 детальных: Аккаунт, Синхронизация,
 // Оформление, Уведомления, Приватность, О приложении.
@@ -8,11 +13,11 @@ const { useState: useStateS } = React;
 function SettingsIndex({ onEnter }) {
   const [profile, setProfile] = useStateS(null);
   React.useEffect(() => {
-    if (!window.live) return;
-    window.live.loadProfile().then(({ profile }) => profile && setProfile(profile));
+    if (!live) return;
+    live.loadProfile().then(({ profile }) => profile && setProfile(profile));
   }, []);
-  const themeName = (typeof window !== 'undefined' && window.dotTheme)
-    ? ({ light: 'Светлая', dark: 'Тёмная', warm: 'Тёплая' }[window.dotTheme.get()] || 'Светлая')
+  const themeName = (typeof window !== 'undefined' && dotTheme)
+    ? ({ light: 'Светлая', dark: 'Тёмная', warm: 'Тёплая' }[dotTheme.get()] || 'Светлая')
     : 'Светлая';
   const rows = [
     { id: 'account',  icon: IconUser,     label: 'Аккаунт',       sub: profile?.email || '—' },
@@ -121,21 +126,21 @@ function Toggle({ on }) {
 function AccountDetail() {
   const [profile, setProfile] = useStateS(null);
   React.useEffect(() => {
-    if (!window.live) return;
-    window.live.loadProfile().then(({ profile }) => profile && setProfile(profile));
+    if (!live) return;
+    live.loadProfile().then(({ profile }) => profile && setProfile(profile));
   }, []);
 
   const signOut = async () => {
-    if (!window.live) return;
-    await window.live.signOut();
+    if (!live) return;
+    await live.signOut();
     window.location.reload();
   };
   const deleteAccount = async () => {
     if (!window.confirm('Удалить аккаунт? Все данные (задачи, привычки, страницы) будут стёрты безвозвратно.')) return;
-    if (!window.live) return;
-    const { error } = await window.live.deleteAccount();
+    if (!live) return;
+    const { error } = await live.deleteAccount();
     if (error) {
-      window.dotToast(window.dotErr(error), 'error');
+      dotToast(dotErr(error), 'error');
       return;
     }
     window.location.reload();
@@ -185,10 +190,10 @@ function SyncDetail() {
 
 // ─── Detail: Theme ───────────────────────────
 function ThemeDetail() {
-  const [theme, setTheme] = useStateS(window.dotTheme ? window.dotTheme.get() : 'light');
+  const [theme, setTheme] = useStateS(dotTheme ? dotTheme.get() : 'light');
   const apply = (t) => {
     setTheme(t);
-    if (window.dotTheme) window.dotTheme.set(t);
+    if (dotTheme) dotTheme.set(t);
   };
   return (
     <div style={{ borderTop: '1px solid var(--line)' }}>
@@ -219,7 +224,7 @@ function AboutDetail() {
         <div style={{ fontSize: 14, color: 'var(--sub)', marginTop: 8 }}>Прототип · v0.5</div>
       </div>
       <div style={{ borderTop: '1px solid var(--line)' }}>
-        <Row label="Исходники на GitHub" onClick={() => window.open('https://github.com/danillezny-byte/dot-app', '_blank')} right={<window.IconExternalLink size={14} color="var(--sub)" strokeWidth={1.75} />} />
+        <Row label="Исходники на GitHub" onClick={() => window.open('https://github.com/danillezny-byte/dot-app', '_blank')} right={<IconExternalLink size={14} color="var(--sub)" strokeWidth={1.75} />} />
         <Row label="Бэкенд" value="Supabase" />
         <Row label="Авторы" value="Данил + Claude" />
       </div>

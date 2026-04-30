@@ -1,4 +1,6 @@
 import React from 'react';
+import { IconMail, IconInfo, IconCheck, IconChevronLeft, IconChevronRight } from './icons.jsx';
+import { Button } from './phone.jsx';
 // Email verification flow + ограниченный режим
 
 const { useState: useStateEV } = React;

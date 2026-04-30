@@ -1,4 +1,8 @@
 import React from 'react';
+import { IconCalendar, IconClock, IconFlag, IconRepeat, IconTarget, IconTrash } from './icons.jsx';
+import { IosKeyboard } from './keyboard.jsx';
+import { DatePickerSheet, ReminderPickerSheet, PriorityPickerSheet } from './task-pickers.jsx';
+import { HabitRepeatPickerSheet, HabitGoalPickerSheet, HabitReminderPickerSheet } from './habit-pickers.jsx';
 // Полноэкранные композеры для создания задачи и привычки.
 
 const { useState: useStateCV } = React;

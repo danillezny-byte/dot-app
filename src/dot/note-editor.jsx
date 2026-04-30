@@ -1,4 +1,12 @@
 import React from 'react';
+import {
+  IconBold, IconBook, IconBriefcase, IconCalendar, IconCheck, IconCheckSquare,
+  IconChevronDown, IconChevronLeft, IconCompass, IconFile, IconFolder, IconGrip,
+  IconHash, IconHeart, IconItalic, IconLink, IconList, IconListOrdered,
+  IconLogOut, IconMore, IconPin, IconPlus, IconPlusSmall, IconQuote, IconRepeat,
+  IconSearch, IconSlash, IconStar, IconType, IconUser,
+} from './icons.jsx';
+import { SystemKeyboard } from './composer-variants.jsx';
 // Редактор страницы «Базы» — Notion-like, но без визуального шума.
 // Блочная модель: H1, H2, параграф (с inline bold/italic/link),
 // маркированный/нумерованный список, чек-лист, цитата, разделитель.

@@ -1,4 +1,7 @@
 import React from 'react';
+import { IconSparkles, IconTarget, IconShield, IconCheck, IconRefresh } from './icons.jsx';
+import { Button } from './phone.jsx';
+import { live, dotMarkOnboarded } from './live.jsx';
 // Onboarding (3 steps) + Migration dialog.
 
 const { useState: useStateO } = React;
@@ -36,8 +39,8 @@ function Onboarding({ onGo }) {
   // Не блокируем переход — вкладку Базы юзер откроет позже, к тому моменту
   // создание уже отработает.
   const finish = () => {
-    window.dotMarkOnboarded?.();
-    window.live?.createSmartInbox?.().catch((e) => console.warn('[dot] inbox failed', e));
+    dotMarkOnboarded?.();
+    live?.createSmartInbox?.().catch((e) => console.warn('[dot] inbox failed', e));
     onGo && onGo('home');
   };
 

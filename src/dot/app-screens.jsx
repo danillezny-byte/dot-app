@@ -1,4 +1,17 @@
 import React from 'react';
+import {
+  IconBook, IconBriefcase, IconCalendar, IconCamera, IconCheck, IconCheckSquare,
+  IconChevronDown, IconChevronLeft, IconChevronRight, IconCompass, IconExternalLink,
+  IconFile, IconFlag, IconFlame, IconFolder, IconHash, IconHeart, IconInfo,
+  IconLink, IconList, IconLogOut, IconMore, IconPin, IconPlus, IconPlusSmall,
+  IconRepeat, IconSearch, IconSettings, IconSlash, IconStar, IconTrash, IconType, IconUser,
+} from './icons.jsx';
+import { Button, Logo } from './phone.jsx';
+import { live as liveApi, sb, dotErr, dotHaptic, dotToast, dotLiveHelpers } from './live.jsx';
+import { TASKS, HABITS, BASE_TREE, PINNED_PAGES } from './tokens.jsx';
+import { AddTaskComposer, AddPageComposer } from './composers.jsx';
+import { ComposerFullscreen, ComposerFullscreenHabit } from './composer-variants.jsx';
+import { BaseEmpty, CreateSpaceSheet } from './note-editor.jsx';
 // Main app — rebuilt to match real dot. visuals.
 // Structure: Header (logo + ⋯), body, FAB, bottom tabs (no labels glyphs only).
 // Tabs: Задачи · Привычки · База · Профиль
@@ -9,10 +22,10 @@ function Home({ onGo, initialTab, live }) {
   const [tab, setTab] = useStateH(initialTab || 'tasks');
   // initial state из кэша → первый paint без пустого экрана.
   // Если кэша нет (первый заход) — пустой массив, грузим как раньше.
-  const [tasks, setTasks] = useStateH(live ? (window.live?.getCachedTasks?.() || []) : window.TASKS);
+  const [tasks, setTasks] = useStateH(live ? (liveApi?.getCachedTasks?.() || []) : TASKS);
   // loading = true только если КЭША НЕТ. Если есть — UI уже показывает данные,
   // фоновый рефреш проходит молча.
-  const [loading, setLoading] = useStateH(!!live && !(window.live?.getCachedTasks?.() || []).length);
+  const [loading, setLoading] = useStateH(!!live && !(liveApi?.getCachedTasks?.() || []).length);
   const [composerOpen, setComposerOpen] = useStateH(false);
   const [editingTask, setEditingTask] = useStateH(null); // task object or null
   const [habitComposerOpen, setHabitComposerOpen] = useStateH(false);
@@ -27,10 +40,10 @@ function Home({ onGo, initialTab, live }) {
   const [undoToast, setUndoToast] = useStateH(null); // { kind, id, snapshot, label }
 
   useEffectH(() => {
-    if (!live || !window.live) return;
+    if (!live || !liveApi) return;
     let cancelled = false;
     (async () => {
-      const { tasks: fetched, error } = await window.live.loadTasks();
+      const { tasks: fetched, error } = await liveApi.loadTasks();
       if (cancelled) return;
       if (!error) setTasks(fetched);
       setLoading(false);
@@ -42,7 +55,7 @@ function Home({ onGo, initialTab, live }) {
   // в зависимости от текущего таба. Возвращает Promise — индикатор крутится
   // до его resolve.
   const onPullRefresh = async () => {
-    window.dotHaptic?.('light');
+    dotHaptic?.('light');
     if (tab === 'tasks') {
       setTasksTick(t => t + 1);
       // Ждём один RAF чтобы дать React смонтировать новый useEffect и
@@ -60,10 +73,10 @@ function Home({ onGo, initialTab, live }) {
 
   // Подгружаем space-данные когда заходим в edit-space
   useEffectH(() => {
-    if (baseRoute.kind !== 'edit-space' || !window.live) return;
+    if (baseRoute.kind !== 'edit-space' || !liveApi) return;
     let cancelled = false;
     (async () => {
-      const { spaces } = await window.live.loadSpaces();
+      const { spaces } = await liveApi.loadSpaces();
       if (cancelled) return;
       setEditingSpace(spaces.find((s) => s.id === baseRoute.id) || null);
     })();
@@ -78,11 +91,11 @@ function Home({ onGo, initialTab, live }) {
   }, [undoToast]);
 
   const toggle = (id) => {
-    window.dotHaptic?.('light');
+    dotHaptic?.('light');
     setTasks((ts) => ts.map((t) => t.id === id ? { ...t, done: !t.done } : t));
-    if (live && window.live) {
+    if (live && liveApi) {
       const cur = tasks.find((t) => t.id === id);
-      if (cur) window.live.toggleTask(id, !cur.done);
+      if (cur) liveApi.toggleTask(id, !cur.done);
     }
   };
 
@@ -103,8 +116,8 @@ function Home({ onGo, initialTab, live }) {
         // Создание страницы делегируется через setBaseRoute → BaseViewLive перехватит,
         // но проще: вызываем createPage здесь.
         (async () => {
-          const { page, error } = await window.live.createPage({ spaceId: baseRoute.id, title: '' });
-          if (error) { window.dotToast(window.dotErr(error), 'error'); return; }
+          const { page, error } = await liveApi.createPage({ spaceId: baseRoute.id, title: '' });
+          if (error) { dotToast(dotErr(error), 'error'); return; }
           if (page) setBaseRoute({ kind: 'page', id: page.id, spaceId: baseRoute.id });
           setBaseTick((n) => n + 1);
         })();
@@ -117,52 +130,52 @@ function Home({ onGo, initialTab, live }) {
   };
 
   const handleHabitSubmit = async ({ title, color, repeat, goal, reminder }) => {
-    if (!window.live) return;
+    if (!liveApi) return;
     if (editingHabit) {
-      await window.live.updateHabit(editingHabit.id, { title, color, repeat, goal, reminder });
+      await liveApi.updateHabit(editingHabit.id, { title, color, repeat, goal, reminder });
     } else {
-      await window.live.createHabit({ title, color, repeat, goal, reminder });
+      await liveApi.createHabit({ title, color, repeat, goal, reminder });
     }
     setHabitsTick((n) => n + 1);
   };
 
   const handleHabitDelete = async () => {
-    if (!editingHabit || !window.live) return;
+    if (!editingHabit || !liveApi) return;
     const id = editingHabit.id;
     const snapshot = editingHabit;
-    await window.live.deleteHabit(id);
+    await liveApi.deleteHabit(id);
     setHabitsTick((n) => n + 1);
     setUndoToast({ kind: 'habit', id, snapshot, label: 'Привычка удалена' });
   };
 
   // ── База: создание/редактирование пространства ──
   const handleSpaceSubmit = async ({ name, description, icon, color }) => {
-    if (!window.live) return;
+    if (!liveApi) return;
     if (baseRoute.kind === 'edit-space') {
-      await window.live.updateSpace(baseRoute.id, { name, description, icon, color });
+      await liveApi.updateSpace(baseRoute.id, { name, description, icon, color });
       setBaseRoute({ kind: 'space', id: baseRoute.id });
     } else {
-      const { space } = await window.live.createSpace({ name, description, icon, color });
+      const { space } = await liveApi.createSpace({ name, description, icon, color });
       if (space) setBaseRoute({ kind: 'space', id: space.id });
     }
     setBaseTick((n) => n + 1);
   };
 
   const handleSpaceDelete = async () => {
-    if (baseRoute.kind !== 'edit-space' || !window.live) return;
+    if (baseRoute.kind !== 'edit-space' || !liveApi) return;
     const id = baseRoute.id;
-    const { spaces } = await window.live.loadSpaces();
+    const { spaces } = await liveApi.loadSpaces();
     const snapshot = spaces.find((s) => s.id === id);
-    await window.live.deleteSpace(id);
+    await liveApi.deleteSpace(id);
     setBaseRoute({ kind: 'tree' });
     setBaseTick((n) => n + 1);
     setUndoToast({ kind: 'space', id, snapshot, label: 'Пространство удалено' });
   };
 
   const handlePageDelete = async (pageId, spaceId) => {
-    if (!window.live) return;
-    const { page: snapshot } = await window.live.loadPage(pageId);
-    await window.live.deletePage(pageId);
+    if (!liveApi) return;
+    const { page: snapshot } = await liveApi.loadPage(pageId);
+    await liveApi.deletePage(pageId);
     setBaseRoute({ kind: 'space', id: spaceId });
     setBaseTick((n) => n + 1);
     setUndoToast({ kind: 'page', id: pageId, snapshot, label: 'Страница удалена' });
@@ -182,17 +195,17 @@ function Home({ onGo, initialTab, live }) {
     setActionSheet(null);
     if (action === 'rename')    setBaseRoute({ kind: 'edit-space', id: sp.id });
     else if (action === 'duplicate') {
-      await window.live.duplicateSpace(sp.id);
+      await liveApi.duplicateSpace(sp.id);
       setBaseTick((n) => n + 1);
     }
     else if (action === 'pin') {
-      const { error } = await window.live.togglePin('space', sp.id);
-      if (error) window.dotToast('Закрепление недоступно — выполни SQL-миграцию из README', 'error');
+      const { error } = await liveApi.togglePin('space', sp.id);
+      if (error) dotToast('Закрепление недоступно — выполни SQL-миграцию из README', 'error');
       setBaseTick((n) => n + 1);
     }
     else if (action === 'delete') {
       if (!window.confirm(`Удалить пространство «${sp.name}»? Действие можно отменить.`)) return;
-      await window.live.deleteSpace(sp.id);
+      await liveApi.deleteSpace(sp.id);
       // Если мы внутри удаляемого пространства — выйти на дерево
       if (baseRoute.kind === 'space' && baseRoute.id === sp.id) setBaseRoute({ kind: 'tree' });
       else if (baseRoute.kind === 'page' && baseRoute.spaceId === sp.id) setBaseRoute({ kind: 'tree' });
@@ -207,17 +220,17 @@ function Home({ onGo, initialTab, live }) {
     setActionSheet(null);
     if (action === 'rename')    setBaseRoute({ kind: 'page', id: pg.id, spaceId: pg.space_id });
     else if (action === 'duplicate') {
-      await window.live.duplicatePage(pg.id);
+      await liveApi.duplicatePage(pg.id);
       setBaseTick((n) => n + 1);
     }
     else if (action === 'pin') {
-      const { error } = await window.live.togglePin('page', pg.id);
-      if (error) window.dotToast('Закрепление недоступно — выполни SQL-миграцию из README', 'error');
+      const { error } = await liveApi.togglePin('page', pg.id);
+      if (error) dotToast('Закрепление недоступно — выполни SQL-миграцию из README', 'error');
       setBaseTick((n) => n + 1);
     }
     else if (action === 'addsubpage') {
-      const { page, error } = await window.live.createPage({ spaceId: pg.space_id, parentPageId: pg.id, title: '' });
-      if (error) { window.dotToast(window.dotErr(error), 'error'); return; }
+      const { page, error } = await liveApi.createPage({ spaceId: pg.space_id, parentPageId: pg.id, title: '' });
+      if (error) { dotToast(dotErr(error), 'error'); return; }
       if (page) setBaseRoute({ kind: 'page', id: page.id, spaceId: pg.space_id });
       setBaseTick((n) => n + 1);
     }
@@ -226,8 +239,8 @@ function Home({ onGo, initialTab, live }) {
     }
     else if (action === 'delete') {
       if (!window.confirm(`Удалить страницу «${pg.title || 'Без заголовка'}»? Действие можно отменить.`)) return;
-      const { page: snapshot } = await window.live.loadPage(pg.id);
-      await window.live.deletePage(pg.id);
+      const { page: snapshot } = await liveApi.loadPage(pg.id);
+      await liveApi.deletePage(pg.id);
       if (baseRoute.kind === 'page' && baseRoute.id === pg.id) setBaseRoute({ kind: 'space', id: pg.space_id });
       setBaseTick((n) => n + 1);
       setUndoToast({ kind: 'page', id: pg.id, snapshot, label: 'Страница удалена' });
@@ -235,14 +248,14 @@ function Home({ onGo, initialTab, live }) {
   };
 
   const handleMove = async ({ spaceId: targetSpaceId, parentPageId }) => {
-    if (!movePicker || !window.live) return;
+    if (!movePicker || !liveApi) return;
     const pageId = movePicker.pageId;
     setMovePicker(null);
-    const { error } = await window.sb.from('pages').update({
+    const { error } = await sb.from('pages').update({
       space_id: targetSpaceId,
       parent_page_id: parentPageId,
     }).eq('id', pageId);
-    if (error) window.dotToast(window.dotErr(error), 'error');
+    if (error) dotToast(dotErr(error), 'error');
     setBaseTick((n) => n + 1);
   };
 
@@ -254,46 +267,46 @@ function Home({ onGo, initialTab, live }) {
   };
 
   const handleComposerSubmit = async ({ title, dueIso, priority }) => {
-    if (!window.live) return;
+    if (!liveApi) return;
     const prioMap = { 'Срочно': 'urgent', 'Обычный': 'medium', 'Низкий': 'low' };
     const dbPriority = prioMap[priority] || null;
     if (editingTask) {
-      const { task, error } = await window.live.updateTask(editingTask.id, { title, dueIso, priority: dbPriority });
-      if (error) { window.dotToast(window.dotErr(error), 'error'); return; }
+      const { task, error } = await liveApi.updateTask(editingTask.id, { title, dueIso, priority: dbPriority });
+      if (error) { dotToast(dotErr(error), 'error'); return; }
       if (task) setTasks((ts) => ts.map((t) => t.id === task.id ? task : t));
     } else {
-      const { task, error } = await window.live.createTask(title, dueIso, dbPriority);
-      if (error) { window.dotToast(window.dotErr(error), 'error'); return; }
+      const { task, error } = await liveApi.createTask(title, dueIso, dbPriority);
+      if (error) { dotToast(dotErr(error), 'error'); return; }
       if (task) {
-        window.dotHaptic?.('light');
+        dotHaptic?.('light');
         setTasks((ts) => [task, ...ts]);
       }
     }
   };
 
   const handleDelete = async () => {
-    if (!editingTask || !window.live) return;
+    if (!editingTask || !liveApi) return;
     const id = editingTask.id;
     const snapshot = tasks.find((t) => t.id === id);
-    window.dotHaptic?.('medium');
+    dotHaptic?.('medium');
     setTasks((ts) => ts.filter((t) => t.id !== id));
-    await window.live.deleteTask(id);
+    await liveApi.deleteTask(id);
     setUndoToast({ kind: 'task', id, snapshot, label: 'Задача удалена' });
   };
 
   const handleUndo = async () => {
-    if (!undoToast || !window.live) return;
+    if (!undoToast || !liveApi) return;
     if (undoToast.kind === 'task') {
-      await window.live.restoreTask(undoToast.id);
+      await liveApi.restoreTask(undoToast.id);
       if (undoToast.snapshot) setTasks((ts) => [undoToast.snapshot, ...ts]);
     } else if (undoToast.kind === 'habit') {
-      await window.live.restoreHabit(undoToast.id);
+      await liveApi.restoreHabit(undoToast.id);
       setHabitsTick((n) => n + 1);
     } else if (undoToast.kind === 'space') {
-      await window.live.restoreSpace(undoToast.id);
+      await liveApi.restoreSpace(undoToast.id);
       setBaseTick((n) => n + 1);
     } else if (undoToast.kind === 'page') {
-      await window.live.restorePage(undoToast.id);
+      await liveApi.restorePage(undoToast.id);
       setBaseTick((n) => n + 1);
     }
     setUndoToast(null);
@@ -788,11 +801,11 @@ function HabitsView({ live, onAdd, onEdit }) {
   };
 
   if (!live) {
-    // Статичный артборд из window.HABITS — как было.
+    // Статичный артборд из HABITS — как было.
     const todayIdx = 3;
     return (
       <div style={{ borderTop: '1px solid var(--line)' }}>
-        {window.HABITS.map((h) => (
+        {HABITS.map((h) => (
           <div key={h.id} style={{ padding: '16px 24px', borderBottom: '1px solid var(--line)' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
               <div style={{ flex: 1, minWidth: 0, fontSize: 15, fontWeight: 500 }}>{h.title}</div>
@@ -837,7 +850,7 @@ function HabitsView({ live, onAdd, onEdit }) {
 }
 
 function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
-  const cachedHabits = window.live?.getCachedHabits?.() || [];
+  const cachedHabits = liveApi?.getCachedHabits?.() || [];
   const [habits, setHabits] = useStateH(cachedHabits);
   const [logs, setLogs]     = useStateH(new Map()); // habitId → Set<YYYY-MM-DD>
   const [streaks, setStreaks] = useStateH({});
@@ -845,23 +858,23 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
   const [loading, setLoading] = useStateH(!cachedHabits.length);
 
   const today = new Date(); today.setHours(0,0,0,0);
-  const monday = window.dotLiveHelpers.mondayOf(today);
+  const monday = dotLiveHelpers.mondayOf(today);
   const weekDates = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(monday); d.setDate(d.getDate() + i); return d;
   });
   const todayIdx = weekDates.findIndex(d => +d === +today);
-  const todayKey = window.dotLiveHelpers.ymd(today);
+  const todayKey = dotLiveHelpers.ymd(today);
 
   const reload = async () => {
-    if (!window.live) return;
+    if (!liveApi) return;
     const [{ habits: h }, { logs: l }] = await Promise.all([
-      window.live.loadHabits(),
-      window.live.loadLogsForWeek(today),
+      liveApi.loadHabits(),
+      liveApi.loadLogsForWeek(today),
     ]);
     setHabits(h);
     setLogs(l);
     // streaks per habit
-    const entries = await Promise.all(h.map(async (hh) => [hh.id, (await window.live.loadStreak(hh.id)).streak]));
+    const entries = await Promise.all(h.map(async (hh) => [hh.id, (await liveApi.loadStreak(hh.id)).streak]));
     setStreaks(Object.fromEntries(entries));
     setLoading(false);
   };
@@ -869,7 +882,7 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
   useEffectH(() => { reload(); }, []);
 
   const handleToday = async (habit) => {
-    window.dotHaptic?.('light');
+    dotHaptic?.('light');
     // Optimistic toggle
     const habitLogs = new Set(logs.get(habit.id) || []);
     const wasDone = habitLogs.has(todayKey);
@@ -877,9 +890,9 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
     const next = new Map(logs); next.set(habit.id, habitLogs);
     setLogs(next);
     setStreaks(s => ({ ...s, [habit.id]: Math.max(0, (s[habit.id] || 0) + (wasDone ? -1 : 1)) }));
-    await window.live.toggleHabitDay(habit.id, today);
+    await liveApi.toggleHabitDay(habit.id, today);
     // Refresh streak (more accurate than optimistic +/-1)
-    const { streak } = await window.live.loadStreak(habit.id);
+    const { streak } = await liveApi.loadStreak(habit.id);
     setStreaks(s => ({ ...s, [habit.id]: streak }));
   };
 
@@ -926,7 +939,7 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
             </div>
             <div style={gridStyle}>
               {weekDates.map((d, i) => {
-                const key = window.dotLiveHelpers.ymd(d);
+                const key = dotLiveHelpers.ymd(d);
                 const done = habitLogs.has(key);
                 const isToday = i === todayIdx;
                 const accentColor = h.color || 'var(--accent)';
@@ -1000,7 +1013,7 @@ function BaseViewMock({ onGo }) {
   const [openSpaces, setOpenSpaces] = useStateH({ 'sp-work': true, 'sp-life': true, 'sp-ref': false });
   const [openPages, setOpenPages] = useStateH({});
   const [q, setQ] = useStateH('');
-  const pinned = collectPages(window.BASE_TREE).filter((p) => window.PINNED_PAGES.includes(p.id));
+  const pinned = collectPages(BASE_TREE).filter((p) => PINNED_PAGES.includes(p.id));
 
   const toggleSpace = (id) => setOpenSpaces((s) => ({ ...s, [id]: !s[id] }));
   const togglePage  = (id) => setOpenPages((s) => ({ ...s, [id]: !s[id] }));
@@ -1027,7 +1040,7 @@ function BaseViewMock({ onGo }) {
       )}
 
       <BaseHeader>Пространства</BaseHeader>
-      {window.BASE_TREE.map((sp) => {
+      {BASE_TREE.map((sp) => {
         const SpaceIcon = SPACE_ICON[sp.iconKey] || IconFolder;
         return (
         <div key={sp.id}>
@@ -1143,8 +1156,8 @@ function BaseViewLive({ route, setRoute, hint, onPageDelete, onSpaceAction, onPa
 function BaseTreeView({ setRoute, hint, onSpaceAction, onPageAction }) {
   // Warm cache: при первом рендере собираем пространства и страницы из кэша,
   // чтобы дерево «Базы» появилось мгновенно. Фоновый reload подтянет свежее.
-  const cachedSpaces = window.live?.getCachedSpaces?.() || [];
-  const cachedPages = window.live?.getCachedPages?.() || [];
+  const cachedSpaces = liveApi?.getCachedSpaces?.() || [];
+  const cachedPages = liveApi?.getCachedPages?.() || [];
   const buildPagesBySpace = (sps, allPages) => {
     const byId = {};
     sps.forEach((sp) => { byId[sp.id] = { all: [], topLevel: [], childrenByParent: {} }; });
@@ -1170,11 +1183,11 @@ function BaseTreeView({ setRoute, hint, onSpaceAction, onPageAction }) {
   const [q, setQ] = useStateH('');
 
   const reload = async () => {
-    if (!window.live) return;
+    if (!liveApi) return;
     // Параллельный fetch — было два await друг за другом, стало один Promise.all.
     const [{ spaces: sps }, { pages: allPages }] = await Promise.all([
-      window.live.loadSpaces(),
-      window.live.loadPages(),
+      liveApi.loadSpaces(),
+      liveApi.loadPages(),
     ]);
     setSpaces(sps);
     setPagesBySpace(buildPagesBySpace(sps, allPages));
@@ -1343,10 +1356,10 @@ function SpaceView({ spaceId, setRoute, onBack, hint, onPageAction }) {
   const [loading, setLoading] = useStateH(true);
 
   const reload = async () => {
-    const [{ page: _ignore }, { spaces }] = [{}, await window.live.loadSpaces()];
+    const [{ page: _ignore }, { spaces }] = [{}, await liveApi.loadSpaces()];
     const sp = spaces.find((s) => s.id === spaceId);
     setSpace(sp);
-    const { pages: ps } = await window.live.loadPages(spaceId);
+    const { pages: ps } = await liveApi.loadPages(spaceId);
     // Только страницы верхнего уровня
     setPages(ps.filter((p) => !p.parent_page_id));
     setLoading(false);
@@ -1354,8 +1367,8 @@ function SpaceView({ spaceId, setRoute, onBack, hint, onPageAction }) {
   useEffectH(() => { reload(); }, [spaceId, hint]);
 
   const createPage = async () => {
-    const { page, error } = await window.live.createPage({ spaceId, title: '' });
-    if (error) { window.dotToast(window.dotErr(error), 'error'); return; }
+    const { page, error } = await liveApi.createPage({ spaceId, title: '' });
+    if (error) { dotToast(dotErr(error), 'error'); return; }
     if (page) setRoute({ kind: 'page', id: page.id, spaceId });
   };
 
@@ -1529,7 +1542,7 @@ function PageView({ pageId, spaceId, onBack, hint, onDelete, onAction }) {
   const refs = React.useRef({});
 
   const reload = async () => {
-    const { page: p } = await window.live.loadPage(pageId);
+    const { page: p } = await liveApi.loadPage(pageId);
     if (p) {
       setPage(p);
       setTitle(p.title || '');
@@ -1545,7 +1558,7 @@ function PageView({ pageId, spaceId, onBack, hint, onDelete, onAction }) {
     if (loading || !page) return;
     const t = setTimeout(async () => {
       const trimmed = blocks.length === 1 && !blocks[0].content && blocks[0].type === 'text' ? [] : blocks;
-      await window.live.updatePage(pageId, { title, blocks: trimmed, properties });
+      await liveApi.updatePage(pageId, { title, blocks: trimmed, properties });
       setSavedAt(Date.now());
     }, 600);
     return () => clearTimeout(t);
@@ -1877,10 +1890,10 @@ function ImageBlockView({ block, onChange }) {
     if (!file) return;
     setBusy(true);
     setErr('');
-    const { url, error } = await window.live.uploadImage(file);
+    const { url, error } = await liveApi.uploadImage(file);
     setBusy(false);
     if (error) {
-      setErr(window.dotErr(error) || 'Не удалось загрузить');
+      setErr(dotErr(error) || 'Не удалось загрузить');
       return;
     }
     onChange(url);
@@ -2383,8 +2396,8 @@ function MovePickerSheet({ movePicker, onClose, onPick }) {
 
   React.useEffect(() => {
     (async () => {
-      const { spaces: sps } = await window.live.loadSpaces();
-      const { pages: allPages } = await window.live.loadPages();
+      const { spaces: sps } = await liveApi.loadSpaces();
+      const { pages: allPages } = await liveApi.loadPages();
       const byId = {};
       sps.forEach((sp) => { byId[sp.id] = []; });
       allPages.forEach((p) => {
@@ -2498,12 +2511,12 @@ function ProfileView({ onGo, live }) {
   const [data, setData] = useStateH(live ? null : MOCK);
 
   useEffectH(() => {
-    if (!live || !window.live) return;
+    if (!live || !liveApi) return;
     let cancelled = false;
     (async () => {
       const [{ profile }, { stats }] = await Promise.all([
-        window.live.loadProfile(),
-        window.live.loadStats(),
+        liveApi.loadProfile(),
+        liveApi.loadStats(),
       ]);
       if (cancelled || !profile) return;
       setData({
@@ -2583,7 +2596,7 @@ function ProfileView({ onGo, live }) {
 
       <div style={{ padding: '22px 24px 8px', textAlign: 'center' }}>
         <button onClick={async () => {
-          if (live && window.live) await window.live.signOut();
+          if (live && liveApi) await liveApi.signOut();
           onGo && onGo('login');
         }} style={{
           background: 'none', border: 'none', color: '#E44',

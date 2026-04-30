@@ -1,4 +1,9 @@
 import React from 'react';
+import {
+  IconBook, IconCalendar, IconChevronLeft, IconChevronRight, IconClock,
+  IconFile, IconFlag, IconFolder, IconHash, IconList, IconLock, IconPin, IconTarget,
+} from './icons.jsx';
+import { IosKeyboard } from './keyboard.jsx';
 // Inline composers: создание задачи и страницы в базе.
 // Ключевая идея — модификаторы вынесены в отдельный ряд чипов НАД клавиатурой,
 // так что они всегда видны и доступны одним тапом.

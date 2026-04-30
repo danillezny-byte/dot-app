@@ -1,4 +1,7 @@
 import React from 'react';
+import { IconChevronLeft, IconMail } from './icons.jsx';
+import { Button, Field, Logo, Checkbox } from './phone.jsx';
+import { live as liveApi, dotErr, dotToast, dotShouldOnboard } from './live.jsx';
 // Auth flow screens — Login, Register, Reset, Onboarding, Migration dialog.
 
 const { useState: useStateA } = React;
@@ -33,16 +36,16 @@ function Login({ onGo, live }) {
     if (!email.includes('@')) { setErr('Введите корректный email'); return; }
     if (pwd.length < 6) { setErr('Пароль короче 6 символов'); return; }
     setErr('');
-    if (live && window.live) {
+    if (live) {
       setBusy(true);
-      const { error } = await window.live.signIn(email.trim(), pwd);
+      const { error } = await liveApi.signIn(email.trim(), pwd);
       setBusy(false);
-      if (error) { setErr(window.dotErr(error) || 'Не удалось войти'); return; }
+      if (error) { setErr(dotErr(error) || 'Не удалось войти'); return; }
     }
     // Если юзер на этом устройстве ещё не проходил onboarding (например,
     // зарегистрировался на другом устройстве и впервые тут логинится) —
     // показываем приветствие. Иначе — сразу в home.
-    onGo && onGo(window.dotShouldOnboard?.() ? 'onboarding' : 'home');
+    onGo && onGo(dotShouldOnboard?.() ? 'onboarding' : 'home');
   };
 
   return (
@@ -83,8 +86,8 @@ function Login({ onGo, live }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <Button kind="ghost" full onClick={async () => {
-          const res = await window.live.signInWithGoogle();
-          if (res?.error) window.dotToast(window.dotErr(res.error) || 'Не удалось войти через Google', 'error');
+          const res = await liveApi.signInWithGoogle();
+          if (res?.error) dotToast(dotErr(res.error) || 'Не удалось войти через Google', 'error');
           // При успехе Supabase сам редиректит на accounts.google.com,
           // потом обратно на origin — в этот момент LiveApp заметит сессию через getUser().
         }}><GoogleIcon /> Продолжить с Google</Button>
@@ -116,11 +119,11 @@ function Register({ onGo, live }) {
 
   const submit = async () => {
     setErr('');
-    if (live && window.live) {
+    if (live) {
       setBusy(true);
-      const { session, error } = await window.live.signUp(email.trim(), pwd, name);
+      const { session, error } = await liveApi.signUp(email.trim(), pwd, name);
       setBusy(false);
-      if (error) { setErr(window.dotErr(error) || 'Не удалось зарегистрироваться'); return; }
+      if (error) { setErr(dotErr(error) || 'Не удалось зарегистрироваться'); return; }
       if (!session) {
         setErr('Аккаунт создан, но требуется подтверждение email. Проверьте почту.');
         return;
@@ -184,11 +187,11 @@ function Reset({ onGo, live }) {
 
   const submit = async () => {
     setErr('');
-    if (live && window.live) {
+    if (live) {
       setBusy(true);
-      const { error } = await window.live.resetPassword(email.trim());
+      const { error } = await liveApi.resetPassword(email.trim());
       setBusy(false);
-      if (error) { setErr(window.dotErr(error) || 'Не удалось отправить ссылку'); return; }
+      if (error) { setErr(dotErr(error) || 'Не удалось отправить ссылку'); return; }
     }
     setSent(true);
   };

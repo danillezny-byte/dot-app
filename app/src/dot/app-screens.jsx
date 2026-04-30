@@ -308,7 +308,9 @@ function Home({ onGo, initialTab, live }) {
           PullToRefresh оборачивает scroll-зону: tasks/habits/base поддерживают
           жест «потянуть вниз → обновить»; на 'me' — нет смысла, там профиль. */}
       <PullToRefresh key={tab} onRefresh={tab === 'me' ? null : onPullRefresh}>
-        <div className="dot-tab-fade">
+        {/* minHeight 100% — чтобы дочерние EmptyShell с minHeight: 100%
+            корректно растянулись (иначе их % считается от 0). */}
+        <div className="dot-tab-fade" style={{ minHeight: '100%' }}>
           {tab === 'tasks'  && <TasksView tasks={tasks} toggle={toggle} loading={loading} live={live} onAdd={openComposer} onEdit={live ? openEditor : undefined} />}
           {tab === 'habits' && <HabitsView key={habitsTick} live={live} onAdd={live ? openHabitComposer : undefined} onEdit={live ? openHabitEditor : undefined} />}
           {tab === 'base'   && <BaseView onGo={onGo} live={live} route={baseRoute} setRoute={setBaseRoute} hint={baseTick} onPageDelete={handlePageDelete} onSpaceAction={handleSpaceAction} onPageAction={handlePageAction} />}

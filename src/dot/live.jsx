@@ -226,6 +226,11 @@ const live = {
     if (plain) Object.keys(plain).forEach((k) => map.set(k, new Set(plain[k])));
     return map;
   },
+  // Streak-цифры (огонёк в карточке привычки) — отдельный blob {habitId: number}.
+  // Loader их не пишет (они высчитываются на стороне клиента из логов 60 дней),
+  // вызываем cacheStreaks в HabitsViewLive после reload-а.
+  getCachedStreaks() { return cacheGet('streaks') || {}; },
+  cacheStreaks(map) { cacheSet('streaks', map); },
 
   // Google OAuth. Открывает редирект на accounts.google.com → после успеха
   // возвращает на window.location.origin (этот URL должен быть в Supabase

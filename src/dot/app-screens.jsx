@@ -854,9 +854,10 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
   // не кэшим — пересчитаются через полсекунды и обновятся молча.
   const cachedHabits = liveApi?.getCachedHabits?.() || [];
   const cachedLogs = liveApi?.getCachedLogsForWeek?.() || new Map();
+  const cachedStreaks = liveApi?.getCachedStreaks?.() || {};
   const [habits, setHabits] = useStateH(cachedHabits);
   const [logs, setLogs]     = useStateH(cachedLogs);
-  const [streaks, setStreaks] = useStateH({});
+  const [streaks, setStreaks] = useStateH(cachedStreaks);
   const [loading, setLoading] = useStateH(!cachedHabits.length);
 
   const today = new Date(); today.setHours(0,0,0,0);
@@ -875,9 +876,12 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
     ]);
     setHabits(h);
     setLogs(l);
-    // streaks per habit
+    // streaks per habit (параллельно)
     const entries = await Promise.all(h.map(async (hh) => [hh.id, (await liveApi.loadStreak(hh.id)).streak]));
-    setStreaks(Object.fromEntries(entries));
+    const streakMap = Object.fromEntries(entries);
+    setStreaks(streakMap);
+    // Кэшируем чтобы при следующем заходе огонёк появлялся мгновенно.
+    liveApi.cacheStreaks?.(streakMap);
     setLoading(false);
   };
 

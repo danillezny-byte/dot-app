@@ -28,9 +28,17 @@ function Onboarding({ onGo }) {
   const [step, setStep] = useStateO(0);
   const cur = STEPS[step];
 
+  // finish — единая точка выхода. Ставит флаг чтобы при следующем логине
+  // приветствие не показывалось, и идёт в home минуя Migration (тот
+  // показывает мок-числа 24/6/12, для реальных новых юзеров — путаница).
+  const finish = () => {
+    window.dotMarkOnboarded?.();
+    onGo && onGo('home');
+  };
+
   const next = () => {
     if (step < STEPS.length - 1) setStep(step + 1);
-    else onGo && onGo('migration');
+    else finish();
   };
 
   return (
@@ -58,9 +66,9 @@ function Onboarding({ onGo }) {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <Button kind="primary" full onClick={next}>{step < STEPS.length - 1 ? 'Далее' : 'Продолжить'}</Button>
+        <Button kind="primary" full onClick={next}>{step < STEPS.length - 1 ? 'Далее' : 'Начать'}</Button>
         {step < STEPS.length - 1 && (
-          <button onClick={() => onGo && onGo('migration')} style={{ background: 'none', border: 'none', color: 'var(--sub)', fontSize: 14, cursor: 'pointer', padding: 12, fontFamily: 'inherit' }}>Пропустить</button>
+          <button onClick={finish} style={{ background: 'none', border: 'none', color: 'var(--sub)', fontSize: 14, cursor: 'pointer', padding: 12, fontFamily: 'inherit' }}>Пропустить</button>
         )}
       </div>
     </div>

@@ -55,6 +55,17 @@ function cacheClearAll() {
 }
 window.dotCache = { get: cacheGet, set: cacheSet, clearAll: cacheClearAll };
 
+// ─── Флаг первого захода ──────────────────────────────────────
+// localStorage['dot-onboarded'] = '1' выставляется когда юзер прошёл
+// (или пропустил) onboarding. Дальше при логинах не показываем.
+// Сбрасывается на signOut (новый юзер на этом устройстве пройдёт заново).
+window.dotShouldOnboard = function () {
+  return localStorage.getItem('dot-onboarded') !== '1';
+};
+window.dotMarkOnboarded = function () {
+  localStorage.setItem('dot-onboarded', '1');
+};
+
 // ─── Перевод технических ошибок Supabase в человеческие ──────
 // Юзер не должен видеть «invalid login credentials». Видит «Неверный email
 // или пароль». Если для конкретной ошибки нет перевода — возвращаем оригинал
@@ -158,6 +169,9 @@ window.live = {
   async signOut() {
     if (sb) await sb.auth.signOut();
     cacheClearAll(); // важно: чужой кэш не показываем
+    // Сбрасываем onboarding-флаг — следующий юзер на этом устройстве
+    // тоже должен увидеть приветствие.
+    try { localStorage.removeItem('dot-onboarded'); } catch {}
   },
 
   // Sync-геттеры из кэша. Возвращают [] если нет данных.
@@ -654,16 +668,43 @@ const THEME_VARS = {
   dark:  { '--bg':'#000000','--surface':'#1C1C1E','--text':'#FFF','--sub':'rgba(235,235,245,0.6)','--line':'rgba(84,84,88,0.5)','--chip':'rgba(255,255,255,0.06)' },
   warm:  { '--bg':'#F4F0E8','--surface':'#FBF8F1','--text':'#2A2418','--sub':'rgba(42,36,24,0.6)','--line':'rgba(42,36,24,0.1)','--chip':'rgba(42,36,24,0.04)' },
 };
+// Какую тему отдать если в localStorage ничего нет:
+// смотрим на prefers-color-scheme устройства (iOS dark mode, Windows тема).
+// Если медиа-query не поддерживается (старый Safari) — fallback 'light'.
+function detectSystemTheme() {
+  try {
+    if (window.matchMedia?.('(prefers-color-scheme: dark)').matches) return 'dark';
+  } catch {}
+  return 'light';
+}
+
 window.dotTheme = {
-  get() { return localStorage.getItem('dot-theme') || 'light'; },
+  get() { return localStorage.getItem('dot-theme') || detectSystemTheme(); },
   set(name) {
     const vars = THEME_VARS[name] || THEME_VARS.light;
     Object.entries(vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
     localStorage.setItem('dot-theme', name);
   },
-  apply() { window.dotTheme.set(window.dotTheme.get()); },
+  // apply() для первого захода: НЕ пишем в localStorage (set делает это),
+  // а просто применяем переменные. Иначе системную тему мы бы «зафиксировали»
+  // и юзер потом не получал бы автоматическое обновление при смене системной.
+  apply() {
+    const stored = localStorage.getItem('dot-theme');
+    const name = stored || detectSystemTheme();
+    const vars = THEME_VARS[name] || THEME_VARS.light;
+    Object.entries(vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
+  },
 };
 window.dotTheme.apply();
+
+// Если юзер не выбирал тему явно — слушаем смену системной и подстраиваемся.
+// Например iOS включил Dark в 22:00 — наша вкладка (если открыта) тоже потемнеет.
+try {
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  mq.addEventListener?.('change', () => {
+    if (!localStorage.getItem('dot-theme')) window.dotTheme.apply();
+  });
+} catch {}
 
 // ─── Toast-уведомления ─────────────────────────────────────────
 // Лёгкая замена alert(): мягкая плашка сверху, сама уезжает через 3.5с.

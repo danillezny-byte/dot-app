@@ -39,7 +39,10 @@ function Login({ onGo, live }) {
       setBusy(false);
       if (error) { setErr(window.dotErr(error) || 'Не удалось войти'); return; }
     }
-    onGo && onGo('home');
+    // Если юзер на этом устройстве ещё не проходил onboarding (например,
+    // зарегистрировался на другом устройстве и впервые тут логинится) —
+    // показываем приветствие. Иначе — сразу в home.
+    onGo && onGo(window.dotShouldOnboard?.() ? 'onboarding' : 'home');
   };
 
   return (

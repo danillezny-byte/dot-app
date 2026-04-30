@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#F5F5F7">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<title>Политика конфиденциальности — dot.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root { --bg: #F5F5F7; --surface: #FFFFFF; --text: #111; --sub: rgba(60,60,67,0.6); --line: rgba(60,60,67,0.12); --accent: #6D3CF0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; line-height: 1.6; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 48px 24px 96px; }
+  .brand { font-size: 22px; font-weight: 700; letter-spacing: -0.5; text-decoration: none; color: var(--text); }
+  .brand span { color: var(--accent); }
+  h1 { font-size: 32px; font-weight: 600; letter-spacing: -0.6; margin: 32px 0 8px; }
+  h2 { font-size: 18px; font-weight: 600; margin: 32px 0 8px; }
+  p, li { font-size: 15px; color: var(--text); }
+  .meta { color: var(--sub); font-size: 13px; margin: 0 0 24px; }
+  ul { padding-left: 22px; margin: 8px 0; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .nav { display: flex; gap: 16px; margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 14px; color: var(--sub); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="/" class="brand">dot<span>.</span></a>
+
+  <h1>Политика конфиденциальности</h1>
+  <p class="meta">Последнее обновление: 30 апреля 2026 г.</p>
+
+  <p>dot. (далее — «Сервис», «мы») уважает вашу приватность. Этот документ объясняет, какие данные мы собираем, зачем и как храним.</p>
+
+  <h2>1. Какие данные мы собираем</h2>
+  <ul>
+    <li><strong>Учётная запись:</strong> email, имя, пароль (в виде криптографического хеша), URL аватара, выбранный тариф.</li>
+    <li><strong>Контент:</strong> ваши задачи, привычки, страницы базы знаний, изображения которые вы загружаете.</li>
+    <li><strong>Технические данные:</strong> анонимные метрики производительности (время загрузки страницы) через Vercel Speed Insights. Без идентификации пользователей.</li>
+  </ul>
+
+  <h2>2. Зачем мы это собираем</h2>
+  <ul>
+    <li>Чтобы Сервис работал — авторизация, синхронизация ваших данных между устройствами.</li>
+    <li>Чтобы улучшать производительность приложения.</li>
+    <li>Чтобы связаться с вами, если вы попросите поддержку.</li>
+  </ul>
+  <p>Мы <strong>не передаём</strong> ваши данные третьим лицам, не продаём их рекламодателям и не используем для построения рекламных профилей.</p>
+
+  <h2>3. Где данные хранятся</h2>
+  <p>Данные хранятся в защищённой инфраструктуре <a href="https://supabase.com" target="_blank" rel="noopener">Supabase</a> (PostgreSQL, шифрование at-rest и in-transit). Доступ ограничен правилами Row-Level Security: каждый пользователь видит и может изменять только свои данные.</p>
+
+  <h2>4. Сторонние сервисы</h2>
+  <ul>
+    <li><strong>Google OAuth</strong> — если вы вошли через Google, мы получаем только email и имя из вашего профиля. Не получаем доступ к Gmail, контактам, диску.</li>
+    <li><strong>Vercel</strong> — хостинг приложения и аналитика производительности.</li>
+    <li><strong>Supabase</strong> — база данных и хранилище файлов.</li>
+  </ul>
+
+  <h2>5. Ваши права</h2>
+  <p>Вы можете в любой момент:</p>
+  <ul>
+    <li>Изменить ваши данные через раздел «Профиль».</li>
+    <li>Удалить аккаунт через «Настройки → Аккаунт → Удалить аккаунт». Удаление необратимо: все ваши задачи, привычки, страницы и изображения стираются безвозвратно в течение 24 часов.</li>
+    <li>Запросить экспорт ваших данных, написав на email ниже.</li>
+  </ul>
+
+  <h2>6. Cookies и localStorage</h2>
+  <p>Мы используем localStorage для хранения сессии (чтобы вы не выходили из аккаунта при перезагрузке страницы), вашего выбора темы и кэша данных для быстрого первого экрана. Сторонних трекеров и рекламных cookies нет.</p>
+
+  <h2>7. Изменения в политике</h2>
+  <p>Если эта политика изменится, мы обновим дату вверху и уведомим активных пользователей по email об изменениях, влияющих на ваши данные.</p>
+
+  <h2>8. Контакты</h2>
+  <p>По вопросам приватности: <a href="mailto:danillezny@gmail.com">danillezny@gmail.com</a></p>
+
+  <div class="nav">
+    <a href="/">Назад в приложение</a>
+    <a href="/terms.html">Условия использования</a>
+  </div>
+</div>
+</body>
+</html>

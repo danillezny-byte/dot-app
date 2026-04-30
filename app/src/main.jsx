@@ -68,7 +68,11 @@ function LiveApp() {
   useEffect(() => {
     if (!window.live) return;
     window.live.getUser().then((user) => {
-      if (user && (screen === 'login' || screen === 'register')) setScreen('home');
+      if (user && (screen === 'login' || screen === 'register')) {
+        // Уже залогинен (например, переоткрыл вкладку): если ещё не видел
+        // onboarding на этом устройстве — показываем, иначе сразу в home.
+        setScreen(window.dotShouldOnboard?.() ? 'onboarding' : 'home');
+      }
     });
   }, []);
 

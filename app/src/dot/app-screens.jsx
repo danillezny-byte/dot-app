@@ -3,7 +3,7 @@ import React from 'react';
 // Structure: Header (logo + ⋯), body, FAB, bottom tabs (no labels glyphs only).
 // Tabs: Задачи · Привычки · База · Профиль
 
-const { useState: useStateH, useEffect: useEffectH } = React;
+const { useState: useStateH, useEffect: useEffectH, useRef: useRefH } = React;
 
 function Home({ onGo, initialTab, live }) {
   const [tab, setTab] = useStateH(initialTab || 'tasks');
@@ -18,6 +18,7 @@ function Home({ onGo, initialTab, live }) {
   const [habitComposerOpen, setHabitComposerOpen] = useStateH(false);
   const [editingHabit, setEditingHabit] = useStateH(null);
   const [habitsTick, setHabitsTick] = useStateH(0); // increment to force HabitsView reload
+  const [tasksTick, setTasksTick] = useStateH(0);   // increment to force tasks reload (pull-to-refresh)
   const [baseRoute, setBaseRoute] = useStateH({ kind: 'tree' });
   const [baseTick, setBaseTick] = useStateH(0); // force base reload after CRUD
   const [editingSpace, setEditingSpace] = useStateH(null);
@@ -35,7 +36,27 @@ function Home({ onGo, initialTab, live }) {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [live]);
+  }, [live, tasksTick]);
+
+  // pull-to-refresh: вызывается из PullToRefresh-компонента вокруг scroll-зоны
+  // в зависимости от текущего таба. Возвращает Promise — индикатор крутится
+  // до его resolve.
+  const onPullRefresh = async () => {
+    window.dotHaptic?.('light');
+    if (tab === 'tasks') {
+      setTasksTick(t => t + 1);
+      // Ждём один RAF чтобы дать React смонтировать новый useEffect и
+      // выпустить запрос. Реальное время refresh — в loadTasks; UI скрывает
+      // спиннер сразу после следующего рендера. Достаточно для ощущения «работает».
+      await new Promise(r => setTimeout(r, 400));
+    } else if (tab === 'habits') {
+      setHabitsTick(t => t + 1);
+      await new Promise(r => setTimeout(r, 400));
+    } else if (tab === 'base') {
+      setBaseTick(t => t + 1);
+      await new Promise(r => setTimeout(r, 400));
+    }
+  };
 
   // Подгружаем space-данные когда заходим в edit-space
   useEffectH(() => {
@@ -57,6 +78,7 @@ function Home({ onGo, initialTab, live }) {
   }, [undoToast]);
 
   const toggle = (id) => {
+    window.dotHaptic?.('light');
     setTasks((ts) => ts.map((t) => t.id === id ? { ...t, done: !t.done } : t));
     if (live && window.live) {
       const cur = tasks.find((t) => t.id === id);
@@ -242,7 +264,10 @@ function Home({ onGo, initialTab, live }) {
     } else {
       const { task, error } = await window.live.createTask(title, dueIso, dbPriority);
       if (error) { window.dotToast(window.dotErr(error), 'error'); return; }
-      if (task) setTasks((ts) => [task, ...ts]);
+      if (task) {
+        window.dotHaptic?.('light');
+        setTasks((ts) => [task, ...ts]);
+      }
     }
   };
 
@@ -250,6 +275,7 @@ function Home({ onGo, initialTab, live }) {
     if (!editingTask || !window.live) return;
     const id = editingTask.id;
     const snapshot = tasks.find((t) => t.id === id);
+    window.dotHaptic?.('medium');
     setTasks((ts) => ts.filter((t) => t.id !== id));
     await window.live.deleteTask(id);
     setUndoToast({ kind: 'task', id, snapshot, label: 'Задача удалена' });
@@ -276,12 +302,19 @@ function Home({ onGo, initialTab, live }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', paddingBottom: 72, position: 'relative' }}>
       <DotHeader />
-      <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        {tab === 'tasks'  && <TasksView tasks={tasks} toggle={toggle} loading={loading} live={live} onAdd={openComposer} onEdit={live ? openEditor : undefined} />}
-        {tab === 'habits' && <HabitsView key={habitsTick} live={live} onAdd={live ? openHabitComposer : undefined} onEdit={live ? openHabitEditor : undefined} />}
-        {tab === 'base'   && <BaseView onGo={onGo} live={live} route={baseRoute} setRoute={setBaseRoute} hint={baseTick} onPageDelete={handlePageDelete} onSpaceAction={handleSpaceAction} onPageAction={handlePageAction} />}
-        {tab === 'me'     && <ProfileView onGo={onGo} live={live} />}
-      </div>
+      {/* key={tab} — каждый раз когда меняется вкладка, контейнер полностью
+          перемонтируется и срабатывает CSS-анимация dot-tab-fade (opacity).
+          Без движений и scale — тихий 150мс fade чтобы переход не был резким.
+          PullToRefresh оборачивает scroll-зону: tasks/habits/base поддерживают
+          жест «потянуть вниз → обновить»; на 'me' — нет смысла, там профиль. */}
+      <PullToRefresh key={tab} onRefresh={tab === 'me' ? null : onPullRefresh}>
+        <div className="dot-tab-fade">
+          {tab === 'tasks'  && <TasksView tasks={tasks} toggle={toggle} loading={loading} live={live} onAdd={openComposer} onEdit={live ? openEditor : undefined} />}
+          {tab === 'habits' && <HabitsView key={habitsTick} live={live} onAdd={live ? openHabitComposer : undefined} onEdit={live ? openHabitEditor : undefined} />}
+          {tab === 'base'   && <BaseView onGo={onGo} live={live} route={baseRoute} setRoute={setBaseRoute} hint={baseTick} onPageDelete={handlePageDelete} onSpaceAction={handleSpaceAction} onPageAction={handlePageAction} />}
+          {tab === 'me'     && <ProfileView onGo={onGo} live={live} />}
+        </div>
+      </PullToRefresh>
       <Fab onClick={live ? handleFab : undefined} />
       <DotTabs active={tab} onChange={setTab} />
       {live && composerOpen && (
@@ -471,6 +504,89 @@ function TasksView({ tasks, toggle, loading, live, onAdd, onEdit }) {
       {order.map(sect => (
         <TaskSection key={sect} title={sect} items={tasks.filter(t => t.when === sect)} toggle={toggle} onEdit={onEdit} />
       ))}
+    </div>
+  );
+}
+
+// ─── Pull-to-refresh ─────────────────────────────────────────
+// Стандартный мобильный жест: тянем вниз когда уже наверху списка → круглый
+// индикатор → отпускаем → onRefresh(). Работает на touch (мобила/планшет),
+// на десктопе ничего не делает.
+//
+// Дизайн: индикатор появляется в верхней области с opacity пропорционально
+// pull-distance, threshold 70px. После триггера показывает спиннер пока
+// onRefresh-Promise не resolve, потом откатывается обратно.
+const PULL_THRESHOLD = 70;
+const PULL_MAX = 110;
+
+function PullToRefresh({ onRefresh, children }) {
+  const ref = useRefH(null);
+  const [pull, setPull] = useStateH(0);          // текущая дистанция (px), 0 если не тянем
+  const [refreshing, setRefreshing] = useStateH(false);
+  const startY = useRefH(0);
+  const tracking = useRefH(false);
+
+  const onTouchStart = (e) => {
+    if (refreshing) return;
+    const el = ref.current;
+    if (!el || el.scrollTop > 0) return; // тянуть можно только когда уже наверху
+    startY.current = e.touches[0].clientY;
+    tracking.current = true;
+  };
+  const onTouchMove = (e) => {
+    if (!tracking.current || refreshing) return;
+    const dy = e.touches[0].clientY - startY.current;
+    if (dy <= 0) { setPull(0); return; }
+    // Резистанс: тянется всё медленнее по мере увеличения дистанции (как iOS).
+    const resisted = Math.min(PULL_MAX, dy * 0.5);
+    setPull(resisted);
+  };
+  const onTouchEnd = async () => {
+    if (!tracking.current) return;
+    tracking.current = false;
+    if (pull >= PULL_THRESHOLD && !refreshing) {
+      setRefreshing(true);
+      setPull(PULL_THRESHOLD); // фиксируем индикатор на пороге пока крутится
+      try { await onRefresh?.(); } catch {}
+      setRefreshing(false);
+    }
+    setPull(0);
+  };
+
+  // Индикатор: круг, opacity = pull/threshold, при threshold вращается.
+  const progress = Math.min(1, pull / PULL_THRESHOLD);
+  const showIndicator = pull > 0 || refreshing;
+
+  return (
+    <div
+      ref={ref}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      style={{
+        flex: 1, overflowY: 'auto', overflowX: 'hidden', position: 'relative',
+        // Сдвигаем контент вниз пока тянут — визуально content «следует за пальцем».
+        transform: pull ? `translateY(${pull}px)` : undefined,
+        transition: pull && !tracking.current ? 'transform 220ms ease' : 'none',
+      }}
+    >
+      {showIndicator && (
+        <div style={{
+          position: 'absolute', top: -50, left: 0, right: 0,
+          display: 'flex', justifyContent: 'center',
+          opacity: progress,
+          pointerEvents: 'none',
+        }}>
+          <div style={{
+            width: 28, height: 28, borderRadius: '50%',
+            border: '2.5px solid var(--line)',
+            borderTopColor: 'var(--accent)',
+            animation: refreshing ? 'dot-spin 0.8s linear infinite' : 'none',
+            transform: !refreshing ? `rotate(${progress * 360}deg)` : undefined,
+          }} />
+        </div>
+      )}
+      {children}
     </div>
   );
 }
@@ -733,6 +849,7 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
   useEffectH(() => { reload(); }, []);
 
   const handleToday = async (habit) => {
+    window.dotHaptic?.('light');
     // Optimistic toggle
     const habitLogs = new Set(logs.get(habit.id) || []);
     const wasDone = habitLogs.has(todayKey);

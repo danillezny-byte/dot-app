@@ -66,6 +66,21 @@ window.dotMarkOnboarded = function () {
   localStorage.setItem('dot-onboarded', '1');
 };
 
+// ─── Haptic feedback ──────────────────────────────────────────
+// Лёгкий тап через navigator.vibrate. На iOS работает только в установленной
+// PWA (Safari в обычном режиме игнорит — это by-design Apple). На Android
+// работает в любом Chrome.
+//   light  — 8мс  — отметка задачи, тоггл привычки на день
+//   medium — 14мс — создание/удаление, открытие сheet
+//   heavy  — 24мс — деструктивное подтверждение (удаление аккаунта)
+// Если тип не задан — light.
+const HAPTIC_MS = { light: 8, medium: 14, heavy: 24 };
+window.dotHaptic = function (kind = 'light') {
+  try {
+    navigator.vibrate?.(HAPTIC_MS[kind] || HAPTIC_MS.light);
+  } catch {} // браузеры без vibrate (старый Safari вне PWA) — тихо игнорируем
+};
+
 // ─── Перевод технических ошибок Supabase в человеческие ──────
 // Юзер не должен видеть «invalid login credentials». Видит «Неверный email
 // или пароль». Если для конкретной ошибки нет перевода — возвращаем оригинал
@@ -624,6 +639,45 @@ window.live = {
     if (upErr) return { error: upErr };
     const { data } = sb.storage.from('images').getPublicUrl(path);
     return { url: data?.publicUrl || null };
+  },
+
+  // Создаёт дефолтное пространство «Инбокс» с welcome-страницей внутри.
+  // Зовётся один раз — в конце onboarding. Идемпотентно: если у юзера уже
+  // есть какие-либо пространства, ничего не создаём (юзер мог зарегиться
+  // на другом устройстве и уже что-то накидать).
+  async createSmartInbox() {
+    if (!sb) return { error: { message: 'Supabase не подключён' } };
+    const { spaces } = await this.loadSpaces();
+    if (spaces && spaces.length > 0) return { skipped: true };
+
+    const { space, error: spaceErr } = await this.createSpace({
+      name: 'Инбокс',
+      icon: 'briefcase',
+      color: '#6E2BF5',
+      description: 'Куда складывать всё что не успело раскладываться',
+    });
+    if (spaceErr || !space) return { error: spaceErr };
+
+    // Welcome-страница с минимальным контентом — одно текст-блок-привет
+    // и три «check»-блока что попробовать. Юзер может удалить или переписать.
+    const { page, error: pageErr } = await this.createPage({
+      spaceId: space.id,
+      title: 'Привет 👋',
+    });
+    if (pageErr || !page) return { space, error: pageErr };
+
+    const blocks = [
+      { id: 'b1', type: 'text', content: 'Это твой первый блокнот в dot. Напишите сюда что угодно — мысли, ссылки, заметки.' },
+      { id: 'b2', type: 'heading', content: 'С чего начать' },
+      { id: 'b3', type: 'check', content: 'Создать первую задачу — нажми «+» внизу на вкладке Задачи', checked: false },
+      { id: 'b4', type: 'check', content: 'Завести привычку — то что хочешь делать каждый день', checked: false },
+      { id: 'b5', type: 'check', content: 'Создать ещё одно пространство в Базе — например «Работа» или «Учёба»', checked: false },
+      { id: 'b6', type: 'text', content: '' },
+      { id: 'b7', type: 'text', content: 'Тихо, по-человечески, без шума.' },
+    ];
+    await this.updatePage(page.id, { blocks });
+
+    return { space, page };
   },
 
   async duplicatePage(id) {

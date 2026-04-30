@@ -18,35 +18,33 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
-// Static-импорты dot/*-модулей. Порядок важен: IIFE-файлы (settings-deep2,
-// pickers, note-blocks) читают `const { IconX } = window` на самом старте —
-// иконки должны быть инициализированы раньше. Vite/Rollup сохраняют этот
-// порядок при сборке, потому что каждый импорт — side-effect-only.
-//
-// После того как все IIFE-файлы будут размотаны (Phase 3), эти импорты можно
-// будет переставить в произвольном порядке (или вообще делегировать
-// Vite-трекингу зависимостей через статический анализ).
+// Side-effect imports — нужны для файлов, чьи компоненты НЕ используются
+// напрямую в main.jsx, но используются другими dot/*-модулями через window.
+// После полной миграции потребителей на named-imports их можно будет убрать.
 import './dot/tokens.jsx';
-import './dot/live.jsx';
 import './dot/icons.jsx';
 import './dot/phone.jsx';
 import './dot/keyboard.jsx';
 import './dot/composers.jsx';
-import './dot/settings.jsx';
-import './dot/auth.jsx';
-import './dot/onboarding.jsx';
-import './dot/app-screens.jsx';
-// flow-diagram.jsx — наследие figma-canvas, не нужен в live-режиме.
-// import './dot/flow-diagram.jsx';
 import './dot/composer-variants.jsx';
 import './dot/settings-deep.jsx';
 import './dot/settings-deep2.jsx';
 import './dot/task-pickers.jsx';
 import './dot/habit-pickers.jsx';
-import './dot/profile-screens.jsx';
-import './dot/verify-email.jsx';
 import './dot/note-editor.jsx';
 import './dot/note-blocks.jsx';
+import './dot/verify-email.jsx';
+// flow-diagram.jsx — наследие figma-canvas, не нужен в live-режиме.
+
+// Named-imports для компонентов, которые main.jsx использует напрямую.
+// Эти импорты тоже триггерят side-effects своих файлов (window.X attachments).
+import './dot/live.jsx'; // не вытаскиваем имена — обращаемся через window.live ниже
+import { Login, Register, Reset } from './dot/auth.jsx';
+import { Onboarding, Migration } from './dot/onboarding.jsx';
+import { Home, Plans } from './dot/app-screens.jsx';
+import { ProfileEdit, SubscriptionManage, HelpSupport } from './dot/profile-screens.jsx';
+import { SettingsIndex, SettingsDetail } from './dot/settings.jsx';
+import { IconChevronLeft } from './dot/icons.jsx';
 
 // Шим window.React оставляем — IIFE-файлы могут где-то опираться на глобал,
 // + некоторые легаси-обращения (window.live доступ через window.React.useState).
@@ -81,10 +79,6 @@ function LiveApp() {
 
   const back = () => setScreen('home');
 
-  // Эти компоненты приходят из dot/* через window-globals (как в babel-standalone).
-  const { Login, Register, Reset, Onboarding, Migration, Home, Plans,
-          ProfileEdit, SubscriptionManage, HelpSupport } = window;
-
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative', overflowY: 'auto' }}>
       {screen === 'login'        && <Login {...props} />}
@@ -106,7 +100,6 @@ function LiveApp() {
 function SettingsLive({ onBack }) {
   const { useState } = React;
   const [id, setId] = useState('index');
-  const { SettingsIndex, SettingsDetail, IconChevronLeft } = window;
 
   if (id === 'index') {
     return (

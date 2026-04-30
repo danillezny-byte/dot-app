@@ -315,7 +315,14 @@ function Home({ onGo, initialTab, live }) {
           {tab === 'me'     && <ProfileView onGo={onGo} live={live} />}
         </div>
       </PullToRefresh>
-      <Fab onClick={live ? handleFab : undefined} />
+      {/* FAB прячем там, где «+» не имеет осмысленного действия:
+          - Профиль: незачем создавать задачу с экрана статистики
+          - Внутри страницы Базы: для добавления блоков юзается «/» в редакторе
+          - При открытом sheet'е создания/редактирования пространства: его всё
+            равно перекрывает, чтобы не было «двух плюсов» одновременно */}
+      {live && tab !== 'me' && !(tab === 'base' && (baseRoute.kind === 'page' || baseRoute.kind === 'create-space' || baseRoute.kind === 'edit-space')) && (
+        <Fab onClick={handleFab} />
+      )}
       <DotTabs active={tab} onChange={setTab} />
       {live && composerOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 50 }}>

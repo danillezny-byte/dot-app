@@ -850,11 +850,13 @@ function HabitsView({ live, onAdd, onEdit }) {
 }
 
 function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
+  // Warm cache: habits + week logs из localStorage. Streak-цифры (огонёк)
+  // не кэшим — пересчитаются через полсекунды и обновятся молча.
   const cachedHabits = liveApi?.getCachedHabits?.() || [];
+  const cachedLogs = liveApi?.getCachedLogsForWeek?.() || new Map();
   const [habits, setHabits] = useStateH(cachedHabits);
-  const [logs, setLogs]     = useStateH(new Map()); // habitId → Set<YYYY-MM-DD>
+  const [logs, setLogs]     = useStateH(cachedLogs);
   const [streaks, setStreaks] = useStateH({});
-  // loading=false если есть кэш — UI уже что-то показывает, refresh идёт молча.
   const [loading, setLoading] = useStateH(!cachedHabits.length);
 
   const today = new Date(); today.setHours(0,0,0,0);
@@ -2506,9 +2508,24 @@ function ProfileView({ onGo, live }) {
     name: 'Алиса Королёва', email: 'alice@mail.com', plan: 'plus',
     stats: { tasks: 127, streak: 12, pages: 42 },
   };
-  // В live-режиме стартуем с пустых данных и сразу прячем шапку до загрузки —
-  // чтобы не было вспышки моковой Алисы.
-  const [data, setData] = useStateH(live ? null : MOCK);
+
+  // Warm cache: при наличии кэшированного профиля и статистики показываем
+  // их мгновенно — нет белой паузы перед первым рендером. Фоновый refetch
+  // подтянет свежее.
+  const buildFromCache = () => {
+    if (!live) return MOCK;
+    const cp = liveApi?.getCachedProfile?.();
+    const cs = liveApi?.getCachedStats?.();
+    if (!cp) return null;
+    return {
+      name: cp.name || (cp.email || '').split('@')[0],
+      email: cp.email,
+      plan: cp.plan || 'free',
+      avatarUrl: cp.avatar_url || null,
+      stats: cs || { tasks: 0, streak: 0, pages: 0 },
+    };
+  };
+  const [data, setData] = useStateH(buildFromCache);
 
   useEffectH(() => {
     if (!live || !liveApi) return;
@@ -2530,7 +2547,7 @@ function ProfileView({ onGo, live }) {
     return () => { cancelled = true; };
   }, [live]);
 
-  // Пока грузим — показываем пустой блок с placeholder. Так не будет «Алисы Королёвой».
+  // Пока кэш пустой и фоновая загрузка ещё не закончилась — placeholder.
   if (!data) {
     return (
       <div style={{ padding: 32, minHeight: 200 }} />

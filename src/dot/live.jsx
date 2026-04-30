@@ -209,12 +209,22 @@ const live = {
 
   // Sync-геттеры из кэша. Возвращают [] если нет данных.
   // Используются как initial state в useState(() => getCachedX()).
-  getCachedTasks()  { return cacheGet('tasks')  || []; },
-  getCachedHabits() { return cacheGet('habits') || []; },
-  getCachedSpaces() { return cacheGet('spaces') || []; },
+  getCachedTasks()   { return cacheGet('tasks')   || []; },
+  getCachedHabits()  { return cacheGet('habits')  || []; },
+  getCachedSpaces()  { return cacheGet('spaces')  || []; },
+  getCachedProfile() { return cacheGet('profile') || null; },
+  getCachedStats()   { return cacheGet('stats')   || null; },
   getCachedPages(spaceId) {
     const all = cacheGet('pages') || [];
     return spaceId ? all.filter((p) => p.space_id === spaceId) : all;
+  },
+  // Возвращает Map<habitId, Set<YYYY-MM-DD>> из кэша или пустой Map.
+  getCachedLogsForWeek(refDate = new Date()) {
+    const monday = mondayOf(refDate);
+    const plain = cacheGet(`logs-week-${ymd(monday)}`);
+    const map = new Map();
+    if (plain) Object.keys(plain).forEach((k) => map.set(k, new Set(plain[k])));
+    return map;
   },
 
   // Google OAuth. Открывает редирект на accounts.google.com → после успеха
@@ -352,17 +362,13 @@ const live = {
       .select('id, email, name, avatar_url, plan')
       .eq('id', user.id)
       .single();
+    if (!error && data) cacheSet('profile', data);
     return { profile: data, error };
   },
 
   async loadStats() {
     if (!sb) return { stats: null };
-    // Параллелим ВСЁ что не зависит друг от друга:
-    //  1) count задач
-    //  2) загрузка привычек
-    // Затем для каждой привычки — параллельно её streak.
-    // Было: 1 + 1 + N последовательных раундтрипов = ~N+2 RTT.
-    // Стало: 1 RTT (count + habits в параллели) + 1 RTT (все streaks в параллели) = 2 RTT.
+    // 1 RTT (count + habits параллельно) + 1 RTT (все streaks параллельно) = 2 RTT.
     const [{ count: taskCount }, { habits }] = await Promise.all([
       sb.from('tasks').select('id', { count: 'exact', head: true }).is('deleted_at', null),
       this.loadHabits(),
@@ -373,7 +379,9 @@ const live = {
     );
     const streak = streaks.reduce((m, s) => Math.max(m, s), 0);
 
-    return { stats: { tasks: taskCount ?? 0, streak, pages: 0 } };
+    const stats = { tasks: taskCount ?? 0, streak, pages: 0 };
+    cacheSet('stats', stats);
+    return { stats };
   },
 
   async deleteTask(id) {
@@ -409,6 +417,12 @@ const live = {
       if (!logs.has(l.habit_id)) logs.set(l.habit_id, new Set());
       logs.get(l.habit_id).add(l.date);
     });
+    // Кэшируем как plain object {habitId: ['2026-04-30', ...]} — Map в JSON не сериализуется.
+    if (!error) {
+      const plain = {};
+      logs.forEach((set, k) => { plain[k] = [...set]; });
+      cacheSet(`logs-week-${ymd(monday)}`, plain);
+    }
     return { logs, error };
   },
 

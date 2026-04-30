@@ -229,5 +229,4 @@ function AddPageComposerTitle(props) {
   return wrapped();
 }
 
-Object.assign(window, { AddTaskComposer, ModChip, AddPageComposer, AddPageComposerTitle });
 export { AddTaskComposer, ModChip, AddPageComposer, AddPageComposerTitle };

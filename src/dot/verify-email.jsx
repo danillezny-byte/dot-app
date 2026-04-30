@@ -161,6 +161,4 @@ function AccRow({ label, value, right, disabled }) {
   );
 }
 
-// Дуальный режим во время ESM-миграции: window для legacy, export для нового кода.
-Object.assign(window, { VerifyEmailSent, VerifyEmailSuccess, HomeUnverified, UnverifiedAccountSection, AccRow });
 export { VerifyEmailSent, VerifyEmailSuccess, HomeUnverified, UnverifiedAccountSection, AccRow };

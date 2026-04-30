@@ -18,7 +18,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 const sb = (SUPABASE_URL && SUPABASE_ANON_KEY)
   ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
-window.sb = sb;
+// sb уже const выше — экспортится в конце
 
 // ─── Warm cache в localStorage ─────────────────────────────────
 // Идея: при первом заходе после открытия приложения мы РИСУЕМ
@@ -53,16 +53,16 @@ function cacheClearAll() {
       .forEach((k) => localStorage.removeItem(k));
   } catch {}
 }
-window.dotCache = { get: cacheGet, set: cacheSet, clearAll: cacheClearAll };
+const dotCache = { get: cacheGet, set: cacheSet, clearAll: cacheClearAll };
 
 // ─── Флаг первого захода ──────────────────────────────────────
 // localStorage['dot-onboarded'] = '1' выставляется когда юзер прошёл
 // (или пропустил) onboarding. Дальше при логинах не показываем.
 // Сбрасывается на signOut (новый юзер на этом устройстве пройдёт заново).
-window.dotShouldOnboard = function () {
+function dotShouldOnboard() {
   return localStorage.getItem('dot-onboarded') !== '1';
 };
-window.dotMarkOnboarded = function () {
+function dotMarkOnboarded() {
   localStorage.setItem('dot-onboarded', '1');
 };
 
@@ -75,7 +75,7 @@ window.dotMarkOnboarded = function () {
 //   heavy  — 24мс — деструктивное подтверждение (удаление аккаунта)
 // Если тип не задан — light.
 const HAPTIC_MS = { light: 8, medium: 14, heavy: 24 };
-window.dotHaptic = function (kind = 'light') {
+function dotHaptic(kind = 'light') {
   try {
     navigator.vibrate?.(HAPTIC_MS[kind] || HAPTIC_MS.light);
   } catch {} // браузеры без vibrate (старый Safari вне PWA) — тихо игнорируем
@@ -116,7 +116,7 @@ const ERROR_TRANSLATIONS = [
   [/function delete_my_account does not exist/i,     'SQL-миграция delete-account не выполнена в БД.'],
 ];
 
-window.dotErr = function (err) {
+function dotErr(err) {
   if (!err) return '';
   const msg = (err && (err.message || err.error_description || err.toString())) || '';
   for (const [pattern, ru] of ERROR_TRANSLATIONS) {
@@ -706,8 +706,7 @@ const live = {
   },
 };
 
-// Дуальный режим: window.live для legacy-потребителей, named export для ESM.
-window.live = live;
+// live экспортится в конце как named export
 
 function ymd(d) {
   const y = d.getFullYear();
@@ -721,7 +720,7 @@ function mondayOf(d) {
   x.setDate(x.getDate() - (dow - 1));
   return x;
 }
-window.dotLiveHelpers = { ymd, mondayOf };
+const dotLiveHelpers = { ymd, mondayOf };
 
 // ─── Тема (localStorage) ───────────────────────────────────────
 const THEME_VARS = {
@@ -739,7 +738,7 @@ function detectSystemTheme() {
   return 'light';
 }
 
-window.dotTheme = {
+const dotTheme = {
   get() { return localStorage.getItem('dot-theme') || detectSystemTheme(); },
   set(name) {
     const vars = THEME_VARS[name] || THEME_VARS.light;
@@ -756,14 +755,14 @@ window.dotTheme = {
     Object.entries(vars).forEach(([k, v]) => document.documentElement.style.setProperty(k, v));
   },
 };
-window.dotTheme.apply();
+dotTheme.apply();
 
 // Если юзер не выбирал тему явно — слушаем смену системной и подстраиваемся.
 // Например iOS включил Dark в 22:00 — наша вкладка (если открыта) тоже потемнеет.
 try {
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
   mq.addEventListener?.('change', () => {
-    if (!localStorage.getItem('dot-theme')) window.dotTheme.apply();
+    if (!localStorage.getItem('dot-theme')) dotTheme.apply();
   });
 } catch {}
 
@@ -774,7 +773,7 @@ try {
 // Реализация без React — просто DOM-элемент через portal-стиле,
 // чтобы можно было вызывать из любого места (даже не из компонента).
 let _toastContainer = null;
-window.dotToast = function (message, type = 'info') {
+function dotToast(message, type = 'info') {
   if (!_toastContainer) {
     _toastContainer = document.createElement('div');
     _toastContainer.setAttribute('aria-live', 'polite');
@@ -836,14 +835,11 @@ window.dotToast = function (message, type = 'info') {
 };
 
 // ─── ESM exports ─────────────────────────────────────────────
-// Все API-объекты что висят на window также доступны как named exports.
-// После полной миграции потребителей window.* attachments снимутся.
-const dotCache = window.dotCache;
-const dotShouldOnboard = window.dotShouldOnboard;
-const dotMarkOnboarded = window.dotMarkOnboarded;
-const dotHaptic = window.dotHaptic;
-const dotErr = window.dotErr;
-const dotToast = window.dotToast;
-const dotTheme = window.dotTheme;
-const dotLiveHelpers = window.dotLiveHelpers;
-export { sb, live, dotCache, dotShouldOnboard, dotMarkOnboarded, dotHaptic, dotErr, dotToast, dotTheme, dotLiveHelpers };
+// Все API теперь чистый ESM — никаких window.* attachments.
+// Если что-то снаружи всё-таки нужно через window (например, отладочный
+// доступ из DevTools console), импортируй здесь и присвой сам.
+export {
+  sb, live,
+  dotCache, dotShouldOnboard, dotMarkOnboarded, dotHaptic,
+  dotErr, dotToast, dotTheme, dotLiveHelpers,
+};

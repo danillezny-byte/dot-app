@@ -367,6 +367,4 @@ function SystemKeyboard({ mode = 'lower' }) {
   return <IosKeyboard mode={mode} />;
 }
 
-// Дуальный режим во время ESM-миграции: window для legacy, export для нового кода.
-Object.assign(window, { ComposerFullscreen, ComposerFullscreenHabit, BigPill, SystemKeyboard });
 export { ComposerFullscreen, ComposerFullscreenHabit, BigPill, SystemKeyboard };

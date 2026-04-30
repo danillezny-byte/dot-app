@@ -186,6 +186,4 @@ function Checkbox({ checked, onChange }) {
 }
 
 // Row коллидирует с settings.jsx — НЕ вешаем на window, экспортим только в ESM.
-// Дуальный режим: window для legacy-потребителей, export для нового кода.
-Object.assign(window, { Phone, StatusBar, HomeIndicator, Logo, Button, Field, Card, TabBar, Checkbox });
 export { Phone, StatusBar, HomeIndicator, Logo, Button, Field, Card, Row, TabBar, Checkbox };

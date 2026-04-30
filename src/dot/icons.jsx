@@ -525,27 +525,7 @@ const IconExternalLink = (p) => (
   </LucideBase>
 );
 
-// Все иконки экспортятся одним блоком (для ESM-импорта по имени) и параллельно
-// вешаются на window (для ещё не сконвертированных потребителей).
-const ALL_ICONS = {
-  IconCheckSquare, IconRepeat, IconBook, IconUser,
-  IconPlus, IconMore, IconSearch,
-  IconChevronLeft, IconChevronRight, IconChevronDown, IconCheck,
-  IconMail, IconMessageCircle, IconFile, IconFolder, IconPin, IconFlame,
-  IconSparkles, IconTarget, IconRefresh, IconShield,
-  IconBriefcase, IconHeart, IconCompass,
-  IconCalendar, IconClock, IconFlag, IconHash, IconList, IconLock,
-  IconBell, IconPalette, IconCloud, IconInfo, IconLogOut,
-  IconStar, IconSettings, IconCamera,
-  IconBold, IconItalic, IconLink, IconType, IconListOrdered,
-  IconGrip, IconQuote, IconPlusSmall, IconSlash,
-  IconX, IconMonitor, IconSmartphone, IconTablet, IconLaptop,
-  IconTrash, IconEye, IconEyeOff,
-  IconDownload, IconSun, IconMoon, IconVolume, IconFingerprint,
-  IconActivity, IconFileText, IconAlertTriangle, IconWifiOff,
-  IconCheckCircle, IconCode, IconExternalLink,
-};
-Object.assign(window, ALL_ICONS);
+// Все иконки экспортятся одним блоком для ESM-импорта по имени.
 export {
   IconCheckSquare, IconRepeat, IconBook, IconUser,
   IconPlus, IconMore, IconSearch,
@@ -564,4 +544,3 @@ export {
   IconActivity, IconFileText, IconAlertTriangle, IconWifiOff,
   IconCheckCircle, IconCode, IconExternalLink,
 };
-

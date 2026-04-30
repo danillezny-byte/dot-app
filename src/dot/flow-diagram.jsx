@@ -110,8 +110,3 @@ function FlowDiagram() {
     </div>
   );
 }
-
-Object.assign(window, { FlowDiagram });
-
-
-Object.assign(window, { FlowNode, FlowEdge, FlowDiagram });

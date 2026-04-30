@@ -333,15 +333,6 @@ import { SystemKeyboard } from './composer-variants.jsx';
     );
   }
 
-// Дуальный режим — window для legacy, export для ESM.
-Object.assign(window, {
-  SettingsChangeName,
-  SettingsChangeEmail,
-  SettingsChangePassword,
-  SettingsDevices,
-  SettingsDeleteAccount,
-  DeepShell, FieldLabel, Note, TextField,
-});
 export {
   SettingsChangeName,
   SettingsChangeEmail,
@@ -350,4 +341,3 @@ export {
   SettingsDeleteAccount,
   DeepShell, FieldLabel, Note, TextField,
 };
-

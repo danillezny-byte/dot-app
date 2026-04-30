@@ -1310,21 +1310,6 @@ const Caret = () => (
     />;
   }
 
-// Дуальный режим — window для legacy, export для ESM.
-Object.assign(window, {
-  NoteReading, NoteEditing,
-  NoteProperties, NotePropertyType, NoteProject,
-  NoteEmpty, NoteTitleTyped,
-  NoteSlashPopover, NotePlusProperty, NoteSlashImage,
-  NoteSlashLink, NoteLinkBlockEmpty, NoteLinkBlockLoading, NoteLinkBlockReady,
-  NoteFormatBar, NoteLinkButton, NoteLinkInput, NoteLinkApplied,
-  NoteChecklist, NoteImageBlock, NoteBlockActions,
-  NotePropTap, NotePropTypes,
-  NotePropTextName, NotePropTextFilled,
-  NotePropDateWheel, NotePropNumberKb,
-  NotePropRatingStars, NotePropCheckbox, NotePropLinkInput,
-  NotePropsAll,
-});
 export {
   NoteReading, NoteEditing,
   NoteProperties, NotePropertyType, NoteProject,
@@ -1339,4 +1324,3 @@ export {
   NotePropRatingStars, NotePropCheckbox, NotePropLinkInput,
   NotePropsAll,
 };
-

@@ -383,13 +383,6 @@ import { IconRepeat, IconTarget, IconClock, IconCheck } from './icons.jsx';
 // Дуальный режим — window для legacy, export для ESM-потребителей.
 // Note: window-key HabitRepeatPickerSheet — это alias для RepeatPickerSheet
 // (то же самое для Goal/Reminder). Сохраняем эти алиасы при ESM-экспорте.
-Object.assign(window, {
-  HabitRepeatField, HabitRepeatWeekdays, HabitRepeatEveryN,
-  HabitGoalField, HabitReminderField,
-  HabitRepeatPickerSheet: RepeatPickerSheet,
-  HabitGoalPickerSheet: GoalPickerSheet,
-  HabitReminderPickerSheet: ReminderPickerSheet,
-});
 export {
   HabitRepeatField, HabitRepeatWeekdays, HabitRepeatEveryN,
   HabitGoalField, HabitReminderField,
@@ -397,4 +390,3 @@ export {
   GoalPickerSheet as HabitGoalPickerSheet,
   ReminderPickerSheet as HabitReminderPickerSheet,
 };
-

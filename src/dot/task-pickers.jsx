@@ -378,15 +378,8 @@ import { IconCalendar, IconClock, IconFolder, IconFlag, IconCheck } from './icon
   }
 
 // Дуальный режим — window для legacy, export для ESM-потребителей.
-const _exports = {
-  TaskDateField, TaskReminderField,
-  TaskPriorityField, TaskAllFilled,
-  DatePickerSheet, ReminderPickerSheet, PriorityPickerSheet,
-};
-Object.assign(window, _exports);
 export {
   TaskDateField, TaskReminderField,
   TaskPriorityField, TaskAllFilled,
   DatePickerSheet, ReminderPickerSheet, PriorityPickerSheet,
 };
-

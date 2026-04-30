@@ -1,55 +1,25 @@
-// app/src/main.jsx — точка входа Vite-сборки.
+// src/main.jsx — точка входа Vite-сборки.
 //
-// Что это, по-дизайнерски: главный артборд, который собирает все
-// компоненты из dot/* (как frame с инстансами компонентов из библиотеки)
-// и запускает их на устройстве.
+// Что это по-дизайнерски: главный артборд, собирающий компоненты из
+// src/dot/ (как frame с инстансами компонентов библиотеки) и
+// запускающий их в браузере.
 //
-// Зачем шимы window.React / window.ReactDOM:
-// файлы dot/*.jsx написаны для старой среды (babel-standalone + CDN),
-// где React и ReactDOM были глобалами. Чтобы не переписывать
-// все 19 файлов, мы кладём те же глобалы из npm-пакетов на window
-// ДО того, как код dot/* начнёт исполняться. Динамические `import()`
-// гарантируют этот порядок (статические `import` хойстятся выше).
-//
-// Когда пройдёт мобильный тест и переедем в корень — заменим эти
-// dynamic-импорты на честные именованные `import { Login } from './dot/auth'`.
+// После Phase 5 ESM-миграции — чистый ESM. Никаких window.* шимов,
+// никаких side-effect imports. Vite сам строит dep-graph через named
+// imports.
 
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
-// Side-effect imports — нужны для файлов, чьи компоненты НЕ используются
-// напрямую в main.jsx, но используются другими dot/*-модулями через window.
-// После полной миграции потребителей на named-imports их можно будет убрать.
-import './dot/tokens.jsx';
-import './dot/icons.jsx';
-import './dot/phone.jsx';
-import './dot/keyboard.jsx';
-import './dot/composers.jsx';
-import './dot/composer-variants.jsx';
-import './dot/settings-deep.jsx';
-import './dot/settings-deep2.jsx';
-import './dot/task-pickers.jsx';
-import './dot/habit-pickers.jsx';
-import './dot/note-editor.jsx';
-import './dot/note-blocks.jsx';
-import './dot/verify-email.jsx';
-// flow-diagram.jsx — наследие figma-canvas, не нужен в live-режиме.
-
-// Named-imports для компонентов, которые main.jsx использует напрямую.
-// Эти импорты тоже триггерят side-effects своих файлов (window.X attachments).
-import './dot/live.jsx'; // не вытаскиваем имена — обращаемся через window.live ниже
+// Named-imports — Vite трассирует все транзитивные зависимости через них.
 import { Login, Register, Reset } from './dot/auth.jsx';
 import { Onboarding, Migration } from './dot/onboarding.jsx';
 import { Home, Plans } from './dot/app-screens.jsx';
 import { ProfileEdit, SubscriptionManage, HelpSupport } from './dot/profile-screens.jsx';
 import { SettingsIndex, SettingsDetail } from './dot/settings.jsx';
 import { IconChevronLeft } from './dot/icons.jsx';
-
-// Шим window.React оставляем — IIFE-файлы могут где-то опираться на глобал,
-// + некоторые легаси-обращения (window.live доступ через window.React.useState).
-window.React = React;
-window.ReactDOM = { createRoot };
+import { live, dotShouldOnboard } from './dot/live.jsx';
 
 // LiveApp — корневой компонент. Логика 1-в-1 как в app.html (script type=text/babel),
 // просто перенесена в JSX-модуль.
@@ -67,12 +37,11 @@ function LiveApp() {
   const props = { onGo: goTo, live: true };
 
   useEffect(() => {
-    if (!window.live) return;
-    window.live.getUser().then((user) => {
+    live.getUser().then((user) => {
       if (user && (screen === 'login' || screen === 'register')) {
         // Уже залогинен (например, переоткрыл вкладку): если ещё не видел
         // onboarding на этом устройстве — показываем, иначе сразу в home.
-        setScreen(window.dotShouldOnboard?.() ? 'onboarding' : 'home');
+        setScreen(dotShouldOnboard?.() ? 'onboarding' : 'home');
       }
     });
   }, []);

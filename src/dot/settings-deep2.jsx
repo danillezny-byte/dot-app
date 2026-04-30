@@ -1006,15 +1006,6 @@ import {
     );
   }
 
-// Дуальный режим — window для legacy, export для ESM.
-Object.assign(window, {
-  SettingsSyncStatus, SettingsSyncConflicts,
-  SettingsTheme, SettingsAccent, SettingsFont,
-  SettingsReminderTime, SettingsQuietHours, SettingsSounds,
-  SettingsExport, SettingsActivity, SettingsLock,
-  SettingsChangelog, SettingsLicenses, SettingsPolicy,
-  SettingsTaskLead, SettingsAutoLock,
-});
 export {
   SettingsSyncStatus, SettingsSyncConflicts,
   SettingsTheme, SettingsAccent, SettingsFont,
@@ -1023,4 +1014,3 @@ export {
   SettingsChangelog, SettingsLicenses, SettingsPolicy,
   SettingsTaskLead, SettingsAutoLock,
 };
-

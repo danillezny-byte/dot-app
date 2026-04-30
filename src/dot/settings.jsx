@@ -241,6 +241,4 @@ function SettingsShell({ id = 'index' }) {
   return <SettingsDetail id={id} />;
 }
 
-// Дуальный режим во время ESM-миграции: window для legacy, export для нового кода.
-Object.assign(window, { SettingsIndex, SettingsDetail, SectionHead, Toggle, AccountDetail, ComingSoonDetail, SyncDetail, ThemeDetail, NotifDetail, PrivacyDetail, AboutDetail, SettingsShell });
 export { SettingsIndex, SettingsDetail, SectionHead, Toggle, AccountDetail, ComingSoonDetail, SyncDetail, ThemeDetail, NotifDetail, PrivacyDetail, AboutDetail, SettingsShell };

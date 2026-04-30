@@ -1466,6 +1466,4 @@ function BaseOneSpaceScreen() {
   );
 }
 
-// Дуальный режим во время ESM-миграции: window для legacy, export для нового кода.
-Object.assign(window, { NoteHeader, NoteBody, Block, Caret, SelectedInline, NoteReading, NoteEditing, NoteSlashMenu, NoteFormatBar, FmtBtn, EditorFooterBar, NoteEmpty, BookListPage, NoteSlashPopover, NoteProperties, NotePropertyType, BaseEmpty, SpaceEmpty, CreateSpaceSheet, PageLongPress, SpaceMenu, PageMenu, BaseOneSpaceScreen });
 export { NoteHeader, NoteBody, Block, Caret, SelectedInline, NoteReading, NoteEditing, NoteSlashMenu, NoteFormatBar, FmtBtn, EditorFooterBar, NoteEmpty, BookListPage, NoteSlashPopover, NoteProperties, NotePropertyType, BaseEmpty, SpaceEmpty, CreateSpaceSheet, PageLongPress, SpaceMenu, PageMenu, BaseOneSpaceScreen };

@@ -308,9 +308,13 @@ function Home({ onGo, initialTab, live }) {
           PullToRefresh оборачивает scroll-зону: tasks/habits/base поддерживают
           жест «потянуть вниз → обновить»; на 'me' — нет смысла, там профиль. */}
       <PullToRefresh key={tab} onRefresh={tab === 'me' ? null : onPullRefresh}>
-        {/* minHeight 100% — чтобы дочерние EmptyShell с minHeight: 100%
-            корректно растянулись (иначе их % считается от 0). */}
-        <div className="dot-tab-fade" style={{ minHeight: '100%' }}>
+        {/* CSS-quirk: процентный minHeight у child не видит процентный
+            minHeight parent — резолвится в 0. Нужен явный height: 100%
+            (или display:flex с flex:1 у child) на этом промежуточном слое,
+            чтобы EmptyShell с minHeight: 100% корректно растягивалась.
+            Длинные списки задач/привычек не клипаются — overflow-y: auto
+            висит на PullToRefresh-обёртке выше. */}
+        <div className="dot-tab-fade" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
           {tab === 'tasks'  && <TasksView tasks={tasks} toggle={toggle} loading={loading} live={live} onAdd={openComposer} onEdit={live ? openEditor : undefined} />}
           {tab === 'habits' && <HabitsView key={habitsTick} live={live} onAdd={live ? openHabitComposer : undefined} onEdit={live ? openHabitEditor : undefined} />}
           {tab === 'base'   && <BaseView onGo={onGo} live={live} route={baseRoute} setRoute={setBaseRoute} hint={baseTick} onPageDelete={handlePageDelete} onSpaceAction={handleSpaceAction} onPageAction={handlePageAction} />}
@@ -676,6 +680,9 @@ function BaseSkeleton() {
 function EmptyShell({ children }) {
   return (
     <div style={{
+      // flex: 1 фуллфилит вертикально внутри родителя-флексбокса (.dot-tab-fade);
+      // фолбэк minHeight для случаев если родитель не флекс (e.g. legacy).
+      flex: 1,
       minHeight: '100%',
       display: 'flex', flexDirection: 'column',
       alignItems: 'center', justifyContent: 'center',

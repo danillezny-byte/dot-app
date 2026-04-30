@@ -11,7 +11,7 @@ import { live as liveApi, sb, dotErr, dotHaptic, dotToast, dotLiveHelpers } from
 import { TASKS, HABITS, BASE_TREE, PINNED_PAGES } from './tokens.jsx';
 import { AddTaskComposer, AddPageComposer } from './composers.jsx';
 import { ComposerFullscreen, ComposerFullscreenHabit } from './composer-variants.jsx';
-import { BaseEmpty, CreateSpaceSheet } from './note-editor.jsx';
+import { BaseEmpty, SpaceEmpty, CreateSpaceSheet } from './note-editor.jsx';
 // Main app — rebuilt to match real dot. visuals.
 // Structure: Header (logo + ⋯), body, FAB, bottom tabs (no labels glyphs only).
 // Tabs: Задачи · Привычки · База · Профиль

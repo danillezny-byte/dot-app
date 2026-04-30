@@ -723,7 +723,7 @@ window.dotLiveHelpers = { ymd, mondayOf };
 // ─── Тема (localStorage) ───────────────────────────────────────
 const THEME_VARS = {
   light: { '--bg':'#F5F5F7','--surface':'#FFFFFF','--text':'#111','--sub':'rgba(60,60,67,0.6)','--line':'rgba(60,60,67,0.12)','--chip':'rgba(0,0,0,0.04)' },
-  dark:  { '--bg':'#000000','--surface':'#1C1C1E','--text':'#FFF','--sub':'rgba(235,235,245,0.6)','--line':'rgba(84,84,88,0.5)','--chip':'rgba(255,255,255,0.06)' },
+  dark:  { '--bg':'#1C1C1E','--surface':'#2C2C2E','--text':'#FFF','--sub':'rgba(235,235,245,0.6)','--line':'rgba(84,84,88,0.4)','--chip':'rgba(255,255,255,0.06)' },
   warm:  { '--bg':'#F4F0E8','--surface':'#FBF8F1','--text':'#2A2418','--sub':'rgba(42,36,24,0.6)','--line':'rgba(42,36,24,0.1)','--chip':'rgba(42,36,24,0.04)' },
 };
 // Какую тему отдать если в localStorage ничего нет:

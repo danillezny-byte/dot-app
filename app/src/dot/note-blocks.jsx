@@ -6,13 +6,21 @@ import React from 'react';
 // выделен ли текст, открыт ли bottom-sheet типов. Это ближе к правде
 // (в реальном продукте это один экран с состояниями), чем 10 копий.
 
-(() => {
-  const Caret = () => (
-    <span style={{
-      display: 'inline-block', width: 2, height: '1em', background: 'var(--accent)',
-      marginLeft: 1, verticalAlign: 'middle', animation: 'caret 1s steps(1) infinite',
-    }} />
-  );
+// IIFE распакован — модуль теперь top-level.
+// Иконки импортятся явно вместо чтения с window.
+import {
+  IconBold, IconBook, IconCalendar, IconCamera, IconCheck, IconCheckSquare,
+  IconChevronLeft, IconFile, IconFlag, IconFolder, IconHash, IconItalic,
+  IconLink, IconList, IconListOrdered, IconLogOut, IconMore, IconPlusSmall,
+  IconQuote, IconStar, IconType, IconUser,
+} from './icons.jsx';
+
+const Caret = () => (
+  <span style={{
+    display: 'inline-block', width: 2, height: '1em', background: 'var(--accent)',
+    marginLeft: 1, verticalAlign: 'middle', animation: 'caret 1s steps(1) infinite',
+  }} />
+);
 
   // ─── Accessory bar над клавиатурой ─────────────────────────────
   // B, I, 🔗 — форматы, применяемые к выделению. Если выделения нет,
@@ -917,8 +925,10 @@ import React from 'react';
     />;
   }
 
+  // 5f-5h дубликаты — V1 был dead code до распаковки IIFE (last-wins).
+  // Активная версия ниже на строке ~1101.
   // 5f · Пустой блок-ссылка — карточка с полем «Вставьте URL»
-  function NoteLinkBlockEmpty() {
+  function _NoteLinkBlockEmptyV1() {
     return <EditorScreen
       crumbs={['База', 'Работа']}
       title="Запуск лендинга"
@@ -932,7 +942,7 @@ import React from 'react';
   }
 
   // 5g · Загрузка превью
-  function NoteLinkBlockLoading() {
+  function _NoteLinkBlockLoadingV1() {
     return <EditorScreen
       crumbs={['База', 'Работа']}
       title="Запуск лендинга"
@@ -946,7 +956,7 @@ import React from 'react';
   }
 
   // 5h · Готовая карточка (превью загрузилось)
-  function NoteLinkBlockReady() {
+  function _NoteLinkBlockReadyV1() {
     return <EditorScreen
       crumbs={['База', 'Работа']}
       title="Запуск лендинга"
@@ -1300,19 +1310,33 @@ import React from 'react';
     />;
   }
 
-  Object.assign(window, {
-    NoteReading, NoteEditing,
-    NoteProperties, NotePropertyType, NoteProject,
-    NoteEmpty, NoteTitleTyped,
-    NoteSlashPopover, NotePlusProperty, NoteSlashImage,
-    NoteSlashLink, NoteLinkBlockEmpty, NoteLinkBlockLoading, NoteLinkBlockReady,
-    NoteFormatBar, NoteLinkButton, NoteLinkInput, NoteLinkApplied,
-    NoteChecklist, NoteImageBlock, NoteBlockActions,
-    NotePropTap, NotePropTypes,
-    NotePropTextName, NotePropTextFilled,
-    NotePropDateWheel, NotePropNumberKb,
-    NotePropRatingStars, NotePropCheckbox, NotePropLinkInput,
-    NotePropsAll,
-  });
-})();
+// Дуальный режим — window для legacy, export для ESM.
+Object.assign(window, {
+  NoteReading, NoteEditing,
+  NoteProperties, NotePropertyType, NoteProject,
+  NoteEmpty, NoteTitleTyped,
+  NoteSlashPopover, NotePlusProperty, NoteSlashImage,
+  NoteSlashLink, NoteLinkBlockEmpty, NoteLinkBlockLoading, NoteLinkBlockReady,
+  NoteFormatBar, NoteLinkButton, NoteLinkInput, NoteLinkApplied,
+  NoteChecklist, NoteImageBlock, NoteBlockActions,
+  NotePropTap, NotePropTypes,
+  NotePropTextName, NotePropTextFilled,
+  NotePropDateWheel, NotePropNumberKb,
+  NotePropRatingStars, NotePropCheckbox, NotePropLinkInput,
+  NotePropsAll,
+});
+export {
+  NoteReading, NoteEditing,
+  NoteProperties, NotePropertyType, NoteProject,
+  NoteEmpty, NoteTitleTyped,
+  NoteSlashPopover, NotePlusProperty, NoteSlashImage,
+  NoteSlashLink, NoteLinkBlockEmpty, NoteLinkBlockLoading, NoteLinkBlockReady,
+  NoteFormatBar, NoteLinkButton, NoteLinkInput, NoteLinkApplied,
+  NoteChecklist, NoteImageBlock, NoteBlockActions,
+  NotePropTap, NotePropTypes,
+  NotePropTextName, NotePropTextFilled,
+  NotePropDateWheel, NotePropNumberKb,
+  NotePropRatingStars, NotePropCheckbox, NotePropLinkInput,
+  NotePropsAll,
+};
 

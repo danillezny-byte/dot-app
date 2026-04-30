@@ -3,10 +3,9 @@ import React from 'react';
 // Каждый экран — это композер новой привычки с открытым bottom-sheet-пикером
 // для одного из полей.
 
-(function () {
-  const { IconRepeat, IconTarget, IconClock, IconCheck } = window;
+import { IconRepeat, IconTarget, IconClock, IconCheck } from './icons.jsx';
 
-  // ─── Общий шелл bottom sheet ──────────────────────────────────
+// ─── Общий шелл bottom sheet ──────────────────────────────────
   function Sheet({ title, children, height, onCancel, onDone }) {
     const btnStyle = {
       background: 'none', border: 'none', padding: 0,
@@ -381,12 +380,21 @@ import React from 'react';
     return <HabitComposerShell activeField="rem" sheet={<ReminderPickerSheet />} />;
   }
 
-  Object.assign(window, {
-    HabitRepeatField, HabitRepeatWeekdays, HabitRepeatEveryN,
-    HabitGoalField, HabitReminderField,
-    HabitRepeatPickerSheet: RepeatPickerSheet,
-    HabitGoalPickerSheet: GoalPickerSheet,
-    HabitReminderPickerSheet: ReminderPickerSheet,
-  });
-})();
+// Дуальный режим — window для legacy, export для ESM-потребителей.
+// Note: window-key HabitRepeatPickerSheet — это alias для RepeatPickerSheet
+// (то же самое для Goal/Reminder). Сохраняем эти алиасы при ESM-экспорте.
+Object.assign(window, {
+  HabitRepeatField, HabitRepeatWeekdays, HabitRepeatEveryN,
+  HabitGoalField, HabitReminderField,
+  HabitRepeatPickerSheet: RepeatPickerSheet,
+  HabitGoalPickerSheet: GoalPickerSheet,
+  HabitReminderPickerSheet: ReminderPickerSheet,
+});
+export {
+  HabitRepeatField, HabitRepeatWeekdays, HabitRepeatEveryN,
+  HabitGoalField, HabitReminderField,
+  RepeatPickerSheet as HabitRepeatPickerSheet,
+  GoalPickerSheet as HabitGoalPickerSheet,
+  ReminderPickerSheet as HabitReminderPickerSheet,
+};
 

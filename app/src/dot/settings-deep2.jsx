@@ -1,18 +1,17 @@
 import React from 'react';
 // ─── Глубокие экраны остальных разделов настроек ──────────────
 // Синхро · Оформление · Уведомления · Приватность · О приложении
-(function () {
-  const {
-    DeepShell, FieldLabel, Note, TextField,
-    IconChevronLeft, IconChevronRight, IconCheck, IconX,
-    IconCheckCircle, IconAlertTriangle, IconWifiOff, IconRefresh, IconCloud,
-    IconSun, IconMoon, IconType, IconPalette,
-    IconBell, IconClock, IconVolume,
-    IconFingerprint, IconDownload, IconActivity, IconShield, IconTrash,
-    IconInfo, IconFileText, IconCode, IconExternalLink,
-  } = window;
+import { DeepShell, FieldLabel, Note, TextField } from './settings-deep.jsx';
+import {
+  IconChevronLeft, IconChevronRight, IconCheck, IconX,
+  IconCheckCircle, IconAlertTriangle, IconWifiOff, IconRefresh, IconCloud,
+  IconSun, IconMoon, IconType, IconPalette,
+  IconBell, IconClock, IconVolume,
+  IconFingerprint, IconDownload, IconActivity, IconShield, IconTrash,
+  IconInfo, IconFileText, IconCode, IconExternalLink,
+} from './icons.jsx';
 
-  // ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
   // СИНХРО
   // ══════════════════════════════════════════════════════════════
 
@@ -1007,13 +1006,21 @@ import React from 'react';
     );
   }
 
-  Object.assign(window, {
-    SettingsSyncStatus, SettingsSyncConflicts,
-    SettingsTheme, SettingsAccent, SettingsFont,
-    SettingsReminderTime, SettingsQuietHours, SettingsSounds,
-    SettingsExport, SettingsActivity, SettingsLock,
-    SettingsChangelog, SettingsLicenses, SettingsPolicy,
-    SettingsTaskLead, SettingsAutoLock,
-  });
-})();
+// Дуальный режим — window для legacy, export для ESM.
+Object.assign(window, {
+  SettingsSyncStatus, SettingsSyncConflicts,
+  SettingsTheme, SettingsAccent, SettingsFont,
+  SettingsReminderTime, SettingsQuietHours, SettingsSounds,
+  SettingsExport, SettingsActivity, SettingsLock,
+  SettingsChangelog, SettingsLicenses, SettingsPolicy,
+  SettingsTaskLead, SettingsAutoLock,
+});
+export {
+  SettingsSyncStatus, SettingsSyncConflicts,
+  SettingsTheme, SettingsAccent, SettingsFont,
+  SettingsReminderTime, SettingsQuietHours, SettingsSounds,
+  SettingsExport, SettingsActivity, SettingsLock,
+  SettingsChangelog, SettingsLicenses, SettingsPolicy,
+  SettingsTaskLead, SettingsAutoLock,
+};
 

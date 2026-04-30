@@ -1,15 +1,14 @@
 import React from 'react';
 // ─── Глубокие экраны настроек аккаунта ────────────────────────
 // «Сменить имя», «Изменить email», «Сменить пароль», «Устройства», «Удалить аккаунт»
-(function () {
-  const {
-    IconChevronLeft, IconChevronRight, IconCheck, IconX,
-    IconMonitor, IconSmartphone, IconTablet, IconShield, IconMail,
-    IconClock, IconLaptop, IconTrash, IconEye, IconEyeOff,
-    SystemKeyboard,
-  } = window;
+import {
+  IconChevronLeft, IconChevronRight, IconCheck, IconX,
+  IconMonitor, IconSmartphone, IconTablet, IconShield, IconMail,
+  IconClock, IconLaptop, IconTrash, IconEye, IconEyeOff,
+} from './icons.jsx';
+import { SystemKeyboard } from './composer-variants.jsx';
 
-  // ─── Shell: header + optional save button ─────────────────────
+// ─── Shell: header + optional save button ─────────────────────
   function DeepShell({ title, onBack, onSave, saveLabel = 'Сохранить', saveDisabled, saveDanger, children, footerNote }) {
     return (
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
@@ -334,13 +333,21 @@ import React from 'react';
     );
   }
 
-  Object.assign(window, {
-    SettingsChangeName,
-    SettingsChangeEmail,
-    SettingsChangePassword,
-    SettingsDevices,
-    SettingsDeleteAccount,
-    DeepShell, FieldLabel, Note, TextField,
-  });
-})();
+// Дуальный режим — window для legacy, export для ESM.
+Object.assign(window, {
+  SettingsChangeName,
+  SettingsChangeEmail,
+  SettingsChangePassword,
+  SettingsDevices,
+  SettingsDeleteAccount,
+  DeepShell, FieldLabel, Note, TextField,
+});
+export {
+  SettingsChangeName,
+  SettingsChangeEmail,
+  SettingsChangePassword,
+  SettingsDevices,
+  SettingsDeleteAccount,
+  DeepShell, FieldLabel, Note, TextField,
+};
 

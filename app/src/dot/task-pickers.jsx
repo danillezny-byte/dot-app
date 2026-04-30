@@ -4,10 +4,9 @@ import React from 'react';
 // для одного из полей. Пользователь уже видит: «я в задаче, тап по пилюле,
 // открылся выбор».
 
-(function () {
-  const { IconCalendar, IconClock, IconFolder, IconFlag, IconCheck } = window;
+import { IconCalendar, IconClock, IconFolder, IconFlag, IconCheck } from './icons.jsx';
 
-  // ─── Общий шелл bottom sheet ──────────────────────────────────
+// ─── Общий шелл bottom sheet ──────────────────────────────────
   function Sheet({ title, children, height, onCancel, onDone }) {
     const btnStyle = {
       background: 'none', border: 'none', padding: 0,
@@ -378,10 +377,16 @@ import React from 'react';
     return <ComposerShell values={{ date: '16 апр', rem: 'За 15 мин', prio: 'Обычный' }} />;
   }
 
-  Object.assign(window, {
-    TaskDateField, TaskReminderField,
-    TaskPriorityField, TaskAllFilled,
-    DatePickerSheet, ReminderPickerSheet, PriorityPickerSheet,
-  });
-})();
+// Дуальный режим — window для legacy, export для ESM-потребителей.
+const _exports = {
+  TaskDateField, TaskReminderField,
+  TaskPriorityField, TaskAllFilled,
+  DatePickerSheet, ReminderPickerSheet, PriorityPickerSheet,
+};
+Object.assign(window, _exports);
+export {
+  TaskDateField, TaskReminderField,
+  TaskPriorityField, TaskAllFilled,
+  DatePickerSheet, ReminderPickerSheet, PriorityPickerSheet,
+};
 

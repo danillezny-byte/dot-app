@@ -321,12 +321,16 @@ function Home({ onGo, initialTab, live }) {
           {tab === 'me'     && <ProfileView onGo={onGo} live={live} />}
         </div>
       </PullToRefresh>
-      {/* FAB прячем там, где «+» не имеет осмысленного действия:
+      {/* FAB прячем там, где «+» не имеет осмысленного действия или
+          дублирует контекстную кнопку:
           - Профиль: незачем создавать задачу с экрана статистики
           - Внутри страницы Базы: для добавления блоков юзается «/» в редакторе
+          - Внутри пространства Базы: уже есть inline «+ Новая страница»
+            (контекстнее: видно куда добавится). Глобальный FAB делал бы то же,
+            два плюса на экране — путает.
           - При открытом sheet'е создания/редактирования пространства: его всё
-            равно перекрывает, чтобы не было «двух плюсов» одновременно */}
-      {live && tab !== 'me' && !(tab === 'base' && (baseRoute.kind === 'page' || baseRoute.kind === 'create-space' || baseRoute.kind === 'edit-space')) && (
+            равно перекрывает */}
+      {live && tab !== 'me' && !(tab === 'base' && (baseRoute.kind === 'space' || baseRoute.kind === 'page' || baseRoute.kind === 'create-space' || baseRoute.kind === 'edit-space')) && (
         <Fab onClick={handleFab} />
       )}
       <DotTabs active={tab} onChange={setTab} />

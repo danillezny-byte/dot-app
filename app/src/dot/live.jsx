@@ -678,9 +678,6 @@ window.live = {
       { id: 'b7', type: 'check', content: 'Поставить привычку — то, что хочешь делать каждый день', checked: false },
       { id: 'b8', type: 'check', content: 'Завести ещё одно пространство — например «Работа» или «Учёба»', checked: false },
       { id: 'b9', type: 'check', content: 'Эту страницу можно переписать или удалить — она просто пример', checked: false },
-
-      { id: 'b10', type: 'text', content: '' },
-      { id: 'b11', type: 'text', content: 'Тихо, по-человечески, без шума.' },
     ];
     await this.updatePage(page.id, { blocks });
 

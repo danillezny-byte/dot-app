@@ -1,9 +1,9 @@
 import React from 'react';
 import {
-  IconBell, IconCheck, IconChevronLeft, IconChevronRight, IconCloud,
-  IconExternalLink, IconInfo, IconLock, IconPalette, IconUser,
+  IconBell, IconChevronLeft, IconChevronRight, IconCloud,
+  IconExternalLink, IconInfo, IconLock, IconUser,
 } from './icons.jsx';
-import { live, dotErr, dotToast, dotTheme } from './live.jsx';
+import { live, dotErr, dotToast } from './live.jsx';
 // Settings — полный каталог экранов.
 // Index (главный список) + 6 детальных: Аккаунт, Синхронизация,
 // Оформление, Уведомления, Приватность, О приложении.
@@ -16,12 +16,10 @@ function SettingsIndex({ onEnter }) {
     if (!live) return;
     live.loadProfile().then(({ profile }) => profile && setProfile(profile));
   }, []);
-  const themeName = (typeof window !== 'undefined' && dotTheme)
-    ? ({ light: 'Светлая', dark: 'Тёмная', warm: 'Тёплая' }[dotTheme.get()] || 'Светлая')
-    : 'Светлая';
+  // Тема живёт в Профиле → Профиль (ThemeRow с превью карточек) — там
+  // визуально выигрышнее. Здесь дубликат был, убрали.
   const rows = [
     { id: 'account',  icon: IconUser,     label: 'Аккаунт',       sub: profile?.email || '—' },
-    { id: 'theme',    icon: IconPalette,  label: 'Оформление',    sub: themeName },
     { id: 'sync',     icon: IconCloud,    label: 'Синхронизация', sub: 'Авто, через Supabase' },
     { id: 'notif',    icon: IconBell,     label: 'Уведомления',   sub: 'В разработке' },
     { id: 'privacy',  icon: IconLock,     label: 'Приватность',   sub: 'В разработке' },
@@ -77,7 +75,6 @@ function SettingsDetail({ id, onBack }) {
       </div>
       {id === 'account'  && <AccountDetail />}
       {id === 'sync'     && <SyncDetail />}
-      {id === 'theme'    && <ThemeDetail />}
       {id === 'notif'    && <NotifDetail />}
       {id === 'privacy'  && <PrivacyDetail />}
       {id === 'about'    && <AboutDetail />}
@@ -85,7 +82,7 @@ function SettingsDetail({ id, onBack }) {
   );
 }
 const DETAIL_TITLES = {
-  account: 'Аккаунт', sync: 'Синхронизация', theme: 'Оформление',
+  account: 'Аккаунт', sync: 'Синхронизация',
   notif: 'Уведомления', privacy: 'Приватность', about: 'О приложении',
 };
 
@@ -188,26 +185,6 @@ function SyncDetail() {
   );
 }
 
-// ─── Detail: Theme ───────────────────────────
-function ThemeDetail() {
-  const [theme, setTheme] = useStateS(dotTheme ? dotTheme.get() : 'light');
-  const apply = (t) => {
-    setTheme(t);
-    if (dotTheme) dotTheme.set(t);
-  };
-  return (
-    <div style={{ borderTop: '1px solid var(--line)' }}>
-      <SectionHead>Тема</SectionHead>
-      {[['light','Светлая'],['dark','Тёмная'],['warm','Тёплая бежевая']].map(([k,l]) => (
-        <Row key={k} label={l} onClick={() => apply(k)} right={theme === k ? <IconCheck size={16} color="var(--accent)" strokeWidth={2.2} /> : null} />
-      ))}
-      <div style={{ padding: '14px 24px', fontSize: 13, color: 'var(--sub)', lineHeight: 1.5 }}>
-        Тема сохраняется на устройстве. На разных устройствах можно настроить независимо.
-      </div>
-    </div>
-  );
-}
-
 function NotifDetail() {
   return <ComingSoonDetail what="Push-уведомления требуют разрешения от браузера/iOS и serviceWorker. Сейчас все напоминания у задач/привычек видны только когда открыто приложение." />;
 }
@@ -241,4 +218,4 @@ function SettingsShell({ id = 'index' }) {
   return <SettingsDetail id={id} />;
 }
 
-export { SettingsIndex, SettingsDetail, SectionHead, Toggle, AccountDetail, ComingSoonDetail, SyncDetail, ThemeDetail, NotifDetail, PrivacyDetail, AboutDetail, SettingsShell };
+export { SettingsIndex, SettingsDetail, SectionHead, Toggle, AccountDetail, ComingSoonDetail, SyncDetail, NotifDetail, PrivacyDetail, AboutDetail, SettingsShell };

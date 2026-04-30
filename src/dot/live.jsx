@@ -66,6 +66,24 @@ function dotMarkOnboarded() {
   localStorage.setItem('dot-onboarded', '1');
 };
 
+// ─── Синхронная проверка сессии Supabase ──────────────────────
+// Supabase JS пишет токен в localStorage под ключом sb-<project>-auth-token.
+// Читаем его сразу, без сетевого вызова, чтобы LiveApp знал стартовать с
+// 'home' а не с 'login'. На странице больше не мигает экран логина перед
+// автологином. Реальная валидация токена идёт асинхронно через getUser().
+function hasStoredSession() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k?.startsWith('sb-') && k.endsWith('-auth-token')) {
+        const v = localStorage.getItem(k);
+        if (v && v !== 'null') return true;
+      }
+    }
+  } catch {}
+  return false;
+}
+
 // ─── Haptic feedback ──────────────────────────────────────────
 // Лёгкий тап через navigator.vibrate. На iOS работает только в установленной
 // PWA (Safari в обычном режиме игнорит — это by-design Apple). На Android
@@ -842,4 +860,5 @@ export {
   sb, live,
   dotCache, dotShouldOnboard, dotMarkOnboarded, dotHaptic,
   dotErr, dotToast, dotTheme, dotLiveHelpers,
+  hasStoredSession,
 };

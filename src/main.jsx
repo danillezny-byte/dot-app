@@ -19,13 +19,20 @@ import { Home, Plans } from './dot/app-screens.jsx';
 import { ProfileEdit, SubscriptionManage, HelpSupport } from './dot/profile-screens.jsx';
 import { SettingsIndex, SettingsDetail } from './dot/settings.jsx';
 import { IconChevronLeft } from './dot/icons.jsx';
-import { live, dotShouldOnboard } from './dot/live.jsx';
+import { live, dotShouldOnboard, hasStoredSession } from './dot/live.jsx';
 
 // LiveApp — корневой компонент. Логика 1-в-1 как в app.html (script type=text/babel),
 // просто перенесена в JSX-модуль.
 function LiveApp() {
   const { useState, useEffect } = React;
-  const [screen, setScreen] = useState('login');
+  // Если в localStorage уже лежит токен Supabase — стартуем сразу с home.
+  // Без этого был flash экрана логина при каждом открытии (~200-400мс
+  // пока async getUser завершится). Реальная валидация токена идёт в
+  // useEffect ниже — если токен протух, нас выкинет назад на login.
+  const initialScreen = hasStoredSession()
+    ? (dotShouldOnboard?.() ? 'onboarding' : 'home')
+    : 'login';
+  const [screen, setScreen] = useState(initialScreen);
   const [homeTab, setHomeTab] = useState(localStorage.getItem('dot-start-tab') || 'tasks');
 
   const goTo = (s) => {
@@ -37,10 +44,13 @@ function LiveApp() {
   const props = { onGo: goTo, live: true };
 
   useEffect(() => {
+    // Валидируем сессию в фоне. Если токен оказался протухшим — вернёмся
+    // на login. Если жив — оставляем как есть (мы уже стартовали с home
+    // через hasStoredSession-fast-path).
     live.getUser().then((user) => {
-      if (user && (screen === 'login' || screen === 'register')) {
-        // Уже залогинен (например, переоткрыл вкладку): если ещё не видел
-        // onboarding на этом устройстве — показываем, иначе сразу в home.
+      if (!user && screen !== 'login' && screen !== 'register' && screen !== 'reset') {
+        setScreen('login');
+      } else if (user && (screen === 'login' || screen === 'register')) {
         setScreen(dotShouldOnboard?.() ? 'onboarding' : 'home');
       }
     });

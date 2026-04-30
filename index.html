@@ -77,6 +77,9 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- TLS-handshake к Supabase делается параллельно с загрузкой бандла —
+     первый getUser / loadTasks срабатывает на ~100-200мс быстрее. -->
+<link rel="preconnect" href="https://yhhqctadcqjdsuhyhlvv.supabase.co" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {

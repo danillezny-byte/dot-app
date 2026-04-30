@@ -225,7 +225,6 @@ function Reset({ onGo, live }) {
   );
 }
 
-Object.assign(window, { Login, Register, Reset });
-
-
+// Дуальный режим во время ESM-миграции: window для legacy, export для нового кода.
 Object.assign(window, { GoogleIcon, AppleIcon, Login, Register, Reset });
+export { GoogleIcon, AppleIcon, Login, Register, Reset };

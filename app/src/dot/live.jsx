@@ -159,7 +159,7 @@ function toUiTask(t) {
 }
 
 // ── Публичный API ──────────────────────────────────────────────
-window.live = {
+const live = {
   async signIn(email, password) {
     if (!sb) return { error: { message: 'Supabase не подключён' } };
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
@@ -706,6 +706,9 @@ window.live = {
   },
 };
 
+// Дуальный режим: window.live для legacy-потребителей, named export для ESM.
+window.live = live;
+
 function ymd(d) {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -831,3 +834,16 @@ window.dotToast = function (message, type = 'info') {
   }
   setTimeout(dismiss, 3500);
 };
+
+// ─── ESM exports ─────────────────────────────────────────────
+// Все API-объекты что висят на window также доступны как named exports.
+// После полной миграции потребителей window.* attachments снимутся.
+const dotCache = window.dotCache;
+const dotShouldOnboard = window.dotShouldOnboard;
+const dotMarkOnboarded = window.dotMarkOnboarded;
+const dotHaptic = window.dotHaptic;
+const dotErr = window.dotErr;
+const dotToast = window.dotToast;
+const dotTheme = window.dotTheme;
+const dotLiveHelpers = window.dotLiveHelpers;
+export { sb, live, dotCache, dotShouldOnboard, dotMarkOnboarded, dotHaptic, dotErr, dotToast, dotTheme, dotLiveHelpers };

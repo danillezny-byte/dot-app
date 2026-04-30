@@ -2709,7 +2709,6 @@ function Plans({ onGo }) {
   );
 }
 
-Object.assign(window, { Home, Plans });
-
-
+// Дуальный режим во время ESM-миграции: window для legacy, export для нового кода.
 Object.assign(window, { Home, DotHeader, Fab, DotTabs, TasksView, TasksEmpty, TaskSection, RoundCheck, HabitsView, HabitsViewLive, HabitsEmpty, BaseView, BaseViewMock, BaseHeader, PageNode, PageRow, BaseViewLive, BaseTreeView, SpaceView, PageView, PageBlock, ImageBlockView, LinkBlockView, SlashSheet, PropertiesSection, PropertyRow, PropertyValueView, PropertyEditorSheet, PropertyValueEditor, PageActionSheet, ItemActionSheet, MovePickerSheet, RowMoreButton, ProfileView, Stat, PRow, MenuGroup, Plans });
+export { Home, DotHeader, Fab, DotTabs, TasksView, TasksEmpty, TaskSection, RoundCheck, HabitsView, HabitsViewLive, HabitsEmpty, BaseView, BaseViewMock, BaseHeader, PageNode, PageRow, BaseViewLive, BaseTreeView, SpaceView, PageView, PageBlock, ImageBlockView, LinkBlockView, SlashSheet, PropertiesSection, PropertyRow, PropertyValueView, PropertyEditorSheet, PropertyValueEditor, PageActionSheet, ItemActionSheet, MovePickerSheet, RowMoreButton, ProfileView, Stat, PRow, MenuGroup, Plans };

@@ -661,7 +661,6 @@ function HelpSupport({ onBack }) {
   );
 }
 
-Object.assign(window, { ProfileEdit, SubscriptionManage, PaymentMethod, BillingHistory, CancelSubscription, HelpSupport });
-
-
+// Дуальный режим во время ESM-миграции: window для legacy, export для нового кода.
 Object.assign(window, { ProfileEdit, StartTabRow, ThemeRow, EditSection, EditField, EditRow, SubscriptionManage, PlanLine, PaymentMethod, BillingHistory, CancelSubscription, HelpSupport });
+export { ProfileEdit, StartTabRow, ThemeRow, EditSection, EditField, EditRow, SubscriptionManage, PlanLine, PaymentMethod, BillingHistory, CancelSubscription, HelpSupport };

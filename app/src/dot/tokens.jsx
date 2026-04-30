@@ -80,5 +80,8 @@ const HABITS = [
   { id: 'h4', title: 'Английский',         streak: 3,  days: [1,1,1,0,0,0,0] }, // пн-вт-ср подряд, сегодня ещё не отмечено
 ];
 
+// Дуальный режим во время ESM-миграции: и window-globals (для не-конвертированных
+// потребителей), и proper ESM-export. После миграции window-блок снимется.
 Object.assign(window, { VARIANT_META, ACCENTS, FONTS, TASKS, HABITS, BASE_TREE, PINNED_PAGES });
+export { VARIANT_META, ACCENTS, FONTS, TASKS, HABITS, BASE_TREE, PINNED_PAGES };
 

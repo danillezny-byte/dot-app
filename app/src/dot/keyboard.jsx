@@ -70,6 +70,4 @@ function IosKeyboard({ variant = 'light', mode = 'lower' }) {
 }
 
 Object.assign(window, { IosKeyboard });
-
-
-Object.assign(window, { IosKeyboard });
+export { IosKeyboard };

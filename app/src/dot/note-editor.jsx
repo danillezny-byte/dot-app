@@ -1239,8 +1239,6 @@ function PageLongPress() {
   );
 }
 
-Object.assign(window, { NoteReading, NoteEditing, NoteSlashMenu, NoteSlashPopover, NoteFormatBar, NoteEmpty, NoteProperties, NotePropertyType, BaseEmpty, SpaceEmpty, CreateSpaceSheet, PageLongPress, BaseOneSpaceScreen, SpaceMenu, PageMenu });
-
 // ─── Меню действий для пространства (⋯ на экране пространства) ─────
 function SpaceMenu() {
   const actions = [
@@ -1460,5 +1458,6 @@ function BaseOneSpaceScreen() {
   );
 }
 
-
+// Дуальный режим во время ESM-миграции: window для legacy, export для нового кода.
 Object.assign(window, { NoteHeader, NoteBody, Block, Caret, SelectedInline, NoteReading, NoteEditing, NoteSlashMenu, NoteFormatBar, FmtBtn, EditorFooterBar, NoteEmpty, BookListPage, NoteSlashPopover, NoteProperties, NotePropertyType, BaseEmpty, SpaceEmpty, CreateSpaceSheet, PageLongPress, SpaceMenu, PageMenu, BaseOneSpaceScreen });
+export { NoteHeader, NoteBody, Block, Caret, SelectedInline, NoteReading, NoteEditing, NoteSlashMenu, NoteFormatBar, FmtBtn, EditorFooterBar, NoteEmpty, BookListPage, NoteSlashPopover, NoteProperties, NotePropertyType, BaseEmpty, SpaceEmpty, CreateSpaceSheet, PageLongPress, SpaceMenu, PageMenu, BaseOneSpaceScreen };

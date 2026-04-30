@@ -180,7 +180,6 @@ function OnboardingStep({ step = 0 }) {
   );
 }
 
+// Дуальный режим во время ESM-миграции: window для legacy, export для нового кода.
 Object.assign(window, { Onboarding, Migration, OnboardingStep });
-
-
-Object.assign(window, { Onboarding, Migration, OnboardingStep });
+export { Onboarding, Migration, OnboardingStep };

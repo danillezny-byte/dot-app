@@ -18,37 +18,40 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
+// Static-импорты dot/*-модулей. Порядок важен: IIFE-файлы (settings-deep2,
+// pickers, note-blocks) читают `const { IconX } = window` на самом старте —
+// иконки должны быть инициализированы раньше. Vite/Rollup сохраняют этот
+// порядок при сборке, потому что каждый импорт — side-effect-only.
+//
+// После того как все IIFE-файлы будут размотаны (Phase 3), эти импорты можно
+// будет переставить в произвольном порядке (или вообще делегировать
+// Vite-трекингу зависимостей через статический анализ).
+import './dot/tokens.jsx';
+import './dot/live.jsx';
+import './dot/icons.jsx';
+import './dot/phone.jsx';
+import './dot/keyboard.jsx';
+import './dot/composers.jsx';
+import './dot/settings.jsx';
+import './dot/auth.jsx';
+import './dot/onboarding.jsx';
+import './dot/app-screens.jsx';
+// flow-diagram.jsx — наследие figma-canvas, не нужен в live-режиме.
+// import './dot/flow-diagram.jsx';
+import './dot/composer-variants.jsx';
+import './dot/settings-deep.jsx';
+import './dot/settings-deep2.jsx';
+import './dot/task-pickers.jsx';
+import './dot/habit-pickers.jsx';
+import './dot/profile-screens.jsx';
+import './dot/verify-email.jsx';
+import './dot/note-editor.jsx';
+import './dot/note-blocks.jsx';
+
+// Шим window.React оставляем — IIFE-файлы могут где-то опираться на глобал,
+// + некоторые легаси-обращения (window.live доступ через window.React.useState).
 window.React = React;
 window.ReactDOM = { createRoot };
-
-// Порядок импорта зеркалит app.html (старая HTML-точка входа).
-// Менять его нельзя: IIFE-файлы (settings-deep2, pickers, note-blocks)
-// читают `const { IconX } = window` на самом старте — иконки должны
-// быть зарегистрированы раньше.
-async function loadAll() {
-  await import('./dot/tokens.jsx');
-  await import('./dot/live.jsx');
-  await import('./dot/icons.jsx');
-  await import('./dot/phone.jsx');
-  await import('./dot/keyboard.jsx');
-  await import('./dot/composers.jsx');
-  await import('./dot/settings.jsx');
-  await import('./dot/auth.jsx');
-  await import('./dot/onboarding.jsx');
-  await import('./dot/app-screens.jsx');
-  // flow-diagram.jsx — наследие figma-canvas, не нужен в live-режиме.
-  // Если когда-нибудь понадобится — раскомментируй и добавь вызов <FlowDiagram /> где-то в UI.
-  // await import('./dot/flow-diagram.jsx');
-  await import('./dot/composer-variants.jsx');
-  await import('./dot/settings-deep.jsx');
-  await import('./dot/settings-deep2.jsx');
-  await import('./dot/task-pickers.jsx');
-  await import('./dot/habit-pickers.jsx');
-  await import('./dot/profile-screens.jsx');
-  await import('./dot/verify-email.jsx');
-  await import('./dot/note-editor.jsx');
-  await import('./dot/note-blocks.jsx');
-}
 
 // LiveApp — корневой компонент. Логика 1-в-1 как в app.html (script type=text/babel),
 // просто перенесена в JSX-модуль.
@@ -179,52 +182,20 @@ class ErrorBoundary extends React.Component {
   }
 }
 
-// BootShell — корневой компонент, который монтируется СРАЗУ (до loadAll).
-// Это важно для двух вещей:
-//  1) SpeedInsights видит ранние Web Vitals (FCP/LCP/TTFB) — иначе если
-//     ждать загрузки 19 dot/*-модулей, метрики уже прошли и пусто в дашборде.
-//  2) Пользователь видит хоть что-то (логотип/skeleton) пока грузятся модули,
-//     а не пустоту 0.5-2 секунды.
+// BootShell — корневой компонент. Раньше был с loadAll/ready/splash,
+// потому что dot/*-модули грузились динамически. После Phase 2 ESM-миграции
+// все импорты статичные, к моменту render() ВСЕ модули уже исполнились
+// и зарегистрировались (window.live, window.React, etc). Splash больше
+// не нужен — рендерим LiveApp сразу.
+//
+// SpeedInsights остаётся в boot — он подхватывает Web Vitals (FCP/LCP/TTFB)
+// с самого старта, иначе метрики были бы потеряны.
 function BootShell() {
-  const { useState, useEffect } = React;
-  const [ready, setReady] = useState(!!window.live);
-
-  useEffect(() => {
-    let cancelled = false;
-    loadAll().then(() => {
-      if (!cancelled) setReady(true);
-    }).catch((err) => {
-      console.error('[dot] Не удалось загрузить модули:', err);
-    });
-    return () => { cancelled = true; };
-  }, []);
-
   return (
     <ErrorBoundary>
-      {/* SpeedInsights монтируется немедленно, ловит FCP/LCP/TTFB.
-          Это пустой компонент (вставляет скрипт в head), не ломает layout. */}
       <SpeedInsights />
-      {ready ? <LiveApp /> : <BootSplash />}
+      <LiveApp />
     </ErrorBoundary>
-  );
-}
-
-// Brand splash во время первоначальной загрузки модулей (~500-2000мс).
-// Просто три точки в центре + лёгкий pulse. Когда модули загружены — заменяется на LiveApp.
-function BootSplash() {
-  return (
-    <div style={{
-      flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-    }}>
-      <div style={{
-        display: 'flex', gap: 12,
-        animation: 'dot-pulse 1.4s ease-in-out infinite',
-      }}>
-        <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--text)' }} />
-        <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--text)' }} />
-        <span style={{ width: 12, height: 12, borderRadius: '50%', background: 'var(--text)' }} />
-      </div>
-    </div>
   );
 }
 
@@ -232,6 +203,4 @@ function BootSplash() {
 // заново, и React 19 ругается «container already passed to createRoot».
 const rootEl = document.getElementById('root');
 const root = window.__dotRoot || (window.__dotRoot = createRoot(rootEl));
-
-// Рендерим СРАЗУ — до loadAll. Это запускает SpeedInsights в правильное время.
 root.render(<BootShell />);

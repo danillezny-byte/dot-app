@@ -8,18 +8,44 @@
 // никаких side-effect imports. Vite сам строит dep-graph через named
 // imports.
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { createRoot } from 'react-dom/client';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 
-// Named-imports — Vite трассирует все транзитивные зависимости через них.
+// ── Eager imports: нужны для первого рендера ─────────────────────
+// Login/Register/Reset — потенциально первый экран что юзер видит,
+// нет смысла дробить.
 import { Login, Register, Reset } from './dot/auth.jsx';
-import { Onboarding, Migration } from './dot/onboarding.jsx';
-import { Home, Plans } from './dot/app-screens.jsx';
-import { ProfileEdit, SubscriptionManage, HelpSupport } from './dot/profile-screens.jsx';
-import { SettingsIndex, SettingsDetail } from './dot/settings.jsx';
 import { IconChevronLeft } from './dot/icons.jsx';
 import { live, dotShouldOnboard, hasStoredSession } from './dot/live.jsx';
+
+// ── Lazy imports: пост-логин экраны выносятся в отдельные чанки ──
+// Vite/Rollup создаёт отдельный JS-файл на каждый dynamic import().
+// Бандл при первом заходе (логин-флоу) сильно меньше — на мобильном CPU
+// LCP падает с ~4с в зелёную зону. Чанки догружаются по необходимости.
+const Onboarding = lazy(() => import('./dot/onboarding.jsx').then((m) => ({ default: m.Onboarding })));
+const Migration  = lazy(() => import('./dot/onboarding.jsx').then((m) => ({ default: m.Migration })));
+const Home       = lazy(() => import('./dot/app-screens.jsx').then((m) => ({ default: m.Home })));
+const Plans      = lazy(() => import('./dot/app-screens.jsx').then((m) => ({ default: m.Plans })));
+const ProfileEdit         = lazy(() => import('./dot/profile-screens.jsx').then((m) => ({ default: m.ProfileEdit })));
+const SubscriptionManage  = lazy(() => import('./dot/profile-screens.jsx').then((m) => ({ default: m.SubscriptionManage })));
+const HelpSupport         = lazy(() => import('./dot/profile-screens.jsx').then((m) => ({ default: m.HelpSupport })));
+const SettingsIndex  = lazy(() => import('./dot/settings.jsx').then((m) => ({ default: m.SettingsIndex })));
+const SettingsDetail = lazy(() => import('./dot/settings.jsx').then((m) => ({ default: m.SettingsDetail })));
+
+// Простой fallback — пока подгружается чанк, показываем тихий пульс
+// (тот же что в SplashShell). На скорости ~50KB-чанка это 50-200мс.
+function SuspenseFallback() {
+  return (
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: 12, animation: 'dot-pulse 1.4s ease-in-out infinite' }}>
+        <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--text)' }} />
+        <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--text)' }} />
+        <span style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--text)' }} />
+      </div>
+    </div>
+  );
+}
 
 // LiveApp — корневой компонент. Логика 1-в-1 как в app.html (script type=text/babel),
 // просто перенесена в JSX-модуль.
@@ -60,17 +86,21 @@ function LiveApp() {
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative', overflowY: 'auto' }}>
+      {/* Login/Register/Reset рендерятся синхронно (eager-imported) — ноль ожидания. */}
       {screen === 'login'        && <Login {...props} />}
       {screen === 'register'     && <Register {...props} />}
       {screen === 'reset'        && <Reset {...props} />}
-      {screen === 'onboarding'   && <Onboarding {...props} />}
-      {screen === 'migration'    && <Migration {...props} />}
-      {screen === 'home'         && <Home {...props} initialTab={homeTab} key={homeTab} />}
-      {screen === 'plans'        && <Plans {...props} />}
-      {screen === 'profile-edit' && <ProfileEdit live onBack={back} />}
-      {screen === 'profile-sub'  && <SubscriptionManage onBack={back} />}
-      {screen === 'profile-help' && <HelpSupport onBack={back} />}
-      {screen === 'settings'     && <SettingsLive onBack={back} />}
+      {/* Остальные экраны лениво подгружаются — Suspense даёт fallback пока качается чанк. */}
+      <Suspense fallback={<SuspenseFallback />}>
+        {screen === 'onboarding'   && <Onboarding {...props} />}
+        {screen === 'migration'    && <Migration {...props} />}
+        {screen === 'home'         && <Home {...props} initialTab={homeTab} key={homeTab} />}
+        {screen === 'plans'        && <Plans {...props} />}
+        {screen === 'profile-edit' && <ProfileEdit live onBack={back} />}
+        {screen === 'profile-sub'  && <SubscriptionManage onBack={back} />}
+        {screen === 'profile-help' && <HelpSupport onBack={back} />}
+        {screen === 'settings'     && <SettingsLive onBack={back} />}
+      </Suspense>
     </div>
   );
 }

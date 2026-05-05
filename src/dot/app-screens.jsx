@@ -346,7 +346,11 @@ function Home({ onGo, initialTab, live }) {
       {live && tab !== 'me' && !(tab === 'base' && (baseRoute.kind === 'space' || baseRoute.kind === 'page' || baseRoute.kind === 'create-space' || baseRoute.kind === 'edit-space')) && (
         <Fab onClick={handleFab} />
       )}
-      <DotTabs active={tab} onChange={setTab} />
+      <DotTabs active={tab} onChange={setTab} badges={{
+        // Бейджик: сколько сегодняшних задач ещё не отмечены done.
+        // На Привычки/Базу/Профиль не вешаем — у них нет естественного «горящего» счётчика.
+        tasks: tasks.filter((t) => !t.done && (t.when === 'Сегодня' || t.when === 'Просрочено')).length,
+      }} />
       {live && composerOpen && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 50 }}>
           <ComposerFullscreen
@@ -483,7 +487,7 @@ function Fab({ onClick }) {
   );
 }
 
-function DotTabs({ active, onChange }) {
+function DotTabs({ active, onChange, badges = {} }) {
   const tabs = [
     { id: 'tasks',  label: 'Задачи',   Icon: IconCheckSquare },
     { id: 'habits', label: 'Привычки', Icon: IconRepeat },
@@ -499,6 +503,7 @@ function DotTabs({ active, onChange }) {
       {tabs.map((t) => {
         const on = active === t.id;
         const c = on ? 'var(--accent)' : 'var(--sub)';
+        const badge = badges[t.id];
         return (
           <button key={t.id} onClick={() => onChange(t.id)} style={{
             background: 'none', border: 'none', cursor: 'pointer',
@@ -506,7 +511,19 @@ function DotTabs({ active, onChange }) {
             padding: '4px 14px', position: 'relative',
           }}>
             {on && <span style={{ position: 'absolute', top: -9, width: 22, height: 3, background: 'var(--accent)', borderRadius: 2 }} />}
-            <t.Icon size={22} color={c} strokeWidth={on ? 2 : 1.75} />
+            <div style={{ position: 'relative' }}>
+              <t.Icon size={22} color={c} strokeWidth={on ? 2 : 1.75} />
+              {badge > 0 && (
+                <span style={{
+                  position: 'absolute', top: -4, right: -8,
+                  minWidth: 16, height: 16, padding: '0 4px',
+                  borderRadius: 8, background: 'var(--accent)', color: '#fff',
+                  fontSize: 10, fontWeight: 600,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  lineHeight: 1,
+                }}>{badge > 99 ? '99+' : badge}</span>
+              )}
+            </div>
             <span style={{ fontSize: 11, fontWeight: on ? 600 : 500, color: c }}>{t.label}</span>
           </button>
         );

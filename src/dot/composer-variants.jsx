@@ -136,7 +136,46 @@ function ComposerFullscreen({ live, onClose, onSubmit, initialTask, onDelete }) 
           <div style={{ marginTop: 6, fontSize: 14, color: 'var(--sub)' }}>Описание или заметка…</div>
         )}
 
-        <div style={{ marginTop: 26, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {/* Quick chips для даты — самые популярные пресеты в один тап.
+            Календарь по-прежнему доступен через BigPill «Дата» ниже. */}
+        {live && (
+          <div style={{ marginTop: 22, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            {[
+              { id: 'today',    label: 'Сегодня',      addDays: 0 },
+              { id: 'tomorrow', label: 'Завтра',       addDays: 1 },
+              { id: 'week',     label: 'Через неделю', addDays: 7 },
+              { id: 'none',     label: 'Без даты',     addDays: null },
+            ].map((c) => {
+              // Активный chip — если текущая дата совпадает с пресетом.
+              const isActive = (() => {
+                if (c.addDays === null) return dateValue === null;
+                if (!dateValue) return false;
+                const target = new Date(); target.setHours(12, 0, 0, 0);
+                target.setDate(target.getDate() + c.addDays);
+                const cur = new Date(dateValue); cur.setHours(0, 0, 0, 0);
+                target.setHours(0, 0, 0, 0);
+                return cur.getTime() === target.getTime();
+              })();
+              return (
+                <button key={c.id} onClick={() => {
+                  if (c.addDays === null) { setDateValue(null); setDateLabel('Без даты'); return; }
+                  const d = new Date(); d.setHours(12, 0, 0, 0);
+                  d.setDate(d.getDate() + c.addDays);
+                  setDateValue(d);
+                  setDateLabel(c.label);
+                }} style={{
+                  padding: '8px 14px', borderRadius: 99,
+                  background: isActive ? 'var(--accent)' : 'var(--chip)',
+                  color: isActive ? '#fff' : 'var(--text)',
+                  border: 'none', fontSize: 13, fontWeight: isActive ? 600 : 500,
+                  fontFamily: 'inherit', cursor: 'pointer',
+                }}>{c.label}</button>
+              );
+            })}
+          </div>
+        )}
+
+        <div style={{ marginTop: live ? 14 : 26, display: 'flex', flexDirection: 'column', gap: 10 }}>
           <BigPill icon={<IconCalendar size={16} />} label="Дата"        value={dateDisplay} muted={dateMuted} onClick={live ? () => setPicker('date') : undefined} />
           <BigPill icon={<IconClock size={16} />}    label="Напоминание" value={remLabel}  muted={remMuted}  onClick={live ? () => setPicker('rem')  : undefined} />
           <BigPill icon={<IconFlag size={16} />}     label="Приоритет"   value={prioLabel} muted={prioMuted} onClick={live ? () => setPicker('prio') : undefined} />

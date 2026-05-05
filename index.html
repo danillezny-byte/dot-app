@@ -173,6 +173,11 @@
   @keyframes dot-spin {
     to { transform: rotate(360deg); }
   }
+  /* Tap-feedback на строках задач/привычек: при удержании пальца строка
+     слегка темнеет — пользователь сразу понимает, что попал в кликабельную
+     область. На non-touch (mouse) ведём себя так же на :active. */
+  .dot-row-tap { transition: background-color 120ms ease; }
+  .dot-row-tap:active { background-color: var(--chip); }
   .dot-skeleton {
     background-color: var(--chip);
     background-image: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.45) 50%, transparent 100%);

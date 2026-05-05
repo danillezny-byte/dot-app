@@ -31,6 +31,10 @@ function Home({ onGo, initialTab, live }) {
   const [habitComposerOpen, setHabitComposerOpen] = useStateH(false);
   const [editingHabit, setEditingHabit] = useStateH(null);
   const [habitsTick, setHabitsTick] = useStateH(0); // increment to force HabitsView reload
+  // habitsEmpty — для решения, показывать ли FAB на вкладке Привычки.
+  // Считаем «пусто» если есть кэш и он 0; иначе по умолчанию false (FAB виден,
+  // как раньше, до первого ответа из БД).
+  const [habitsEmpty, setHabitsEmpty] = useStateH(live ? (liveApi?.getCachedHabits?.()?.length === 0) : false);
   const [tasksTick, setTasksTick] = useStateH(0);   // increment to force tasks reload (pull-to-refresh)
   const [baseRoute, setBaseRoute] = useStateH({ kind: 'tree' });
   const [baseTick, setBaseTick] = useStateH(0); // force base reload after CRUD
@@ -329,7 +333,7 @@ function Home({ onGo, initialTab, live }) {
             висит на PullToRefresh-обёртке выше. */}
         <div className="dot-tab-fade" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
           {tab === 'tasks'  && <TasksView tasks={tasks} toggle={toggle} loading={loading} live={live} onAdd={openComposer} onEdit={live ? openEditor : undefined} />}
-          {tab === 'habits' && <HabitsView key={habitsTick} live={live} onAdd={live ? openHabitComposer : undefined} onEdit={live ? openHabitEditor : undefined} />}
+          {tab === 'habits' && <HabitsView key={habitsTick} live={live} onAdd={live ? openHabitComposer : undefined} onEdit={live ? openHabitEditor : undefined} onEmptyChange={setHabitsEmpty} />}
           {tab === 'base'   && <BaseView onGo={onGo} live={live} route={baseRoute} setRoute={setBaseRoute} hint={baseTick} onPageDelete={handlePageDelete} onSpaceAction={handleSpaceAction} onPageAction={handlePageAction} />}
           {tab === 'me'     && <ProfileView onGo={onGo} live={live} />}
         </div>
@@ -343,7 +347,7 @@ function Home({ onGo, initialTab, live }) {
             два плюса на экране — путает.
           - При открытом sheet'е создания/редактирования пространства: его всё
             равно перекрывает */}
-      {live && tab !== 'me' && !(tab === 'base' && (baseRoute.kind === 'space' || baseRoute.kind === 'page' || baseRoute.kind === 'create-space' || baseRoute.kind === 'edit-space')) && (
+      {live && tab !== 'me' && !(tab === 'base' && (baseRoute.kind === 'space' || baseRoute.kind === 'page' || baseRoute.kind === 'create-space' || baseRoute.kind === 'edit-space')) && !(tab === 'tasks' && tasks.length === 0) && !(tab === 'habits' && habitsEmpty) && (
         <Fab onClick={handleFab} />
       )}
       <DotTabs active={tab} onChange={setTab} badges={{
@@ -468,14 +472,30 @@ function DotHeader() {
   // Sticky-шапка: blur-фон поднимается под статус-бар (так контент при скролле
   // визуально просвечивает сквозь frosted-glass). Padding включает safe-area-top
   // чтобы Logo не лез под notch.
+  // Справа — короткий контекст: день недели + дата (балансирует композицию,
+  // даёт ощущение «сегодняшнего экрана» как в iOS Reminders).
+  const today = React.useMemo(() => {
+    try {
+      const d = new Date();
+      const wd = d.toLocaleDateString('ru-RU', { weekday: 'short' });
+      const dm = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+      return `${wd}, ${dm}`.replace('.', '');
+    } catch { return ''; }
+  }, []);
   return (
     <div className="dot-sticky-blur" style={{
       position: 'sticky', top: 0, zIndex: 5,
-      display: 'flex', alignItems: 'center',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       paddingTop: 'calc(env(safe-area-inset-top) + 14px)',
       paddingRight: 24, paddingBottom: 10, paddingLeft: 24,
     }}>
       <Logo size={24} />
+      {today && (
+        <div style={{
+          fontSize: 12, fontWeight: 500, color: 'var(--sub)',
+          letterSpacing: 0.1, textTransform: 'lowercase',
+        }}>{today}</div>
+      )}
     </div>
   );
 }
@@ -487,7 +507,7 @@ function Fab({ onClick }) {
       width: 56, height: 56, borderRadius: 28,
       background: 'var(--accent)', color: '#fff',
       border: 'none', cursor: onClick ? 'pointer' : 'default',
-      boxShadow: '0 10px 24px -6px var(--accent), 0 2px 6px rgba(0,0,0,0.12)',
+      boxShadow: '0 6px 14px -6px var(--accent), 0 2px 6px rgba(0,0,0,0.12)',
       display: 'grid', placeItems: 'center', zIndex: 5,
     }}>
       <IconPlus size={24} strokeWidth={2.2} />
@@ -504,7 +524,10 @@ function DotTabs({ active, onChange, badges = {} }) {
   ];
   return (
     <div style={{
-      position: 'absolute', bottom: 0, left: 0, right: 0, paddingBottom: 22, paddingTop: 8,
+      position: 'absolute', bottom: 0, left: 0, right: 0,
+      // Высота таба = safe-area + 8px → на iPhone home-indicator обходим,
+      // на Android/desktop таб становится компактнее (~64px вместо 88).
+      paddingBottom: 'calc(env(safe-area-inset-bottom) + 8px)', paddingTop: 8,
       background: 'var(--bg)', borderTop: '1px solid var(--line)',
       display: 'flex', justifyContent: 'space-around', zIndex: 10,
     }}>
@@ -518,7 +541,9 @@ function DotTabs({ active, onChange, badges = {} }) {
             display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
             padding: '4px 14px', position: 'relative',
           }}>
-            {on && <span style={{ position: 'absolute', top: -9, width: 22, height: 3, background: 'var(--accent)', borderRadius: 2 }} />}
+            {/* Активный таб помечается только цветом + жирностью лейбла —
+                полоска-«усик» сверху убрана: на телефоне читалась как
+                артефакт, накладывалась на верхнюю safe-area-границу. */}
             <div style={{ position: 'relative' }}>
               <t.Icon size={22} color={c} strokeWidth={on ? 2 : 1.75} />
               {badge > 0 && (
@@ -580,6 +605,10 @@ function PullToRefresh({ onRefresh, children }) {
   const [refreshing, setRefreshing] = useStateH(false);
   const startY = useRefH(0);
   const tracking = useRefH(false);
+  // Чтобы хаптик сработал ровно один раз — в момент пересечения порога
+  // в любую сторону (взвели → отпустили → взвели снова за один жест тоже даст
+  // вибрацию, как в iOS Mail/Reminders).
+  const armed = useRefH(false);
 
   const onTouchStart = (e) => {
     if (refreshing) return;
@@ -587,6 +616,7 @@ function PullToRefresh({ onRefresh, children }) {
     if (!el || el.scrollTop > 0) return; // тянуть можно только когда уже наверху
     startY.current = e.touches[0].clientY;
     tracking.current = true;
+    armed.current = false;
   };
   const onTouchMove = (e) => {
     if (!tracking.current || refreshing) return;
@@ -594,6 +624,14 @@ function PullToRefresh({ onRefresh, children }) {
     if (dy <= 0) { setPull(0); return; }
     // Резистанс: тянется всё медленнее по мере увеличения дистанции (как iOS).
     const resisted = Math.min(PULL_MAX, dy * 0.5);
+    // Хаптик-«щелчок» при пересечении порога — пользователь чувствует,
+    // что палец «зацепил» refresh, и может отпускать.
+    const wasArmed = armed.current;
+    const nowArmed = resisted >= PULL_THRESHOLD;
+    if (nowArmed !== wasArmed) {
+      armed.current = nowArmed;
+      if (nowArmed) dotHaptic?.('light');
+    }
     setPull(resisted);
   };
   const onTouchEnd = async () => {
@@ -736,20 +774,30 @@ function EmptyShell({ children }) {
 function TasksEmpty({ onAdd }) {
   return (
     <EmptyShell>
+      {/* Иконка-бейдж: тоньше штрих + лёгкий поворот + крошечная «искра» в углу,
+          чтобы empty-state выглядел теплее, а не как технический плейсхолдер. */}
       <div style={{
-        width: 64, height: 64, borderRadius: 16,
+        position: 'relative',
+        width: 64, height: 64, borderRadius: 18,
         background: 'var(--accent-soft)', color: 'var(--accent)',
-        display: 'grid', placeItems: 'center', marginBottom: 22,
+        display: 'grid', placeItems: 'center', marginBottom: 18,
+        transform: 'rotate(-4deg)',
       }}>
-        <IconCheckSquare size={28} strokeWidth={1.6} />
+        <IconCheckSquare size={28} strokeWidth={1.4} />
+        <div aria-hidden style={{
+          position: 'absolute', top: -3, right: -3,
+          width: 10, height: 10, borderRadius: 5,
+          background: 'var(--accent)',
+          boxShadow: '0 0 0 3px var(--bg)',
+        }} />
       </div>
       <h2 style={{
         fontSize: 22, fontWeight: 600, letterSpacing: -0.4,
-        margin: '0 0 10px', color: 'var(--text)',
+        margin: '0 0 8px', color: 'var(--text)',
       }}>Задач пока нет</h2>
       <p style={{
         fontSize: 14, color: 'var(--sub)', lineHeight: 1.5,
-        margin: '0 0 22px', maxWidth: 280,
+        margin: '0 0 16px', maxWidth: 280,
       }}>Запишите первое — позвонить, купить, дочитать. dot. покажет нужное в нужный день.</p>
       <button onClick={onAdd} style={{
         display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -757,7 +805,7 @@ function TasksEmpty({ onAdd }) {
         background: 'var(--accent)', color: '#fff',
         border: 'none', cursor: 'pointer',
         fontSize: 15, fontWeight: 600, fontFamily: 'inherit',
-        boxShadow: '0 8px 20px -8px var(--accent)',
+        boxShadow: '0 4px 12px -6px var(--accent)',
       }}>
         <IconPlus size={18} strokeWidth={2.2} /> Новая задача
       </button>
@@ -773,6 +821,7 @@ function TaskSection({ title, items, toggle, onEdit }) {
       <div>
         {items.map((t, i) => (
           <div key={t.id}
+            className={onEdit ? 'dot-row-tap' : undefined}
             onClick={onEdit ? (e) => {
               // Игнорируем клики по чекбоксу — он уже обрабатывается RoundCheck
               if (e.target.closest('button')) return;
@@ -816,7 +865,7 @@ function RoundCheck({ checked, onChange }) {
 // ─── HABITS ───────────────────────────────────────────────
 // День недели подписан прямо над каждым квадратом — связь очевидна,
 // ничего не «оторвано».
-function HabitsView({ live, onAdd, onEdit }) {
+function HabitsView({ live, onAdd, onEdit, onEmptyChange }) {
   const days = ['ПН','ВТ','СР','ЧТ','ПТ','СБ','ВС'];
   const gridStyle = {
     display: 'grid',
@@ -871,10 +920,10 @@ function HabitsView({ live, onAdd, onEdit }) {
   }
 
   // === LIVE ===
-  return <HabitsViewLive days={days} gridStyle={gridStyle} onAdd={onAdd} onEdit={onEdit} />;
+  return <HabitsViewLive days={days} gridStyle={gridStyle} onAdd={onAdd} onEdit={onEdit} onEmptyChange={onEmptyChange} />;
 }
 
-function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
+function HabitsViewLive({ days, gridStyle, onAdd, onEdit, onEmptyChange }) {
   // Warm cache: habits + week logs из localStorage. Streak-цифры (огонёк)
   // не кэшим — пересчитаются через полсекунды и обновятся молча.
   const cachedHabits = liveApi?.getCachedHabits?.() || [];
@@ -911,6 +960,13 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
   };
 
   useEffectH(() => { reload(); }, []);
+
+  // Сообщаем родителю, пуст ли список — он решает, прятать ли FAB
+  // (на пустом экране уже есть primary-кнопка, два «плюса» дублируют).
+  useEffectH(() => {
+    if (loading) return;
+    onEmptyChange?.(habits.length === 0);
+  }, [loading, habits.length]);
 
   const handleToday = async (habit) => {
     dotHaptic?.('light');
@@ -1001,20 +1057,31 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit }) {
 function HabitsEmpty({ onAdd }) {
   return (
     <EmptyShell>
+      {/* Та же визуальная подача, что и у TasksEmpty: тоньше штрих,
+          лёгкий поворот, маленькая «искра» в углу — empty-state читается
+          как обещание, а не как ошибка. */}
       <div style={{
-        width: 64, height: 64, borderRadius: 16,
+        position: 'relative',
+        width: 64, height: 64, borderRadius: 18,
         background: 'var(--accent-soft)', color: 'var(--accent)',
-        display: 'grid', placeItems: 'center', marginBottom: 22,
+        display: 'grid', placeItems: 'center', marginBottom: 18,
+        transform: 'rotate(-4deg)',
       }}>
-        <IconRepeat size={28} strokeWidth={1.6} />
+        <IconRepeat size={28} strokeWidth={1.4} />
+        <div aria-hidden style={{
+          position: 'absolute', top: -3, right: -3,
+          width: 10, height: 10, borderRadius: 5,
+          background: 'var(--accent)',
+          boxShadow: '0 0 0 3px var(--bg)',
+        }} />
       </div>
       <h2 style={{
         fontSize: 22, fontWeight: 600, letterSpacing: -0.4,
-        margin: '0 0 10px', color: 'var(--text)',
+        margin: '0 0 8px', color: 'var(--text)',
       }}>Привычек пока нет</h2>
       <p style={{
         fontSize: 14, color: 'var(--sub)', lineHeight: 1.5,
-        margin: '0 0 22px', maxWidth: 280,
+        margin: '0 0 16px', maxWidth: 280,
       }}>Заведите первую — медитация, чтение, прогулка. Маленькие шаги каждый день.</p>
       <button onClick={onAdd} style={{
         display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -1022,7 +1089,7 @@ function HabitsEmpty({ onAdd }) {
         background: 'var(--accent)', color: '#fff',
         border: 'none', cursor: 'pointer',
         fontSize: 15, fontWeight: 600, fontFamily: 'inherit',
-        boxShadow: '0 8px 20px -8px var(--accent)',
+        boxShadow: '0 4px 12px -6px var(--accent)',
       }}>
         <IconPlus size={18} strokeWidth={2.2} /> Новая привычка
       </button>

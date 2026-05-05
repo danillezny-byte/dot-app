@@ -2612,7 +2612,9 @@ function ProfileView({ onGo, live }) {
         <PRow icon={<IconUser size={18} />}     label="Редактировать профиль" onClick={() => onGo && onGo('profile-edit')} />
         <PRow icon={<IconStar size={18} />}     label="Управление подпиской" sub={data.plan === 'plus' ? 'Plus · до 12 мая 2026' : 'Бесплатный · перейти на Plus'} onClick={() => onGo && onGo('profile-sub')} />
         <PRow icon={<IconSettings size={18} />} label="Настройки приложения" onClick={() => onGo && onGo('settings')} />
-        <PRow icon={<IconInfo size={18} />}     label="Помощь и поддержка" onClick={() => onGo && onGo('profile-help')} />
+        {/* «Помощь и поддержка» спрятана пока нет реальных каналов поддержки —
+            раскомментировать когда появится email/чат/FAQ.
+            <PRow icon={<IconInfo size={18} />} label="Помощь и поддержка" onClick={() => onGo && onGo('profile-help')} /> */}
       </div>
 
       <div style={{ padding: '22px 24px 8px', textAlign: 'center' }}>

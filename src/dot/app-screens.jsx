@@ -42,6 +42,9 @@ function Home({ onGo, initialTab, live }) {
   const [actionSheet, setActionSheet] = useStateH(null); // { kind: 'space'|'page', target: {...} }
   const [movePicker, setMovePicker] = useStateH(null); // { pageId, currentSpaceId, currentParentId }
   const [undoToast, setUndoToast] = useStateH(null); // { kind, id, snapshot, label }
+  // Память скролла по табу: переключился на Привычки → вернулся на Задачи →
+  // лента восстанавливается на той же позиции, где была, а не сверху.
+  const scrollPositions = useRefH({});
 
   useEffectH(() => {
     if (!live || !liveApi) return;
@@ -318,13 +321,18 @@ function Home({ onGo, initialTab, live }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', paddingBottom: 72, position: 'relative' }}>
-      <DotHeader />
+      <DotHeader onLogoTap={tab !== 'tasks' ? () => setTab('tasks') : undefined} />
       {/* key={tab} — каждый раз когда меняется вкладка, контейнер полностью
           перемонтируется и срабатывает CSS-анимация dot-tab-fade (opacity).
           Без движений и scale — тихий 150мс fade чтобы переход не был резким.
           PullToRefresh оборачивает scroll-зону: tasks/habits/base поддерживают
           жест «потянуть вниз → обновить»; на 'me' — нет смысла, там профиль. */}
-      <PullToRefresh key={tab} onRefresh={tab === 'me' ? null : onPullRefresh}>
+      <PullToRefresh
+        key={tab}
+        onRefresh={tab === 'me' ? null : onPullRefresh}
+        initialScrollTop={scrollPositions.current[tab] || 0}
+        onScrollPersist={(top) => { scrollPositions.current[tab] = top; }}
+      >
         {/* CSS-quirk: процентный minHeight у child не видит процентный
             minHeight parent — резолвится в 0. Нужен явный height: 100%
             (или display:flex с flex:1 у child) на этом промежуточном слое,
@@ -468,19 +476,26 @@ function Home({ onGo, initialTab, live }) {
   );
 }
 
-function DotHeader() {
+function DotHeader({ onLogoTap }) {
   // Sticky-шапка: blur-фон поднимается под статус-бар (так контент при скролле
   // визуально просвечивает сквозь frosted-glass). Padding включает safe-area-top
   // чтобы Logo не лез под notch.
   // Справа — короткий контекст: день недели + дата (балансирует композицию,
-  // даёт ощущение «сегодняшнего экрана» как в iOS Reminders).
+  // даёт ощущение «сегодняшнего экрана» как в iOS Reminders). День + месяц
+  // приглушены, число — accent: правый край сам становится мини-объектом,
+  // а не вспомогательной подписью.
   const today = React.useMemo(() => {
     try {
       const d = new Date();
-      const wd = d.toLocaleDateString('ru-RU', { weekday: 'short' });
-      const dm = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-      return `${wd}, ${dm}`.replace('.', '');
-    } catch { return ''; }
+      const wd = d.toLocaleDateString('ru-RU', { weekday: 'short' }).replace('.', '');
+      const day = d.getDate();
+      // Форматируем "5 мая" целиком и срезаем число, чтобы получить родительный
+      // падеж месяца ("мая", не "май"). Если форматировать month: 'short'
+      // отдельно, JS отдаёт именительный падеж — "5 май" по-русски звучит сломанно.
+      const dayMonth = d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+      const month = dayMonth.replace(/^\d+\s*/, '').replace('.', '');
+      return { wd, day, month };
+    } catch { return null; }
   }, []);
   return (
     <div className="dot-sticky-blur" style={{
@@ -489,12 +504,22 @@ function DotHeader() {
       paddingTop: 'calc(env(safe-area-inset-top) + 14px)',
       paddingRight: 24, paddingBottom: 10, paddingLeft: 24,
     }}>
-      <Logo size={24} />
+      {/* Лого как home-button: тап в любой вкладке возвращает на Задачи.
+          На вкладке Задачи остаётся inert — не плодим лишних взаимодействий. */}
+      <button onClick={onLogoTap} style={{
+        background: 'none', border: 'none', padding: 0, margin: 0,
+        cursor: onLogoTap ? 'pointer' : 'default',
+        display: 'inline-flex', alignItems: 'center',
+        color: 'var(--text)', font: 'inherit',
+      }} aria-label="На главную">
+        <Logo size={24} />
+      </button>
       {today && (
         <div style={{
-          fontSize: 12, fontWeight: 500, color: 'var(--sub)',
+          fontSize: 13, fontWeight: 600,
           letterSpacing: 0.1, textTransform: 'lowercase',
-        }}>{today}</div>
+          color: 'var(--sub)',
+        }}>{today.wd}, {today.day} {today.month}</div>
       )}
     </div>
   );
@@ -599,8 +624,19 @@ function TasksView({ tasks, toggle, loading, live, onAdd, onEdit }) {
 const PULL_THRESHOLD = 70;
 const PULL_MAX = 110;
 
-function PullToRefresh({ onRefresh, children }) {
+function PullToRefresh({ onRefresh, children, initialScrollTop = 0, onScrollPersist }) {
   const ref = useRefH(null);
+  // Восстанавливаем scrollTop при mount (после переключения таба) и
+  // сохраняем его в родительский ref на каждом скролле — чтобы возврат
+  // на таб приводил юзера ровно туда, где он был, а не наверх списка.
+  useEffectH(() => {
+    const el = ref.current;
+    if (el && initialScrollTop > 0) el.scrollTop = initialScrollTop;
+    if (!el || !onScrollPersist) return;
+    const handler = () => onScrollPersist(el.scrollTop);
+    el.addEventListener('scroll', handler, { passive: true });
+    return () => el.removeEventListener('scroll', handler);
+  }, []);
   const [pull, setPull] = useStateH(0);          // текущая дистанция (px), 0 если не тянем
   const [refreshing, setRefreshing] = useStateH(false);
   const startY = useRefH(0);
@@ -765,8 +801,12 @@ function EmptyShell({ children }) {
       flex: 1,
       minHeight: '100%',
       display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      textAlign: 'center', padding: '32px 32px 64px',
+      alignItems: 'center', justifyContent: 'flex-start',
+      textAlign: 'center',
+      // Контент стоит на ~32% высоты, не в геометрическом центре —
+      // на телефоне «провисающий» empty-state перестаёт казаться
+      // экраном-заглушкой во время загрузки.
+      padding: '24% 32px 64px',
     }}>{children}</div>
   );
 }
@@ -910,7 +950,10 @@ function HabitsView({ live, onAdd, onEdit, onEmptyChange }) {
                   border: v ? 'none' : '1.5px solid var(--line)',
                   outline: i === todayIdx && !v ? '1.5px dashed var(--accent)' : 'none',
                   outlineOffset: -1.5,
-                }} />
+                  display: 'grid', placeItems: 'center',
+                }}>
+                  {v && <IconCheck size={14} color="#fff" strokeWidth={2.6} />}
+                </div>
               ))}
             </div>
           </div>
@@ -1043,7 +1086,10 @@ function HabitsViewLive({ days, gridStyle, onAdd, onEdit, onEmptyChange }) {
                     outline: isToday && !done ? `1.5px dashed ${accentColor}` : 'none',
                     outlineOffset: -1.5,
                     cursor: isClickable ? 'pointer' : 'default',
-                  }} />
+                    display: 'grid', placeItems: 'center',
+                  }}>
+                    {done && <IconCheck size={14} color="#fff" strokeWidth={2.6} />}
+                  </div>
                 );
               })}
             </div>
@@ -1245,10 +1291,16 @@ function BaseViewLive({ route, setRoute, hint, onPageDelete, onSpaceAction, onPa
     else setRoute({ kind: 'tree' });
   };
 
-  if (r.kind === 'tree') return <BaseTreeView setRoute={setRoute} hint={hint} onSpaceAction={onSpaceAction} onPageAction={onPageAction} />;
-  if (r.kind === 'space') return <SpaceView spaceId={r.id} setRoute={setRoute} onBack={goBack} hint={hint} onPageAction={onPageAction} />;
-  if (r.kind === 'page')  return <PageView pageId={r.id} spaceId={r.spaceId} setRoute={setRoute} onBack={goBack} hint={hint} onDelete={() => onPageDelete && onPageDelete(r.id, r.spaceId)} onAction={onPageAction} />;
-  return null;
+  // key=маршрут → React пересоздаёт обёртку → срабатывает .dot-tab-fade
+  // (тот же 150мс fade по opacity, что и при смене таба). Без анимации
+  // переход дерево→пространство→страница ощущается «прыжком» — теперь
+  // экраны мягко перетекают друг в друга.
+  const fadeKey = r.kind === 'page' ? `page:${r.id}` : r.kind === 'space' ? `space:${r.id}` : 'tree';
+  let body = null;
+  if (r.kind === 'tree') body = <BaseTreeView setRoute={setRoute} hint={hint} onSpaceAction={onSpaceAction} onPageAction={onPageAction} />;
+  else if (r.kind === 'space') body = <SpaceView spaceId={r.id} setRoute={setRoute} onBack={goBack} hint={hint} onPageAction={onPageAction} />;
+  else if (r.kind === 'page')  body = <PageView pageId={r.id} spaceId={r.spaceId} setRoute={setRoute} onBack={goBack} hint={hint} onDelete={() => onPageDelete && onPageDelete(r.id, r.spaceId)} onAction={onPageAction} />;
+  return <div key={fadeKey} className="dot-tab-fade">{body}</div>;
 }
 
 function BaseTreeView({ setRoute, hint, onSpaceAction, onPageAction }) {

@@ -84,8 +84,16 @@ function LiveApp() {
 
   const back = () => setScreen('home');
 
+  // Home сама управляет padding-top (DotHeader включает safe-area-inset-top).
+  // Остальные экраны не имеют sticky-шапки — добавляем padding-top на LiveApp
+  // wrapper чтобы их контент не лез под notch + status-bar overlay.
+  const needsTopSafeArea = screen !== 'home';
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, position: 'relative', overflowY: 'auto' }}>
+    <div style={{
+      flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0,
+      position: 'relative', overflowY: 'auto',
+      paddingTop: needsTopSafeArea ? 'env(safe-area-inset-top)' : 0,
+    }}>
       {/* Login/Register/Reset рендерятся синхронно (eager-imported) — ноль ожидания. */}
       {screen === 'login'        && <Login {...props} />}
       {screen === 'register'     && <Register {...props} />}

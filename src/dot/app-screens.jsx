@@ -465,8 +465,16 @@ function Home({ onGo, initialTab, live }) {
 }
 
 function DotHeader() {
+  // Sticky-шапка: blur-фон поднимается под статус-бар (так контент при скролле
+  // визуально просвечивает сквозь frosted-glass). Padding включает safe-area-top
+  // чтобы Logo не лез под notch.
   return (
-    <div style={{ display: 'flex', alignItems: 'center', padding: '14px 24px 10px' }}>
+    <div className="dot-sticky-blur" style={{
+      position: 'sticky', top: 0, zIndex: 5,
+      display: 'flex', alignItems: 'center',
+      paddingTop: 'calc(env(safe-area-inset-top) + 14px)',
+      paddingRight: 24, paddingBottom: 10, paddingLeft: 24,
+    }}>
       <Logo size={24} />
     </div>
   );

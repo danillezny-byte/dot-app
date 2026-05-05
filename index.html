@@ -114,7 +114,10 @@
   }
   *  { box-sizing: border-box; }
   #root {
-    padding-top: env(safe-area-inset-top);
+    /* padding-top снят — контент скроллится ПОД статус-бар, .dot-status-bar
+       overlay даёт iOS-style frosted-glass эффект. Каждая «голова» экрана
+       (DotHeader, login-обёртка, settings-header) сама добавляет
+       padding-top: env(safe-area-inset-top) чтобы текст не лез на notch. */
     padding-bottom: env(safe-area-inset-bottom);
     display: flex;
     flex-direction: column;
@@ -136,6 +139,36 @@
     to   { opacity: 1; }
   }
   .dot-tab-fade { animation: dot-tab-in 150ms ease-out; }
+  /* iOS-style frosted-glass над статус-баром.
+     Контент скроллится ПОД этой плашкой → текст просвечивает с blur,
+     OS-text (12:34, батарейка) остаётся читаемым на полупрозрачной подложке.
+     В Safari iOS PWA с `apple-mobile-web-app-status-bar-style: black-translucent`
+     дизайн особенно похож на нативные приложения (Apple Music/Mail). */
+  .dot-status-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: env(safe-area-inset-top);
+    z-index: 100;
+    pointer-events: none;
+    background: color-mix(in srgb, var(--bg) 75%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+  }
+  /* Фолбэк для браузеров без backdrop-filter (Firefox <103, старые Safari) —
+     просто непрозрачный фон, чтобы статус-бар не сливался с контентом. */
+  @supports not ((backdrop-filter: blur(0)) or (-webkit-backdrop-filter: blur(0))) {
+    .dot-status-bar { background: var(--bg); }
+  }
+  /* Sticky-header в Home: тот же blur-эффект, чтобы шапка с логотипом
+     визуально продолжала frosted-zone статус-бара. Контент скроллится под. */
+  .dot-sticky-blur {
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    background: color-mix(in srgb, var(--bg) 75%, transparent);
+  }
+  @supports not ((backdrop-filter: blur(0)) or (-webkit-backdrop-filter: blur(0))) {
+    .dot-sticky-blur { background: var(--bg); }
+  }
   /* Spin для pull-to-refresh индикатора (когда крутится после отпускания). */
   @keyframes dot-spin {
     to { transform: rotate(360deg); }
@@ -152,6 +185,8 @@
 </head>
 <body>
 <div id="root"></div>
+<!-- iOS frosted-glass плашка под статус-бар. Контент в #root скроллится под ней. -->
+<div class="dot-status-bar"></div>
 <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>

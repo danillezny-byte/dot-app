@@ -903,20 +903,30 @@ function BaseEmpty({ onCreate, embedded }) {
   // (no-op без templates feature; вернётся когда сделаем).
   const InnerCore = (
     <>
+      {/* Иконка-бейдж: тот же визуальный язык что у TasksEmpty/HabitsEmpty —
+          лёгкий поворот и accent-точка в углу, штрих 1.4. */}
       <div style={{
-        width: 64, height: 64, borderRadius: 16,
+        position: 'relative',
+        width: 64, height: 64, borderRadius: 18,
         background: 'var(--accent-soft)', color: 'var(--accent)',
-        display: 'grid', placeItems: 'center', marginBottom: 22,
+        display: 'grid', placeItems: 'center', marginBottom: 18,
+        transform: 'rotate(-4deg)',
       }}>
-        <IconBook size={28} strokeWidth={1.6} />
+        <IconBook size={28} strokeWidth={1.4} />
+        <div aria-hidden style={{
+          position: 'absolute', top: -3, right: -3,
+          width: 10, height: 10, borderRadius: 5,
+          background: 'var(--accent)',
+          boxShadow: '0 0 0 3px var(--bg)',
+        }} />
       </div>
       <h2 style={{
         fontSize: 22, fontWeight: 600, letterSpacing: -0.4,
-        margin: '0 0 10px', color: 'var(--text)',
+        margin: '0 0 8px', color: 'var(--text)',
       }}>Ваша база пока пуста</h2>
       <p style={{
         fontSize: 14, color: 'var(--sub)', lineHeight: 1.5,
-        margin: '0 0 22px', maxWidth: 280,
+        margin: '0 0 16px', maxWidth: 280,
       }}>Создайте пространство — это папка верхнего уровня. Внутри будут страницы: заметки, проекты, списки.</p>
       <button onClick={onCreate} style={{
         display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -924,18 +934,20 @@ function BaseEmpty({ onCreate, embedded }) {
         background: 'var(--accent)', color: '#fff',
         border: 'none', cursor: onCreate ? 'pointer' : 'default',
         fontSize: 15, fontWeight: 600, fontFamily: 'inherit',
-        boxShadow: '0 8px 20px -8px var(--accent)',
+        boxShadow: '0 4px 12px -6px var(--accent)',
       }}>
         <IconPlus size={18} strokeWidth={2.2} /> Новое пространство
       </button>
     </>
   );
 
-  // Embedded — занимает min-height родителя и центрирует контент.
-  // Identical layout to EmptyShell in app-screens.jsx (общие отступы 32px 32px 64px).
+  // Embedded — тот же layout что у EmptyShell в app-screens.jsx:
+  // центрирование по вертикали, общие отступы. Это даёт одинаковую посадку
+  // всем empty-state'ам (Задачи / Привычки / База).
   if (embedded) {
     return (
       <div style={{
+        flex: 1,
         minHeight: '100%',
         display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',

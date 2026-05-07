@@ -35,6 +35,7 @@ function Home({ onGo, initialTab, live }) {
   // Считаем «пусто» если есть кэш и он 0; иначе по умолчанию false (FAB виден,
   // как раньше, до первого ответа из БД).
   const [habitsEmpty, setHabitsEmpty] = useStateH(live ? (liveApi?.getCachedHabits?.()?.length === 0) : false);
+  const [baseEmpty, setBaseEmpty] = useStateH(live ? (liveApi?.getCachedSpaces?.()?.length === 0) : false);
   const [tasksTick, setTasksTick] = useStateH(0);   // increment to force tasks reload (pull-to-refresh)
   const [baseRoute, setBaseRoute] = useStateH({ kind: 'tree' });
   const [baseTick, setBaseTick] = useStateH(0); // force base reload after CRUD
@@ -342,7 +343,7 @@ function Home({ onGo, initialTab, live }) {
         <div className="dot-tab-fade" style={{ minHeight: '100%', display: 'flex', flexDirection: 'column' }}>
           {tab === 'tasks'  && <TasksView tasks={tasks} toggle={toggle} loading={loading} live={live} onAdd={openComposer} onEdit={live ? openEditor : undefined} />}
           {tab === 'habits' && <HabitsView key={habitsTick} live={live} onAdd={live ? openHabitComposer : undefined} onEdit={live ? openHabitEditor : undefined} onEmptyChange={setHabitsEmpty} />}
-          {tab === 'base'   && <BaseView onGo={onGo} live={live} route={baseRoute} setRoute={setBaseRoute} hint={baseTick} onPageDelete={handlePageDelete} onSpaceAction={handleSpaceAction} onPageAction={handlePageAction} />}
+          {tab === 'base'   && <BaseView onGo={onGo} live={live} route={baseRoute} setRoute={setBaseRoute} hint={baseTick} onPageDelete={handlePageDelete} onSpaceAction={handleSpaceAction} onPageAction={handlePageAction} onEmptyChange={setBaseEmpty} />}
           {tab === 'me'     && <ProfileView onGo={onGo} live={live} />}
         </div>
       </PullToRefresh>
@@ -355,7 +356,7 @@ function Home({ onGo, initialTab, live }) {
             два плюса на экране — путает.
           - При открытом sheet'е создания/редактирования пространства: его всё
             равно перекрывает */}
-      {live && tab !== 'me' && !(tab === 'base' && (baseRoute.kind === 'space' || baseRoute.kind === 'page' || baseRoute.kind === 'create-space' || baseRoute.kind === 'edit-space')) && !(tab === 'tasks' && tasks.length === 0) && !(tab === 'habits' && habitsEmpty) && (
+      {live && tab !== 'me' && !(tab === 'base' && (baseRoute.kind === 'space' || baseRoute.kind === 'page' || baseRoute.kind === 'create-space' || baseRoute.kind === 'edit-space')) && !(tab === 'tasks' && tasks.length === 0) && !(tab === 'habits' && habitsEmpty) && !(tab === 'base' && baseRoute.kind === 'tree' && baseEmpty) && (
         <Fab onClick={handleFab} />
       )}
       <DotTabs active={tab} onChange={setTab} badges={{
@@ -801,12 +802,8 @@ function EmptyShell({ children }) {
       flex: 1,
       minHeight: '100%',
       display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'flex-start',
-      textAlign: 'center',
-      // Контент стоит на ~32% высоты, не в геометрическом центре —
-      // на телефоне «провисающий» empty-state перестаёт казаться
-      // экраном-заглушкой во время загрузки.
-      padding: '24% 32px 64px',
+      alignItems: 'center', justifyContent: 'center',
+      textAlign: 'center', padding: '32px 32px 64px',
     }}>{children}</div>
   );
 }
@@ -1146,9 +1143,9 @@ function HabitsEmpty({ onAdd }) {
 // ─── KNOWLEDGE BASE (redesigned, Notion-lite) ────────────
 const SPACE_ICON = { briefcase: IconBriefcase, heart: IconHeart, compass: IconCompass };
 
-function BaseView({ onGo, live, route, setRoute, hint, onPageDelete, onSpaceAction, onPageAction }) {
+function BaseView({ onGo, live, route, setRoute, hint, onPageDelete, onSpaceAction, onPageAction, onEmptyChange }) {
   if (live) {
-    return <BaseViewLive route={route} setRoute={setRoute} hint={hint} onPageDelete={onPageDelete} onSpaceAction={onSpaceAction} onPageAction={onPageAction} />;
+    return <BaseViewLive route={route} setRoute={setRoute} hint={hint} onPageDelete={onPageDelete} onSpaceAction={onSpaceAction} onPageAction={onPageAction} onEmptyChange={onEmptyChange} />;
   }
   return <BaseViewMock onGo={onGo} />;
 }
@@ -1283,7 +1280,7 @@ function parseSpaceMeta(space) {
   };
 }
 
-function BaseViewLive({ route, setRoute, hint, onPageDelete, onSpaceAction, onPageAction }) {
+function BaseViewLive({ route, setRoute, hint, onPageDelete, onSpaceAction, onPageAction, onEmptyChange }) {
   const r = route || { kind: 'tree' };
   const goBack = () => {
     if (r.kind === 'page')  setRoute({ kind: 'space', id: r.spaceId });
@@ -1297,13 +1294,20 @@ function BaseViewLive({ route, setRoute, hint, onPageDelete, onSpaceAction, onPa
   // экраны мягко перетекают друг в друга.
   const fadeKey = r.kind === 'page' ? `page:${r.id}` : r.kind === 'space' ? `space:${r.id}` : 'tree';
   let body = null;
-  if (r.kind === 'tree') body = <BaseTreeView setRoute={setRoute} hint={hint} onSpaceAction={onSpaceAction} onPageAction={onPageAction} />;
+  if (r.kind === 'tree') body = <BaseTreeView setRoute={setRoute} hint={hint} onSpaceAction={onSpaceAction} onPageAction={onPageAction} onEmptyChange={onEmptyChange} />;
   else if (r.kind === 'space') body = <SpaceView spaceId={r.id} setRoute={setRoute} onBack={goBack} hint={hint} onPageAction={onPageAction} />;
   else if (r.kind === 'page')  body = <PageView pageId={r.id} spaceId={r.spaceId} setRoute={setRoute} onBack={goBack} hint={hint} onDelete={() => onPageDelete && onPageDelete(r.id, r.spaceId)} onAction={onPageAction} />;
-  return <div key={fadeKey} className="dot-tab-fade">{body}</div>;
+  return (
+    <div key={fadeKey} className="dot-tab-fade" style={{
+      // Те же size-контракты что у Tasks/Habits-обёртки в Home —
+      // чтобы EmptyShell с flex:1/minHeight:100% корректно центрировался.
+      flex: 1, minHeight: '100%',
+      display: 'flex', flexDirection: 'column',
+    }}>{body}</div>
+  );
 }
 
-function BaseTreeView({ setRoute, hint, onSpaceAction, onPageAction }) {
+function BaseTreeView({ setRoute, hint, onSpaceAction, onPageAction, onEmptyChange }) {
   // Warm cache: при первом рендере собираем пространства и страницы из кэша,
   // чтобы дерево «Базы» появилось мгновенно. Фоновый reload подтянет свежее.
   const cachedSpaces = liveApi?.getCachedSpaces?.() || [];
@@ -1351,6 +1355,13 @@ function BaseTreeView({ setRoute, hint, onSpaceAction, onPageAction }) {
   };
 
   useEffectH(() => { reload(); }, [hint]);
+
+  // Сообщаем родителю, пуста ли база — используется чтобы прятать FAB
+  // на пустом экране (та же логика что для Задач/Привычек).
+  useEffectH(() => {
+    if (loading) return;
+    onEmptyChange?.(spaces.length === 0);
+  }, [loading, spaces.length]);
 
   if (loading) {
     return <BaseSkeleton />;
